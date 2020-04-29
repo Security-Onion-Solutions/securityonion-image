@@ -5,6 +5,7 @@ FROM node:alpine
 WORKDIR /nav-app/
 
 # copy over needed files
+RUN apk update && apk add curl
 RUN curl -L https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/navigator-1.2.2/navigator.tar.gz -o /tmp/navigator.tgz
 RUN tar xf /tmp/navigator.tgz 
 
