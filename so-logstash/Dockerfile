@@ -41,7 +41,6 @@ ENV PATH=/usr/share/logstash/bin:$PATH
 # a good experience.
 ADD config/logstash.yml config/log4j2.properties /usr/share/logstash/config/
 ADD pipeline/default.conf /usr/share/logstash/pipeline/logstash.conf
-ADD files/conf.d.so/* /usr/share/logstash/pipeline.so/
 ADD files/dictionaries/ /lib/dictionaries/
 ADD files/freq /usr/share/logstash/pipeline.freq/
 ADD files/domainstats /usr/share/logstash/pipeline.dstats/
