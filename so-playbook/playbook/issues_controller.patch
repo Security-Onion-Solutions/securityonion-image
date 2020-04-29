@@ -1,0 +1,12 @@
+# In order to provide the same hook chain as for normal updates, a
+# hook is needed that is called after an issue is saved in bulk_update.
+--- a/app/controllers/issues_controller.rb	2017-03-23 13:49:20.828550346 +0100
++++ b/app/controllers/issues_controller.rb	2017-03-23 13:49:52.909691437 +0100
+@@ -323,6 +323,7 @@
+       call_hook(:controller_issues_bulk_edit_before_save, { :params => params, :issue => issue })
+       if issue.save
+         saved_issues << issue
++        call_hook(:controller_issues_bulk_edit_after_save, { :params => params, :issue => issue, :journal => journal })
+       else
+         unsaved_issues << orig_issue
+       end

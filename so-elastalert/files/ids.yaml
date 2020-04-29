@@ -1,0 +1,14 @@
+# From example_rules/example_frequency.yaml
+es_host: elasticsearch
+es_port: 9200
+name: Security Onion ElastAlert - New IDS Event!
+type: frequency
+index: logstash-ids*
+num_events: 1
+timeframe:
+    minutes: 1
+filter:
+- term:
+    type: "snort"
+alert:
+- "debug"

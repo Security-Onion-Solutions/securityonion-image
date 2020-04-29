@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. /usr/sbin/so-common
+
+if docker ps | grep -q "so-wazuh"; then
+        docker exec -it so-wazuh /var/ossec/bin/ossec-control stop
+	docker stop so-wazuh && docker rm so-wazuh
+else
+	echo "OSSEC already stopped."
+fi

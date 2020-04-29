@@ -1,0 +1,16 @@
+#!/bin/bash
+
+. /usr/sbin/so-common
+. /etc/nsm/securityonion.conf
+
+if docker ps | grep -q "so-wazuh"; then
+        docker exec -it so-wazuh /var/ossec/bin/ossec-control start
+else
+	docker run --hostname=${HOSTNAME}-docker --name=so-wazuh -it --detach \
+                        --publish 0.0.0.0:55000:55000 \
+                        --publish 0.0.0.0:1514:1514/udp \
+                        --volume /opt/so/wazuh/:/var/ossec/data/ \
+                        wlambert/so-wazuh
+	# Connect container to so-elastic-net Docker network
+	docker network connect --alias wazuh so-elastic-net so-wazuh
+fi

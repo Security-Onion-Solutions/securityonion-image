@@ -1,0 +1,66 @@
+<!-- @(#) $Id$
+  -  Security Onion rules for OSSEC.
+  -
+  -  Copyright (C) 2012-2017 Doug Burks and Security Onion Solutions, LLC
+  -  All rights reserved.
+  -
+  -  This program is a free software; you can redistribute it
+  -  and/or modify it under the terms of the GNU General Public
+  -  License (version 2) as published by the FSF - Free Software
+  -  Foundation.
+  -
+  -  License details: http://www.ossec.net/en/licensing.html
+  -->
+
+
+<group name="securityonion,syslog,">
+
+  <rule id="20101" level="4" overwrite="yes">
+    <category>ids</category>
+    <check_if_ignored>srcip, id</check_if_ignored>
+    <description>IDS event.</description>
+  </rule>
+
+  <rule id="111111" level="1">
+    <if_sid>530</if_sid>
+    <match>ossec: output: 'packets_received':</match>
+    <description>Number of packets received in designated time interval (defined in ossec.conf)</description>
+  </rule>
+
+  <rule id="111112" level="7">
+    <if_sid>111111</if_sid>
+    <regex> 0</regex>
+    <description>Received 0 packets in designated time interval (defined in ossec.conf).  Please check interface, cabling, and tap/span!</description>
+  </rule>
+
+  <rule id="111113" level="0">
+    <if_sid>31533</if_sid>
+    <match>/squert/.inc/callback.php</match>
+    <description>Squert</description>
+  </rule>
+
+  <rule id="111114" level="0">
+    <if_sid>31106</if_sid>
+    <match>elsa-query</match>
+    <description>elsa-query</description>
+  </rule>
+
+  <rule id="111115" level="0">
+    <if_sid>31533</if_sid>
+    <match>/elasticsearch</match>
+    <description>Ignore high amount of POST requests to /elasticsearch</description>
+  </rule>
+  
+  <rule id="111116" level="0">
+    <if_sid>510</if_sid>
+    <match>/var/lib/docker</match>
+    <description>Ignore Docker File Mismatch</description>
+  </rule>
+
+  <rule id="111117" level="0">
+    <if_sid>31530</if_sid>
+    <url>/es_admin/</url>
+    <description>Ignore POST requests inside /es_admin.</description>
+  </rule>
+
+</group>

@@ -1,0 +1,18 @@
+#!/bin/bash -e
+
+. /usr/share/logstash/rulesets
+
+rsync --update -raz /usr/share/logstash/pipeline.so/ /usr/share/logstash/pipeline/
+
+if [[ $FREQ == 1 ]]; then
+  rsync --update -raz /usr/share/logstash/pipeline.freq/ /usr/share/logstash/pipeline/
+fi
+if [[ $DSTATS == 1 ]]; then
+  rsync --update -raz /usr/share/logstash/pipeline.dstats/ /usr/share/logstash/pipeline/
+fi
+
+if [[ -z $1 ]] || [[ ${1:0:1} == '-' ]] ; then
+  exec logstash $@
+else
+  exec $@
+fi
