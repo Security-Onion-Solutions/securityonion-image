@@ -18,7 +18,7 @@ FROM nginx:1.17-alpine
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Security Onion Core Functions Docker"
 
-ARG VERSION=9.11.14
+ARG VERSION=9.20.3
 
 RUN mkdir -p /opt/socore/html/cyberchef && \
     wget -O /tmp/CyberChef.zip https://github.com/gchq/CyberChef/releases/download/v$VERSION/CyberChef_v$VERSION.zip  && \
