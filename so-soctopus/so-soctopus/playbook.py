@@ -95,9 +95,9 @@ def thehive_casetemplate_update(issue_id):
         r = requests.post(url, data=json.dumps(case_template), headers=hive_headers,
                           verify=parser.getboolean('hive', 'hive_verifycert', fallback=False)).json()
 
-        # Update Play (on Redmine) with Template ID
+        # Update Play (on Redmine) with Case Template ID
         url = f"{playbook_url}/issues/{issue_id}.json"
-        data = '{"issue":{"custom_fields":[{"id":8,"value":"' + r['id'] + '"}]}}'
+        data = '{"issue":{"custom_fields":[{"id":7,"value":"' + r['id'] + '"}]}}'
         requests.put(url, data=data, headers=playbook_headers, verify=playbook_verifycert)
 
     return 200, "success"
@@ -161,15 +161,15 @@ def play_update(issue_id):
     sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'])
 
     payload = {"issue": {"subject": sigma_meta['title'], "project_id": 1, "tracker": "Play", "custom_fields": [ \
-        {"id": 6, "name": "Title", "value": sigma_meta['title']}, \
-        {"id": 23, "name": "Level", "value": sigma_meta['level']}, \
-        {"id": 15, "name": "ES Query", "value": sigma_meta['esquery']}, \
-        {"id": 25, "name": "Product", "value": sigma_meta['product']}, \
-        {"id": 2, "name": "Description", "value": sigma_meta['description']}, \
-        {"id": 17, "name": "Author", "value": sigma_meta['author']}, \
-        {"id": 16, "name": "References", "value": sigma_meta['references']}, \
-        {"id": 7, "name": "Analysis", "value": f"{sigma_meta['falsepositives']}{sigma_meta['logfields']}"}, \
-        {"id": 27, "name": "Tags", "value": sigma_meta['tags']}]}}
+        {"id": 1, "name": "Title", "value": sigma_meta['title']}, \
+        {"id": 10, "name": "Level", "value": sigma_meta['level']}, \
+        {"id": 6, "name": "ElastAlert Config", "value": sigma_meta['esquery']}, \
+        {"id": 14, "name": "Product", "value": sigma_meta['product']}, \
+        {"id": 3, "name": "Objective", "value": sigma_meta['description']}, \
+        {"id": 2, "name": "Author", "value": sigma_meta['author']}, \
+        {"id": 8, "name": "References", "value": sigma_meta['references']}, \
+        {"id": 5, "name": "Analysis", "value": f"{sigma_meta['falsepositives']}{sigma_meta['logfields']}"}, \
+        {"id": 15, "name": "Tags", "value": sigma_meta['tags']}]}}
 
     url = f"{playbook_url}/issues/{issue_id}.json"
     r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
@@ -280,29 +280,29 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
     # Generate a unique ID for the Play
     play_id = uuid.uuid4().hex
 
-    # If ElastAlert config = "", set the play status to Disabled (id=7) else set it to Draft (id=1)
+    # If ElastAlert config = "", set the play status to Disabled (id=6) else set it to Draft (id=2)
     # Also add a note to the play to make it clear as to why the status is Disabled
-    play_status = "7" if play['raw_elastalert'] == "" else "1"
+    play_status = "6" if play['raw_elastalert'] == "" else "2"
     play_notes = "Play status set to Disabled - Sigmac error when generating ElastAlert config." \
         if play['raw_elastalert'] == "" else "Play imported successfully."
 
     # Create the payload
     payload = {"issue": {"subject": play['title'], "project_id": 1, "status_id": play_status, "tracker": "Play",
                          "custom_fields": [
-                             {"id": 6, "name": "Title", "value": play['title']},
-                             {"id": 24, "name": "Playbook", "value": playbook},
-                             {"id": 15, "name": "ES Query", "value": play['esquery']},
-                             {"id": 23, "name": "Level", "value": play['level']},
-                             {"id": 25, "name": "Product", "value": play['product']},
-                             {"id": 2, "name": "Description", "value": play['description']},
-                             {"id": 17, "name": "Author", "value": play['author']},
-                             {"id": 16, "name": "References", "value": play['references']},
-                             {"id": 7, "name": "Analysis", "value": f"{play['falsepositives']}{play['logfields']}"},
-                             {"id": 28, "name": "PlayID", "value": play_id[0:9]},
-                             {"id": 27, "name": "Tags", "value": play['tags']},
-                             {"id": 30, "name": "Signature ID", "value": play['sigid']},
-                             {"id": 21, "name": "Sigma", "value": play['sigma']},
-                             {"id": 32, "name": "Category", "value": ruleset}
+                             {"id": 1, "name": "Title", "value": play['title']},
+                             {"id": 13, "name": "Playbook", "value": playbook},
+                             {"id": 6, "name": "ElastAlert Config", "value": play['esquery']},
+                             {"id": 10, "name": "Level", "value": play['level']},
+                             {"id": 14, "name": "Product", "value": play['product']},
+                             {"id": 3, "name": "Objective", "value": play['description']},
+                             {"id": 2, "name": "Author", "value": play['author']},
+                             {"id": 8, "name": "References", "value": play['references']},
+                             {"id": 5, "name": "Analysis", "value": f"{play['falsepositives']}{play['logfields']}"},
+                             {"id": 11, "name": "PlayID", "value": play_id[0:9]},
+                             {"id": 15, "name": "Tags", "value": play['tags']},
+                             {"id": 12, "name": "Signature ID", "value": play['sigid']},
+                             {"id": 9, "name": "Sigma", "value": play['sigma']},
+                             {"id": 16, "name": "Category", "value": ruleset}
                              ]}}
 
     # POST the payload to Redmine to create the Play (ie Redmine issue)

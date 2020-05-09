@@ -18,8 +18,8 @@ playbook_headers = {'X-Redmine-API-Key': parser.get(
     "playbook", "playbook_key"), 'Content-Type': 'application/json'}
 playbook_url = parser.get("playbook", "playbook_url")
 
-# Get active plays from Playbook
-url = f"{playbook_url}/issues.json?offset=0&tracker_id=4&limit=100&status_id=3"
+# Get active plays from Playbook - id = 3
+url = f"{playbook_url}/issues.json?offset=0&tracker_id=1&limit=100&status_id=3"
 response = requests.get(url, headers=playbook_headers, verify=False).json()
 
 for i in response['issues']:
@@ -27,7 +27,7 @@ for i in response['issues']:
 
 while offset < response['total_count']:
     offset += 100
-    url = f"{playbook_url}/issues.json?offset={offset}&tracker_id=4&limit=100&status_id=3"
+    url = f"{playbook_url}/issues.json?offset={offset}&tracker_id=1&limit=100&status_id=3"
     response = requests.get(url, headers=playbook_headers, verify=False).json()
     print(f"offset: {offset}")
     for i in response['issues']:
@@ -63,7 +63,7 @@ for play in active_plays:
         print('All Good - HiveID Exists')
 
 
-url = f"{playbook_url}/issues.json?tracker_id=4&limit=300&status_id=4"
+url = f"{playbook_url}/issues.json?tracker_id=1&limit=300&status_id=4"
 inactive_plays = requests.get(
     url, headers=playbook_headers, verify=False).json()
 
