@@ -52,7 +52,7 @@ def update_play(raw_sigma, repo_sigma, ruleset):
                 play_status = "updated"
                 formatted_sigma = f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{raw_sigma}\n</code></pre>\n}}}}'
                 update_payload = {"issue": {"subject": repo_sigma['title'], "project_id": 1, "status": "Disabled", "tracker": "Play", "custom_fields": [
-                    {"id": 21, "name": "Sigma", "value": formatted_sigma.strip()}]}}
+                    {"id": 9, "name": "Sigma", "value": formatted_sigma.strip()}]}}
                 url = f"{playbook_url}/issues/{play['issue_id']}.json"
                 r = requests.put(url, data=json.dumps(
                     update_payload), headers=playbook_headers, verify=False)
@@ -71,7 +71,7 @@ def update_play(raw_sigma, repo_sigma, ruleset):
 
 # Get all the current plays from Playbook & parse out metadata
 print(f"\n\n-= Parsing current Plays in Playbook -=\n\n")
-url = f"{playbook_url}/issues.json?offset=0&tracker_id=4&limit=100"
+url = f"{playbook_url}/issues.json?offset=0&tracker_id=1&limit=100"
 response = requests.get(url, headers=playbook_headers, verify=False).json()
 
 for i in response['issues']:
@@ -80,7 +80,7 @@ for i in response['issues']:
 
 while offset < response['total_count']:
     offset += 100
-    url = f"{playbook_url}/issues.json?offset={offset}&tracker_id=4&limit=100"
+    url = f"{playbook_url}/issues.json?offset={offset}&tracker_id=1&limit=100"
     response = requests.get(url, headers=playbook_headers, verify=False).json()
     print(f"offset: {offset}")
     for i in response['issues']:
