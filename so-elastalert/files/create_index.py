@@ -221,7 +221,7 @@ def main():
     else:
         username = args.username if args.username else None
         password = args.password if args.password else None
-        index_settings = Non
+        index_settings = None
         aws_region = args.aws_region
         host = args.host if args.host else input('Enter Elasticsearch host: ')
         port = args.port if args.port else int(input('Enter Elasticsearch port: '))
