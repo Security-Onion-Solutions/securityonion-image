@@ -8,3 +8,5 @@ RUN addgroup -g 933 elastalert && \
 USER elastalert
 
 COPY ./files/* /usr/local/lib/python3.6/site-packages/elastalert/
+
+ENTRYPOINT ["/opt/elastalert/run.sh", "--verbose"]
