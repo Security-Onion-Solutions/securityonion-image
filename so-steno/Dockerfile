@@ -17,7 +17,7 @@ RUN yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 RUN rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/stenographer_20180316/stenographer-0-1.20180316git57b88aa.el7.centos.x86_64.rpm
 RUN mkdir -p /opt/sensoroni 
 
-RUN curl -L https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/Sensoroni-1.2.2/sensoroni -o /opt/sensoroni/sensoroni
+RUN curl -L https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/Sensoroni-1.3.0/sensoroni -o /opt/sensoroni/sensoroni
 RUN chmod +x /opt/sensoroni/sensoroni
 
 # setcap
