@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. /usr/sbin/so-common
+
+if docker ps | grep -q "so-wazuh"; then
+	docker exec -it so-wazuh /var/ossec/bin/manage_agents $1
+else
+	echo "OSSEC is not running."
+	echo "Start it with -->  sudo so-ossec-start"
+fi

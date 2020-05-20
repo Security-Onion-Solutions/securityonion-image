@@ -1,0 +1,45 @@
+<%= include_passenger_internal_template('global.erb') %>
+
+worker_processes 1;
+events {
+    worker_connections 4096;
+}
+
+http {
+    <%= include_passenger_internal_template('http.erb', 4) %>
+
+    default_type application/octet-stream;
+    types_hash_max_size 2048;
+    server_names_hash_bucket_size 64;
+    client_max_body_size 1024m;
+    access_log off;
+    keepalive_timeout 60;
+    underscores_in_headers on;
+    gzip on;
+    gzip_comp_level 3;
+    gzip_min_length 150;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/json text/javascript
+        application/javascript application/x-javascript application/json
+        application/rss+xml application/vnd.ms-fontobject application/x-font-ttf
+        application/xml font/opentype image/svg+xml text/xml;
+
+    server {
+        server_name _;
+        listen 0.0.0.0:3000;
+        root '/usr/src/redmine/public';
+        passenger_app_env 'production';
+        passenger_spawn_method 'smart';
+        passenger_load_shell_envvars off;
+
+        location ~ ^/playbook(/.*|$) {
+            alias /usr/src/redmine/public$1;
+            passenger_base_uri /playbook;
+            passenger_app_root /usr/src/redmine;
+            passenger_document_root /usr/src/redmine/public;
+            passenger_enabled on;
+        }
+    }
+
+    passenger_pre_start http://0.0.0.0:3000/;
+}

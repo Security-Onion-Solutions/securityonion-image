@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. /usr/sbin/so-common
+
+/usr/sbin/so-ossec-stop &&
+/usr/sbin/so-ossec-start
