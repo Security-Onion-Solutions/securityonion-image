@@ -15,7 +15,7 @@ RUN chown -R cortex /opt/cortex \
      
      
 RUN yum update -y && yum -y install epel-release
-RUN yum -y install https://centos7.iuscommunity.org/ius-release-el7.rpm
+RUN yum -y install https://repo.ius.io/ius-release-el7.rpm
 RUN yum -y makecache && yum -y install python36u python36u-pip && pip3.6 install --upgrade pip && yum clean all
 
 RUN git clone https://github.com/TheHive-Project/Cortex-Analyzers
