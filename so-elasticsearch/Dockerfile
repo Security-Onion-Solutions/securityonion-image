@@ -18,7 +18,7 @@
 ARG FLAVOR
 ARG VERSION
 
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.8.1
+FROM docker.elastic.co/elasticsearch/$FLAVOR:$VERSION
 
 RUN groupmod -g 930 elasticsearch && \
     usermod -u 930 -g 930 elasticsearch
