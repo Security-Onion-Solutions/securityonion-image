@@ -63,6 +63,8 @@ API_GENERATE_CERTS=${API_GENERATE_CERTS:-true}
 
 if [ $FIRST_TIME_INSTALLATION == true ]
 then
+  mkdir -p ${DATA_PATH}/logs/firewall
+  mkdir -p ${DATA_PATH}/logs/ossec
   chown -R ossec:ossec ${DATA_PATH}/logs
   chown -R ossec:ossec ${DATA_PATH}/var
   if [ $AUTO_ENROLLMENT_ENABLED == true ]
