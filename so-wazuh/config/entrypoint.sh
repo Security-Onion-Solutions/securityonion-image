@@ -67,6 +67,7 @@ then
   mkdir -p ${DATA_PATH}/logs/ossec
   chown -R ossec:ossec ${DATA_PATH}/logs
   chown -R ossec:ossec ${DATA_PATH}/var
+  cp -f ${DATA_PATH}/etc/shared/default/* ${DATA_PATH}/etc/shared/
   if [ $AUTO_ENROLLMENT_ENABLED == true ]
   then
     if [ ! -e ${DATA_PATH}/etc/sslmanager.key ]
