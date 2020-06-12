@@ -35,12 +35,6 @@ RUN yum install -y nodejs
 #RUN rpm -i https://packages.wazuh.com/yum/el/7/x86_64/wazuh-api-2.0.1-1.el7.x86_64.rpm
 RUN yum install -y wazuh-api-$WAZUH_VERSION
 
-RUN mkdir -p /var/ossec/logs/firewall && \
-    mkdir -p /var/ossec/logs/ossec && \
-    mkdir -p /var/ossec/queue && \
-    mkdir -p /var/ossec/stats && \
-    chown -R ossec:ossec /var/ossec
-
 # Add OSSEC config
 ADD config/securityonion_rules.xml /var/ossec/ruleset/rules/securityonion_rules.xml
 ADD config/ossec.conf /var/ossec/etc/ossec.conf
@@ -59,7 +53,5 @@ ADD config/entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
 
 RUN yum clean all
-    
-USER ossec
 
 ENTRYPOINT ["/entrypoint.sh"]

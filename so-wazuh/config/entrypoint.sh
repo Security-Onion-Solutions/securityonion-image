@@ -49,6 +49,7 @@ for ossecdir in "${DATA_DIRS[@]}"; do
     print "Installing ${ossecdir}"
     exec_cmd "mkdir -p $(dirname ${DATA_PATH}/${ossecdir})"
     exec_cmd "cp -pr /var/ossec/${ossecdir}-template ${DATA_PATH}/${ossecdir}"
+    chown -R ossec:ossec "${DATA_PATH}/${ossecdir}"
     FIRST_TIME_INSTALLATION=true
   fi
 done
