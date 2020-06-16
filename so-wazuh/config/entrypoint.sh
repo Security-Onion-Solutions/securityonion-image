@@ -49,6 +49,7 @@ for ossecdir in "${DATA_DIRS[@]}"; do
     print "Installing ${ossecdir}"
     exec_cmd "mkdir -p $(dirname ${DATA_PATH}/${ossecdir})"
     exec_cmd "cp -pr /var/ossec/${ossecdir}-template ${DATA_PATH}/${ossecdir}"
+    chown -R ossec:ossec "${DATA_PATH}/${ossecdir}"
     FIRST_TIME_INSTALLATION=true
   fi
 done
@@ -62,6 +63,11 @@ API_GENERATE_CERTS=${API_GENERATE_CERTS:-true}
 
 if [ $FIRST_TIME_INSTALLATION == true ]
 then
+  mkdir -p ${DATA_PATH}/logs/firewall
+  mkdir -p ${DATA_PATH}/logs/ossec
+  chown -R ossec:ossec ${DATA_PATH}/logs
+  chown -R ossec:ossec ${DATA_PATH}/var
+  cp -f ${DATA_PATH}/etc/shared/default/* ${DATA_PATH}/etc/shared/
   if [ $AUTO_ENROLLMENT_ENABLED == true ]
   then
     if [ ! -e ${DATA_PATH}/etc/sslmanager.key ]
