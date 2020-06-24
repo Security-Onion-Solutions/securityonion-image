@@ -6,13 +6,16 @@ ARG YARA_PYTHON_VERSION=3.11.0
 
 # Copy Strelka files
 
-# Update packages
-RUN apt-get -qq update && \
+# Common Ubuntu layer
+RUN apt-get update && \
+    apt-get --no-install-recommends --no-install-suggests -y install \
+        curl \
+        ca-certificates \
+        build-essential
+        
 # Install build packages
-    apt-get install --no-install-recommends -qq \
+RUN apt-get install --no-install-recommends -qq \
     automake \
-    build-essential \
-    curl \
     gcc \
     git \
     libtool \
@@ -44,6 +47,9 @@ RUN mkdir /strelka && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/build/python/backend/requirements.txt /strelka/ && \
     cp -fr /tmp/strelka/build/python/backend/setup.py /strelka/
+
+# Remove temp strelka directory
+RUN rm -rf /tmp/strelka
 
 # Install Python packages
 RUN pip3 install -r /strelka/requirements.txt && \
