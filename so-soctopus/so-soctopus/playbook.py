@@ -76,22 +76,33 @@ def thehive_casetemplate_update(issue_id):
         tasks.insert(0, {"order": 0, "title": f"Analyzer - {minimal_name}", "description": minimal_name})
 
     # Build the case template
-    case_template = {"name": play_meta['playid'], "severity": 2, "tlp": 3, "metrics": {}, "customFields": { \
-        "playObjective": {"string": sigma_meta['description']}, \
-        "playbookLink": {"string": f"{playbook_url}/issues/{issue_id}"}}, \
-                     "description": sigma_meta['description'], \
-                     "tasks": tasks}
+    case_template = \
+        {
+            "name": play_meta['playid'], 
+            "severity": 2, 
+            "tlp": 3, 
+            "metrics": {}, 
+            "customFields": {
+                "playObjective": {
+                    "string": sigma_meta['description']
+                },
+                "playbookLink": {
+                    "string": f"{playbook_url}/issues/{issue_id}"
+                }
+            },
+            "description": sigma_meta['description'],
+            "tasks": tasks
+        }
 
     # Is there a Case Template already created?
     if play_meta['hiveid']:
         # Case Template exists - let's update it
-        url = f"{parser.get('hive', 'hive_url')}/api/case/template/{play_meta['hiveid']}"
+        url = f"{parser.get('hive', 'hive_url')}api/case/template/{play_meta['hiveid']}"
         requests.patch(url, data=json.dumps(case_template), headers=hive_headers,
                        verify=parser.getboolean('hive', 'hive_verifycert', fallback=False)).json()
-
     else:
         # Case Template does not exist - let's create it
-        url = f"{parser.get('hive', 'hive_url')}/api/case/template"
+        url = f"{parser.get('hive', 'hive_url')}api/case/template"
         r = requests.post(url, data=json.dumps(case_template), headers=hive_headers,
                           verify=parser.getboolean('hive', 'hive_verifycert', fallback=False)).json()
 

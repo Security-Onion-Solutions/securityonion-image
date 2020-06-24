@@ -18,10 +18,14 @@
 ARG FLAVOR
 ARG VERSION
 
+ARG GID=930
+ARG UID=930
+ARG USERNAME=elasticsearch
+
 FROM docker.elastic.co/elasticsearch/$FLAVOR:$VERSION
 
-RUN groupmod -g 930 elasticsearch && \
-    usermod -u 930 -g 930 elasticsearch
+RUN groupmod -g ${GID} ${USERNAME} && \
+    usermod -u ${UID} -g ${GID} ${USERNAME}
 
 WORKDIR /usr/share/elasticsearch
 
@@ -37,5 +41,5 @@ COPY --chown=elasticsearch:elasticsearch plugins/  /usr/share/elasticsearch/plug
 RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
     chmod 0750 bin/es-docker
 
-USER elasticsearch
+USER ${USERNAME}
 CMD ["/bin/bash", "bin/es-docker"]
