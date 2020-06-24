@@ -1,4 +1,4 @@
-# Copyright 2014-2020 Security Onion Solutions, LLC
+# Copyright 2014,2015,2016,2017,2018 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -13,28 +13,27 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM python:3-alpine
+FROM centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="IDSTools for downloading rules"
 
-ARG GID=939
-ARG UID=939
-ARG USERNAME=socore
+RUN yum update -y && \
+    yum clean all
 
-RUN apk add --no-cache --virtual .build-deps\
-    shadow
+# Install epel
+RUN yum -y install epel-release bash && yum clean all
+RUN yum update -y && yum -y install python-idstools \
+    && yum clean all && rm -rf /var/cache/yum
 
-RUN mkdir -p /opt/so/idstools/bin && mkdir /opt/so/idstools/etc
-COPY entrypoint.sh /opt/so/idstools/bin
-RUN chmod +x /opt/so/idstools/bin/entrypoint.sh && chown -R ${UID}:${GID} /opt/so/idstools
+RUN mkdir -p /opt/so/idstools/bin
+COPY files/so-idstools.sh /opt/so/idstools/bin
 
-RUN groupadd --gid ${GID} ${USERNAME} && \
-    useradd --uid ${UID} --gid ${GID} \
-    --home-dir /opt/so --no-create-home ${USERNAME}
+RUN chmod +x /opt/so/idstools/bin/so-idstools.sh
 
-RUN apk del .build-deps
+# Create socore user.
+RUN groupadd --gid 939 socore && \
+    adduser --uid 939 --gid 939 \
+    --home-dir /opt/so --no-create-home socore
 
-USER ${USERNAME}
-WORKDIR /opt/so/idstools/bin
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/opt/so/idstools/bin/so-idstools.sh"]
