@@ -9,7 +9,8 @@ RUN yum update -y && \
 # Install epel
 RUN yum -y install epel-release bash libpcap iproute tcpdump && yum clean all
 RUN yum -y install https://repo.ius.io/ius-release-el7.rpm
-RUN yum -y install snappy leveldb jq libaio libseccomp golang which openssl python36u python36u-pip
+RUN yum -y install snappy leveldb tcpdump jq libaio libseccomp golang which openssl python36u python36u-pip
+
 RUN /usr/bin/pip3.6 install
 RUN yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
