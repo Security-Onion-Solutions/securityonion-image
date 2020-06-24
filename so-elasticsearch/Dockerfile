@@ -18,11 +18,11 @@
 ARG FLAVOR
 ARG VERSION
 
+FROM docker.elastic.co/elasticsearch/$FLAVOR:$VERSION
+
 ARG GID=930
 ARG UID=930
 ARG USERNAME=elasticsearch
-
-FROM docker.elastic.co/elasticsearch/$FLAVOR:$VERSION
 
 RUN groupmod -g ${GID} ${USERNAME} && \
     usermod -u ${UID} -g ${GID} ${USERNAME}
