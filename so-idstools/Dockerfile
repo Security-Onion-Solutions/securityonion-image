@@ -21,9 +21,11 @@ LABEL description="IDSTools for downloading rules"
 ARG GID=939
 ARG UID=939
 ARG USERNAME=socore
+ARG VERSION=0.5.2
 
 RUN apk add --no-cache --virtual .build-deps\
-    shadow
+    shadow \
+    bash
 
 RUN mkdir -p /opt/so/idstools/bin && mkdir /opt/so/idstools/etc
 COPY entrypoint.sh /opt/so/idstools/bin
@@ -32,6 +34,8 @@ RUN chmod +x /opt/so/idstools/bin/entrypoint.sh && chown -R ${UID}:${GID} /opt/s
 RUN groupadd --gid ${GID} ${USERNAME} && \
     useradd --uid ${UID} --gid ${GID} \
     --home-dir /opt/so --no-create-home ${USERNAME}
+
+RUN pip install idstools==${VERSION}
 
 RUN apk del .build-deps
 
