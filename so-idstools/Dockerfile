@@ -25,7 +25,8 @@ ARG VERSION=0.6.3
 
 RUN apk add --no-cache --virtual .build-deps\
     shadow \
-    bash
+
+RUN apk add --no-cache bash
 
 RUN mkdir -p /opt/so/idstools/bin && mkdir /opt/so/idstools/etc
 COPY entrypoint.sh /opt/so/idstools/bin
@@ -38,8 +39,6 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
 RUN pip install idstools==${VERSION}
 
 RUN apk del .build-deps
-
-RUN apk add --no-cache bash
 
 USER ${USERNAME}
 WORKDIR /opt/so/idstools/bin
