@@ -24,8 +24,9 @@ ARG USERNAME=domainstats
 
 RUN apk add --no-cache --virtual .build-deps\
     shadow \
-    git \
-	bash
+    git
+
+RUN apk add --no-cache bash
 
 RUN groupadd --gid ${GID} ${USERNAME} && \
     useradd --uid ${UID} --gid ${GID} --no-create-home ${USERNAME}

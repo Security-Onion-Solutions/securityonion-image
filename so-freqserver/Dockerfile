@@ -11,6 +11,8 @@ RUN apk add --no-cache --virtual .build-deps\
     shadow \
     git 
 
+RUN apk add --no-cache bash
+
 RUN groupadd --gid ${GID} ${USERNAME} && \
     useradd --uid ${UID} --gid ${GID} --no-create-home ${USERNAME}
 
