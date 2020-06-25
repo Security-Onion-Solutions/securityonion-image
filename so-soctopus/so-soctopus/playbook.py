@@ -23,11 +23,16 @@ yaml = ruamel.yaml.YAML(typ='safe')
 
 playbook_headers = {'X-Redmine-API-Key': parser.get("playbook", "playbook_key"), 'Content-Type': 'application/json'}
 playbook_url = parser.get("playbook", "playbook_url")
+playbook_unit_test_index = parser.get("playbook", "playbook_unit_test_index")
+playbook_verifycert = parser.getboolean('playbook', 'playbook_verifycert', fallback=False)
 
 hive_headers = {'Authorization': f"Bearer {parser.get('hive', 'hive_key')}", 'Accept': 'application/json, text/plain',
                 'Content-Type': 'application/json;charset=utf-8'}
 
-playbook_verifycert = parser.getboolean('playbook', 'playbook_verifycert', fallback=False)
+es_url = parser.get("es", "es_url")
+es_verifycert = parser.getboolean('es', 'es_verifycert', fallback=False)
+
+es_ip = "10.66.166.195"
 
 def navigator_update():
     # Get play data from Redmine
@@ -196,6 +201,8 @@ def play_metadata(issue_id):
             play['case_analyzers'] = item['value']
         elif item['name'] == "Signature ID":
             play['sigma_id'] = item['value']
+        elif item['name'] == "Target Log":
+            play['target_log'] = item['value']
 
     # Cleanup the Sigma data to get it ready for parsing
     sigma_raw = re.sub(
@@ -211,7 +218,8 @@ def play_metadata(issue_id):
         'sigma_formatted': f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{sigma_raw}\n</code></pre>\n}}}}',
         'sigma_id': play.get('sigma_id'),
         'playbook': play.get('playbook'),
-        'case_analyzers': play.get('case_analyzers')
+        'case_analyzers': play.get('case_analyzers'),
+        'target_log': play.get('target_log')
     }
 
 
@@ -328,6 +336,152 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
     return {
         'play_creation': play_creation,
         'play_url': play_url
+    }
+
+
+def play_unit_test (issue_id,unit_test_trigger,only_normalize=False):
+
+    # Get Play metadata
+    play_meta = play_metadata(issue_id)
+
+    if not play_meta['target_log']:
+        return "No Target Log"
+
+    # Get Sigma metadata
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'])
+
+    # If needed, normalize the Target Log if the trigger is "Target Log Updated"
+    if unit_test_trigger == "Target Log Updated":
+        if not "collapse(View Log)" in play_meta['target_log']:
+            play_unit_test_normalize_log(play_meta['target_log'],issue_id,sigma_meta['title'])
+            if only_normalize:
+                return "only_normalize = True"
+            
+    # Insert the Target Log into Elasticsearch
+    insert_log = play_unit_test_insert_log (play_meta['target_log'],play_meta['playid'])
+    if insert_log['status_code'] != 201:
+        play_unit_test_closeout(issue_id,"Failed",unit_test_trigger,f"Target Log insert into Elasticsearch failed: {insert_log['debug'] }")
+        return
+  
+    # Tweak Play Elastalert alert for use with elastalert-test-rule & output to a temp file
+    newline = '\n'
+    elastalert_alert = f"es_host: {es_ip}{newline}es_port: 9200{newline}{sigma_meta['raw_elastalert']}{newline}alert: debug"
+    elastalert_alert = re.sub(r"index: .*", f"index: {playbook_unit_test_index}", elastalert_alert)
+
+    temp_file = tempfile.NamedTemporaryFile(mode='w+t')
+    print(elastalert_alert, file=temp_file)
+    temp_file.seek(0)
+
+    # Run elastalert-test-rule
+    elastalert_output = subprocess.run(["elastalert-test-rule", "--config", "elastalert_config.yaml", temp_file.name, "--formatted-output"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
+
+    if elastalert_output.returncode != 0:
+        play_unit_test_closeout(issue_id,"Failed",unit_test_trigger,f"Stage - elastalert-test-rule execution failed: {elastalert_output}")
+        return
+
+    # Cleanup stdout, just leaving the status in JSON format
+    elastalert_output = json.loads(f"{{{elastalert_output.stdout.strip().split('{', 1)[-1]}")
+
+    if elastalert_output.get('writeback', {}).get('elastalert_error'):
+        play_unit_test_closeout(issue_id,"Failed",unit_test_trigger,f"Stage - elastalert-test-rule: {elastalert_output['writeback']}")
+    elif elastalert_output.get('writeback', {}).get('elastalert_status'):
+        if  elastalert_output['writeback']['elastalert_status']['hits'] >= 1:
+            print ("Passed")
+            elastalert_status = "Passed"
+            unit_test_debug = "N/A"
+        else:
+            print ("Failed")
+            elastalert_status = "Failed"
+            unit_test_debug = f"Stage - elastalert-test-rule: {elastalert_output['writeback']}"
+    else:
+        print ("Failed")
+        elastalert_status = "Failed"
+        unit_test_debug = f"Stage - elastalert-test-rule: {elastalert_output['writeback']}"
+
+    # Closeout the unit test
+    play_unit_test_closeout(issue_id,elastalert_status,unit_test_trigger,unit_test_debug)
+
+    return {
+        'unit_test_status': elastalert_status
+    }
+
+def play_unit_test_normalize_log (target_log, issue_id, play_name): 
+
+    normalized_log =  f'{{{{collapse(View Log)\n<pre><code class="json">\n\n{target_log}\n</code></pre>\n}}}}',
+    normalized_string = ''.join(normalized_log)
+
+    payload = {"issue": {"project_id": 1, "tracker": "Play", "subject":play_name, "custom_fields": [ \
+    {"id": 18, "value": normalized_string}]}}
+
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return r
+
+def play_unit_test_insert_log (target_log, playid):
+    
+    now_timestamp = strftime("%Y-%m-%d"'T'"%H:%M:%S", gmtime())
+
+    target_log = re.sub("{{collapse\(View Log\)|<pre><code class=\"json\">|</code></pre>|}}", "",target_log)
+    target_log = re.sub(r"@timestamp\":.\".*?,", f"@timestamp\": \"{now_timestamp}\",", target_log)
+    target_log = json.loads(target_log).pop("_source")
+
+    headers = {'Content-Type': 'application/json'}
+    url = f"http://{es_ip}:9200/{playbook_unit_test_index}/_doc"
+    r = requests.post(url, data=json.dumps(target_log), headers=headers, verify=es_verifycert)
+
+    return { 
+        'status_code': r.status_code,
+        'debug': r.__dict__
+    }
+
+def play_unit_test_closeout (issue_id, status, unit_test_trigger, unit_test_debug="N/A"):
+    newline = '\n'
+    now_timestamp = strftime("%Y-%m-%d"'T'"%H:%M:%S", gmtime())
+    play_note = f"Unit Test {status} - {now_timestamp}{newline}Test Triggered by: {unit_test_trigger}{newline}Debug: {unit_test_debug}"
+
+    # Update Play Notes with details of the unit test's outcome
+    play_update_notes(issue_id,play_note)
+
+    # Update Play Unit-Test field with the status of the unit test (Passed|Failed)
+    play_update_unit_test_field(issue_id,status)
+
+    return
+
+
+def play_update_notes (issue_id, play_notes):
+    
+    notes_payload = {"issue": {"notes": play_notes}}
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(notes_payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return {
+        r.status_code
+    }
+
+def play_update_unit_test_field (issue_id, unit_test_status):
+   
+    payload = {"issue": {"project_id": 1, "tracker": "Play", "custom_fields": [ \
+        {"id": 19, "value": unit_test_status}]}}
+
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return {
+        r.status_code
+    }
+
+
+def play_update_custom_field (issue_id, field_id, field_value, play_name):
+   
+    payload = {"issue": {"project_id": 1, "tracker": "Play", "subject":play_name, "custom_fields": [ \
+        {"id": field_id, "value": field_value}]}}
+
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return {
+        r.status_code
     }
 
 
