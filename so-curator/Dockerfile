@@ -23,7 +23,7 @@ ARG USERNAME=curator
 
 ENV LC_ALL=en_US.UTF-8
 
-RUN apk add --no-cache curl grep gawk coreutils shadow
+RUN apk add --no-cache curl grep gawk coreutils shadow bash
 
 RUN groupadd --gid ${GID} ${USERNAME} && \
     useradd --uid ${UID} --gid ${GID} --no-create-home ${USERNAME}

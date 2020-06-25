@@ -17,7 +17,7 @@ FROM alpine
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Fleet running in Docker container for use with Security Onion"
 
-RUN apk --update add ca-certificates unzip curl
+RUN apk --update add ca-certificates unzip curl bash
 RUN mkdir -p /tmp/fleet && cd /tmp/fleet \
 && curl -OL  https://github.com/kolide/fleet/releases/latest/download/fleet.zip \
 && unzip fleet.zip 'linux/*' \
