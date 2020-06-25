@@ -35,6 +35,8 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
 
 RUN apk del .build-deps
 
+RUN apk add --no-cache bash
+
 USER ${USERNAME}
 WORKDIR /opt/so/idstools/bin
 ENTRYPOINT ["./entrypoint.sh"]
