@@ -21,7 +21,7 @@ LABEL description="IDSTools for downloading rules"
 ARG GID=939
 ARG UID=939
 ARG USERNAME=socore
-ARG VERSION=0.5.2
+ARG VERSION=0.6.3
 
 RUN apk add --no-cache --virtual .build-deps\
     shadow \
