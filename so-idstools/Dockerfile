@@ -24,7 +24,7 @@ ARG USERNAME=socore
 ARG VERSION=0.6.3
 
 RUN apk add --no-cache --virtual .build-deps\
-    shadow \
+    shadow
 
 RUN apk add --no-cache bash
 
