@@ -87,7 +87,7 @@ def createHiveAlert(esid):
                 "dhcp": "DHCP",
                 "dnp3": "DNP3",
                 "dns": "DNS",
-                "files": "Files",
+                "file": "Files",
                 "ftp": "FTP",
                 "http": "HTTP",
                 "intel": "Intel",

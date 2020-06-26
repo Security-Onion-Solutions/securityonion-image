@@ -1,10 +1,39 @@
-FROM centos:7
+# Copyright 2014-2020 Security Onion Solutions, LLC
+
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+FROM ubuntu:18.04
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="TheHive Docker container for use with Security Onion"
-RUN yum update -y
-RUN yum install -y https://dl.bintray.com/thehive-project/rpm-stable/thehive-3.4.0-1.noarch.rpm
-RUN yum -y install thehive wget
+
+# Common Ubuntu layer
+RUN apt-get update && \
+    apt-get --no-install-recommends --no-install-suggests -y install \
+        curl \
+        ca-certificates \
+        build-essential
+
+RUN apt-get --no-install-recommends --no-install-suggests -y install \
+  gpg gpg-agent dirmngr \
+  apt-transport-https
+
+RUN echo 'deb https://dl.bintray.com/thehive-project/debian-stable any main' | tee -a /etc/apt/sources.list.d/thehive-project.list
+RUN curl https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add -
+RUN apt-get update
+RUN apt-get --no-install-recommends --no-install-suggests -y install thehive
+
 RUN groupmod -g 939 thehive \
   && usermod -u 939 -g 939 thehive \
   && ls -la /opt \

@@ -1,38 +1,51 @@
-FROM centos:7
+# Copyright 2014-2020 Security Onion Solutions, LLC
 
-# Originally developed by Justin Henderson justin@hasecuritysolutions.com
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+FROM python:3-alpine
+
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Domainstats running in Docker container for use with Security Onion"
 
-# Create a common centos update layer
-RUN yum update -y && \
-    yum clean all
+ARG GID=936
+ARG UID=936
+ARG USERNAME=domainstats
 
-# Create a common python/git layer
-RUN yum update -y && \
-    yum install -y python3 git \
-    yum clean all
+RUN apk add --no-cache --virtual .build-deps\
+    shadow \
+    git
 
-# Create user
-RUN groupadd --gid 936 domainstats && \
-    adduser --uid 936 --gid 936 \
-      --home-dir /usr/share/domainstats --no-create-home \
-      domainstats
+RUN apk add --no-cache bash
 
-# Install and set perms in same layer to save space
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-	python3 get-pip.py && \
-	cd /opt && \
-	git clone https://github.com/MarkBaggett/domain_stats.git && \
-	pip install python-whois six && \
+RUN groupadd --gid ${GID} ${USERNAME} && \
+    useradd --uid ${UID} --gid ${GID} --no-create-home ${USERNAME}
+
+RUN cd /opt && \
+	git clone -b domain_stats_1 https://github.com/MarkBaggett/domain_stats.git && \
 	mkdir /var/log/domain_stats && \
 	ln -sf /dev/stderr /var/log/domain_stats/domain_stats.log && \
-	chown -R domainstats: /opt/domain_stats
+	chown -R ${UID}:${GID} /opt/domain_stats
 
-USER domainstats
+RUN pip install --no-cache-dir six python-whois
+RUN apk del .build-deps
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 20000
-
 STOPSIGNAL SIGTERM
 
-CMD /usr/bin/python3 /opt/domain_stats/domain_stats.py -ip 0.0.0.0 20000 -a /opt/domain_stats/top-1m.csv --preload 0
+USER ${USERNAME}
+
+ENTRYPOINT [ "/entrypoint.sh" ]

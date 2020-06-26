@@ -1,7 +1,7 @@
 # This Dockerfile was based on the official Filebeat Docker image:
 # https://hub.docker.com/r/elastic/filebeat/
 
-# Copyright 2014,2015,2016,2017,2019,2020 Security Onion Solutions, LLC
+# Copyright 2014-2020 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
