@@ -18,13 +18,14 @@ FROM python:3-slim
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="API for automating SOC-related functions"
 
-RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 && rm -rf /var/lib/apt/lists/*
+WORKDIR /SOCtopus
 
-RUN mkdir -p /SOCtopus
+RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 gcc python3-dev && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /SOCtopus/templates
 RUN mkdir -p /SOCtopus/playbook
 RUN mkdir -p /var/log/SOCtopus
-WORKDIR /SOCtopus
+
 COPY ./so-soctopus/requirements.txt /SOCtopus/
 RUN pip install -r requirements.txt 
 RUN pip install --upgrade python-magic

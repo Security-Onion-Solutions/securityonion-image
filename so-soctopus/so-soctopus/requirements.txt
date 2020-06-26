@@ -9,6 +9,6 @@ pymisp>=2.4,<2.5
 requests>=2.23.0,<2.24
 rt>=2.0,<2.1
 ruamel.yaml>=0.16,<0.17
-sigmatools>=0.16,<0.17
+sigmatools>=0.17
 thehive4py>=1.6,<1.7
-
+elastalert==0.2.4
