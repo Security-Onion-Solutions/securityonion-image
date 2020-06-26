@@ -30,9 +30,8 @@ hive_headers = {'Authorization': f"Bearer {parser.get('hive', 'hive_key')}", 'Ac
                 'Content-Type': 'application/json;charset=utf-8'}
 
 es_url = parser.get("es", "es_url")
+es_ip = parser.get("es", "es_url")
 es_verifycert = parser.getboolean('es', 'es_verifycert', fallback=False)
-
-es_ip = "10.66.166.195"
 
 def navigator_update():
     # Get play data from Redmine
