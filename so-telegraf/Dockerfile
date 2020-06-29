@@ -28,8 +28,6 @@ RUN set -ex && \
     rm -rf *.tar.gz* /usr/src /root/.gnupg && \
     apk del .build-deps
 
-EXPOSE 8125/udp 8092/udp 8094
-
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
