@@ -1,51 +1,10 @@
-# Copyright 2014-2020 Security Onion Solutions, LLC
-
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-FROM ubuntu:18.04
+FROM centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Cortex Docker container for use with Security Onion"
-
-# Common Ubuntu layer
-RUN apt-get update && \
-    apt-get --no-install-recommends --no-install-suggests -y install \
-        curl \
-        ca-certificates \
-        build-essential
-
-RUN apt-get --no-install-recommends --no-install-suggests -y install \
-    libffi-dev \
-    python3 \
-    python3-dev \
-    python3-pip \
-    libfuzzy-dev \
-    git \
-    gpg gpg-agent \
-    exiftool \
-    locales
-
-RUN locale-gen en_US.UTF-8
-
-ENV LC_ALL=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-
-RUN echo 'deb https://dl.bintray.com/thehive-project/debian-stable any main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
-    curl -s https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add - > /dev/null 2>&1
-
-RUN apt-get update && apt-get --no-install-recommends --no-install-suggests -y install cortex
-
+RUN yum update -y
+RUN yum install -y https://dl.bintray.com/thehive-project/rpm-stable/cortex-3.0.1-1.noarch.rpm 
+RUN yum -y install cortex wget git
 RUN groupmod -g 939 cortex \
   && usermod -u 939 -g 939 cortex \
   && ls -la /opt \
@@ -54,10 +13,14 @@ RUN mkdir -p /opt/cortex/conf
 RUN chown -R cortex /opt/cortex \
      /var/log/cortex
      
+     
+RUN yum update -y && yum -y install epel-release
+RUN yum -y install https://repo.ius.io/ius-release-el7.rpm
+RUN yum -y makecache && yum -y install python36u python36u-pip && pip3.6 install --upgrade pip && yum clean all
+
 RUN git clone https://github.com/TheHive-Project/Cortex-Analyzers
 
-RUN pip3 install setuptools wheel
-RUN for i in $(find Cortex-Analyzers -name 'requirements.txt'); do pip3 install -r $i || true; done
+RUN for I in $(find Cortex-Analyzers -name 'requirements.txt'); do pip3 install -r $I || true; done
      
 USER cortex
 

@@ -1,17 +1,11 @@
-FROM ubuntu:18.04
+FROM debian:stretch-slim
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Grafana running in Docker container for use with Security Onion"
 
 ARG GRAFANA_URL="https://dl.grafana.com/oss/release/grafana-6.7.3.linux-amd64.tar.gz"
 ARG GF_UID="939"
 ARG GF_GID="939"
-
-# Common Ubuntu layer
-RUN apt-get update && \
-    apt-get --no-install-recommends --no-install-suggests -y install \
-        curl \
-        ca-certificates \
-        build-essential
+ARG GF_INSTALL_PLUGIN="mtanda-histogram-panel,grafana-piechart-panel,grafana-clock-panel,grafana-simple-json-datasource,ryantxu-ajax-panel,michaeldmoore-multistat-panel"
 
 ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
@@ -21,13 +15,13 @@ ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bi
     GF_PATHS_PLUGINS="/var/lib/grafana/plugins" \
     GF_PATHS_PROVISIONING="/etc/grafana/provisioning"
 
-RUN apt-get install -y tar libfontconfig && \
+RUN apt-get update && apt-get install -qq -y tar libfontconfig curl ca-certificates && \
     mkdir -p "$GF_PATHS_HOME/.aws" && \
     curl "$GRAFANA_URL" | tar xfvz - --strip-components=1 -C "$GF_PATHS_HOME" && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
     groupadd -r -g $GF_GID socore && \
-    useradd -r -u $GF_UID -g $GF_GID socore && \
+    useradd -r -u $GF_UID -g socore socore && \
     mkdir -p "$GF_PATHS_PROVISIONING/datasources" \
              "$GF_PATHS_PROVISIONING/dashboards" \
              "$GF_PATHS_LOGS" \
