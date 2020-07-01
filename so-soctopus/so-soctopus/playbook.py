@@ -30,7 +30,7 @@ hive_headers = {'Authorization': f"Bearer {parser.get('hive', 'hive_key')}", 'Ac
                 'Content-Type': 'application/json;charset=utf-8'}
 
 es_url = parser.get("es", "es_url")
-es_ip = parser.get("es", "es_url")
+es_ip = parser.get("es", "es_ip")
 es_verifycert = parser.getboolean('es', 'es_verifycert', fallback=False)
 
 def navigator_update():
@@ -179,7 +179,7 @@ def play_update(issue_id):
         {"id": 1, "name": "Title", "value": sigma_meta['title']}, \
         {"id": 10, "name": "Level", "value": sigma_meta['level']}, \
         {"id": 6, "name": "ElastAlert Config", "value": sigma_meta['esquery']}, \
-        {"id": 14, "name": "Product", "value": sigma_meta['product']}, \
+        {"id": 20, "name": "Product", "value": sigma_meta['product']}, \
         {"id": 3, "name": "Objective", "value": sigma_meta['description']}, \
         {"id": 2, "name": "Author", "value": sigma_meta['author']}, \
         {"id": 8, "name": "References", "value": sigma_meta['references']}, \
@@ -209,7 +209,7 @@ def play_metadata(issue_id):
             play['playbook'] = item['value']
         elif item['name'] == "Case Analyzers":
             play['case_analyzers'] = item['value']
-        elif item['name'] == "Signature ID":
+        elif item['name'] == "Rule ID":
             play['sigma_id'] = item['value']
         elif item['name'] == "Target Log":
             play['target_log'] = item['value']
@@ -289,7 +289,7 @@ def sigma_metadata(sigma_raw, sigma):
     }
 
 
-def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
+def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group="", license=""):
     # Expects Sigma in dict format
 
     # Extract out all the relevant metadata from the Sigma YAML
@@ -311,16 +311,18 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
                              {"id": 13, "name": "Playbook", "value": playbook},
                              {"id": 6, "name": "ElastAlert Config", "value": play['esquery']},
                              {"id": 10, "name": "Level", "value": play['level']},
-                             {"id": 14, "name": "Product", "value": play['product']},
+                             {"id": 20, "name": "Product", "value": play['product']},
                              {"id": 3, "name": "Objective", "value": play['description']},
                              {"id": 2, "name": "Author", "value": play['author']},
                              {"id": 8, "name": "References", "value": play['references']},
                              {"id": 5, "name": "Analysis", "value": f"{play['falsepositives']}{play['logfields']}"},
                              {"id": 11, "name": "PlayID", "value": play_id[0:9]},
                              {"id": 15, "name": "Tags", "value": play['tags']},
-                             {"id": 12, "name": "Signature ID", "value": play['sigid']},
+                             {"id": 12, "name": "Rule ID", "value": play['sigid']},
                              {"id": 9, "name": "Sigma", "value": play['sigma']},
-                             {"id": 16, "name": "Category", "value": ruleset}
+                             {"id": 18, "name": "Ruleset", "value": ruleset},
+                             {"id": 19, "name": "Group", "value": group},
+                             {"id": 26, "name": "License", "value": license}
                              ]}}
 
     # POST the payload to Redmine to create the Play (ie Redmine issue)
@@ -383,7 +385,7 @@ def play_unit_test (issue_id,unit_test_trigger,only_normalize=False):
     temp_file.seek(0)
 
     # Run elastalert-test-rule
-    elastalert_output = subprocess.run(["elastalert-test-rule", "--config", "elastalert_config.yaml", temp_file.name, "--formatted-output"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
+    elastalert_output = subprocess.run(["elastalert-test-rule", "--config", "playbook_elastalert_config.yaml", temp_file.name, "--formatted-output"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
 
     if elastalert_output.returncode != 0:
         play_unit_test_closeout(issue_id,"Failed",unit_test_trigger,f"Stage - elastalert-test-rule execution failed: {elastalert_output}")
@@ -421,7 +423,7 @@ def play_unit_test_normalize_log (target_log, issue_id, play_name):
     normalized_string = ''.join(normalized_log)
 
     payload = {"issue": {"project_id": 1, "tracker": "Play", "subject":play_name, "custom_fields": [ \
-    {"id": 18, "value": normalized_string}]}}
+    {"id": 21, "value": normalized_string}]}}
 
     url = f"{playbook_url}/issues/{issue_id}.json"
     r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
@@ -472,7 +474,7 @@ def play_update_notes (issue_id, play_notes):
 def play_update_unit_test_field (issue_id, unit_test_status):
    
     payload = {"issue": {"project_id": 1, "tracker": "Play", "custom_fields": [ \
-        {"id": 19, "value": unit_test_status}]}}
+        {"id": 22, "value": unit_test_status}]}}
 
     url = f"{playbook_url}/issues/{issue_id}.json"
     r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
