@@ -515,11 +515,11 @@ def playbookWebhook(webhook_content):
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
                     playbook.navigator_update()
-            # Check to see if the Play Target Log (Field ID 18) has been updated - if so, run a Unit Test
-            elif item['prop_key'] == '18' and item['old_value'] == "":
+            # Check to see if the Play Target Log (Field ID 21) has been updated - if so, run a Unit Test
+            elif item['prop_key'] == '21' and item['old_value'] == "":
                 # First time Target Log has been updated - Normalize log only
                 playbook.play_unit_test(issue_id,"Target Log Updated",True)
-            elif item['prop_key'] == '18' and item['old_value'] != "":
+            elif item['prop_key'] == '21' and item['old_value'] != "":
                 # Normalize log (if needed) & run Play unit test
                 playbook.play_unit_test(issue_id,"Target Log Updated")
     return "success"

@@ -20,7 +20,9 @@ LABEL description="API for automating SOC-related functions"
 
 WORKDIR /SOCtopus
 
-RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 gcc python3-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git libmagic1 gcc python3-dev && rm -rf /var/lib/apt/lists/*
+
+RUN git clone https://github.com/Security-Onion-Solutions/sigma.git
 
 RUN mkdir -p /SOCtopus/templates
 RUN mkdir -p /SOCtopus/playbook
