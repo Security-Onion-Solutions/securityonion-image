@@ -122,7 +122,7 @@ chmod -R g+rw ${DATA_PATH}
 /var/ossec/bin/ossec-control start
 
 # Start wazuh-api
-/bin/node /var/ossec/api/app.js &
+node /var/ossec/api/app.js &
 
 # Tail to stay running
-/usr/bin/tail -f /dev/null
+tail -f /dev/null

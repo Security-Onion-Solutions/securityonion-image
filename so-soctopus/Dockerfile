@@ -30,9 +30,9 @@ RUN mkdir -p /var/log/SOCtopus
 
 COPY ./so-soctopus/requirements.txt /SOCtopus/
 RUN pip install -r requirements.txt 
-RUN pip install --upgrade python-magic
+RUN pip install gunicorn
 
 COPY ./so-soctopus /SOCtopus
 
-ENTRYPOINT ["python3", "SOCtopus.py"]
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:7000", "wsgi:app"]
 
