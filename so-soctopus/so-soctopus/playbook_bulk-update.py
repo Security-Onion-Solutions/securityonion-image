@@ -103,9 +103,13 @@ def rule_update(rulesets):
     
     return 
 
+# Starting up....
+print(
+    f"\n\n-= Creating/Updating Plays based on the following categories: {rulesets} -=\n\n")
 
 # Get all the current plays from Playbook & parse out metadata
 print(f"\n\n-= Parsing current Plays in Playbook -=\n\n")
+time.sleep(20)
 url = f"{playbook_url}/issues.json?offset=0&tracker_id=1&limit=100"
 response = requests.get(url, headers=playbook_headers, verify=False).json()
 
@@ -124,9 +128,6 @@ while offset < response['total_count']:
 
 print(f"\n-= Parsed Playbook Plays: {len(plays)} -=\n")
 
-print(
-    f"\n\n-= Creating/Updating Plays based on the following categories: {rulesets} -=\n\n")
-time.sleep(3)
 
 # Create / Update the community Sigma repo
 sigma_repo = f"sigma/README.md"
