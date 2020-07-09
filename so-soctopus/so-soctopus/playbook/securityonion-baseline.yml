@@ -51,16 +51,16 @@ fieldmappings:
     ComputerName: event_data.ComputerName
     CurrentDirectory: process.working_directory"
     Description: process.pe.description
-    DestinationHostname: event_data.DestinationHostname
-    DestinationIp: destination_ip
+    DestinationHostname: destination.hostname
+    DestinationIp: destination.ip
     DestinationIsIpv6: event_data.DestinationIsIpv6
-    DestinationPort: destination_port
+    DestinationPort: destination.port
     Details: event_data.Details
     EngineVersion: event_data.EngineVersion
     EventType: event_data.EventType
     FailureCode: event_data.FailureCode
     FileName: event_data.FileName
-    FileVersion: event_data.FileVersion
+    FileVersion: process.pe.file_version
     GrantedAccess: event_data.GrantedAccess
     GroupName: event_data.GroupName
     Hashes: event_data.Hashes
@@ -78,6 +78,7 @@ fieldmappings:
     ObjectName: event_data.ObjectName
     ObjectType: event_data.ObjectType
     ObjectValueName: event_data.ObjectValueName
+    OriginalFileName: process.pe.original_file_name
     ParentCommandLine: process.parent.command_line
     ParentImage: process.parent.executable
     Path: event_data.Path
@@ -90,15 +91,18 @@ fieldmappings:
     Signature: event_data.Signature
     Source: event_data.Source
     SourceImage: event_data.SourceImage
+    SourceIP: source.ip
+    SourcePort: source.port
+    SourceHostname: source.hostname
     StartModule: event_data.StartModule
     Status: event_data.Status
-    SubjectUserName: event_data.SubjectUserName
-    TargetFilename: event_data.TargetFilename
+    SubjectUserName: user.name
+    TargetFilename: file.target
     TargetImage: event_data.TargetImage
     TargetObject: event_data.TargetObject
     TicketEncryptionType: event_data.TicketEncryptionType
     TicketOptions: event_data.TicketOptions
-    User: event_data.User
+    User: user.name
     WorkstationName: event_data.WorkstationName
     Product: process.pe.product
     GroupSid: event_data.GroupSid    
@@ -110,3 +114,4 @@ fieldmappings:
     query_name: osquery.result.name
     username: user.name
     uid: user.uid
+    Protocol: network.transport
