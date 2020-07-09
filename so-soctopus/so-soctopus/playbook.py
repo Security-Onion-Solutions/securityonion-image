@@ -23,6 +23,7 @@ yaml = ruamel.yaml.YAML(typ='safe')
 
 playbook_headers = {'X-Redmine-API-Key': parser.get("playbook", "playbook_key"), 'Content-Type': 'application/json'}
 playbook_url = parser.get("playbook", "playbook_url")
+playbook_external_url = parser.get("playbook", "playbook_ext_url")
 playbook_unit_test_index = parser.get("playbook", "playbook_unit_test_index")
 playbook_verifycert = parser.getboolean('playbook', 'playbook_verifycert', fallback=False)
 
@@ -108,12 +109,16 @@ def thehive_casetemplate_update(issue_id):
         # Case Template does not exist - let's create it
         url = f"{parser.get('hive', 'hive_url')}api/case/template"
         r = requests.post(url, data=json.dumps(case_template), headers=hive_headers,
-                          verify=parser.getboolean('hive', 'hive_verifycert', fallback=False)).json()
+                          verify=parser.getboolean('hive', 'hive_verifycert', fallback=False))
 
-        # Update Play (on Redmine) with Case Template ID
-        url = f"{playbook_url}/issues/{issue_id}.json"
-        data = '{"issue":{"custom_fields":[{"id":7,"value":"' + r['id'] + '"}]}}'
-        requests.put(url, data=data, headers=playbook_headers, verify=playbook_verifycert)
+        if r.status_code != 201:    
+            print(f"TheHive Template Creation Failed: {r.__dict__}", file=sys.stderr)
+        else:
+            # Update Play (on Redmine) with Case Template ID
+            r = r.json()
+            url = f"{playbook_url}/issues/{issue_id}.json"
+            data = '{"issue":{"custom_fields":[{"id":7,"value":"' + r['id'] + '"}]}}'
+            requests.put(url, data=data, headers=playbook_headers, verify=playbook_verifycert)
 
     return 200, "success"
 
@@ -131,31 +136,57 @@ def elastalert_update(issue_id):
     if os.path.exists(play_file):
         os.remove(play_file)
 
-    if sigma_meta['level'] == "medium" or sigma_meta['level'] == "low":
-        shutil.copy('/etc/playbook-rules/es-generic.template', play_file)
-        for line in fileinput.input(play_file, inplace=True):
-            line = re.sub(r'\/6000', f"/{issue_id}", line.rstrip())
-            line = re.sub(r'play_title:.\"\"', f"play_title: \"{sigma_meta['title']}\"", line.rstrip())
-            line = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n{ea_config_raw}",
-                          line.rstrip())
-            print(line)
-    else:
-        try:
-            if sigma_meta['product'] == 'osquery':
-                shutil.copy('/etc/playbook-rules/osquery.template', play_file)
-            else:
-                shutil.copy('/etc/playbook-rules/generic.template', play_file)
-            for line in fileinput.input(play_file, inplace=True):
-                line = re.sub(r'-\s''', f"- {play_meta['playbook']}", line.rstrip())
-                line = re.sub(r'tags:.*$', f"tags: ['playbook','{play_meta['playid']}','{play_meta['playbook']}']",
-                              line.rstrip())
-                line = re.sub(r'\/6000', f"/{issue_id}", line.rstrip())
-                line = re.sub(r'caseTemplate:.*', f"caseTemplate: '{play_meta['playid']}'\n{ea_config_raw}",
-                              line.rstrip())
-                print(line)
+    if sigma_meta['level'] == "low":
+        event_severity = 1
+    elif sigma_meta['level'] == "medium":
+        event_severity = 2
+    elif sigma_meta['level'] == "high":
+        event_severity = 3
+    elif sigma_meta['level'] == "critical":
+        event_severity = 4
 
-        except FileNotFoundError:
-            print("ElastAlert Template File not found")
+    if play_meta['group'] != None:
+        rule_category = play_meta['group']
+    elif play_meta['ruleset'] != None:
+        rule_category = play_meta['ruleset']
+    else:
+        rule_category = "None"
+        
+    try:
+        if sigma_meta['product'] == 'osquery':
+            shutil.copy('/etc/playbook-rules/osquery.template', play_file)
+        else:
+            shutil.copy('/etc/playbook-rules/generic.template', play_file)
+        with open(play_file, 'r+') as f:
+            content = f.read()
+            f.seek(0)
+            f.truncate()
+            # If Severity is High (3) or Critical (4), substitute Play metadata in TheHive alerter
+            if event_severity >= 3:
+                # Sub Severity 
+                content = re.sub(r' severity:.*', f" severity: {event_severity}", content.rstrip())
+                # Sub Playbook Name
+                content = re.sub(r'-\s''', f"- {play_meta['playbook']}", content.rstrip())
+                # Sub Play Tags
+                content = re.sub(r'tags:.*$', f"tags: ['playbook','{play_meta['playid']}','{play_meta['playbook']}']",
+                            content.rstrip())
+                # Sub Redmine IssueID
+                content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
+                # Sub Case Template
+                content = re.sub(r'caseTemplate:.*', f"caseTemplate: '{play_meta['playid']}'", content.rstrip())
+            else:
+                # This is a low Severity alert - Remove TheHive alerter 
+                content = re.sub(r"alert: hivealerter[\s\S]*5000'", "", content.rstrip()) 
+            # Sub details in the ES_Alerter - play URL, etc
+            content = re.sub(r'rule\.category:.*', f"rule.category: \"{rule_category}\"", content.rstrip())
+            content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
+            content = re.sub(r'play_title:.\"\"', f"play_title: \"{sigma_meta['title']}\"", content.rstrip())
+            content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
+            content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n{ea_config_raw}", content.rstrip())
+            f.write(content)
+
+    except FileNotFoundError:
+        print("ElastAlert Template File not found")
 
     return 200, "success"
 
@@ -213,6 +244,10 @@ def play_metadata(issue_id):
             play['sigma_id'] = item['value']
         elif item['name'] == "Target Log":
             play['target_log'] = item['value']
+        elif item['name'] == "Ruleset":
+            play['ruleset'] = item['value']
+        elif item['name'] == "Group":
+            play['group'] = item['value']
 
     # Cleanup the Sigma data to get it ready for parsing
     sigma_raw = re.sub(
@@ -229,7 +264,9 @@ def play_metadata(issue_id):
         'sigma_id': play.get('sigma_id'),
         'playbook': play.get('playbook'),
         'case_analyzers': play.get('case_analyzers'),
-        'target_log': play.get('target_log')
+        'target_log': play.get('target_log'),
+        'ruleset': play.get('ruleset'),
+        'group': play.get('group')
     }
 
 
@@ -338,7 +375,7 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group=""
         r = requests.put(url, data=json.dumps(notes_payload), headers=playbook_headers, verify=playbook_verifycert)
         # Notate success & Play URL
         play_creation = 201
-        play_url = f"{playbook_url}/issues/{new_issue_id['issue']['id']}"
+        play_url = f"{playbook_external_url}/issues/{new_issue_id['issue']['id']}"
     # If Play creation was not successful, return the status code
     else:
         print("Play Creation Error - " + r.text, file=sys.stderr)
