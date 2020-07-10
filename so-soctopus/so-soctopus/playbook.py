@@ -36,18 +36,18 @@ es_verifycert = parser.getboolean('es', 'es_verifycert', fallback=False)
 
 def navigator_update():
     # Get play data from Redmine
-    url = f"{playbook_url}/issues.json?status_id=3"
+    url = f"{playbook_url}/issues.json?status_id=3&limit=100"
     response_data = requests.get(url, headers=playbook_headers, verify=playbook_verifycert).json()
-
+ 
     technique_payload = []
     for play in response_data['issues']:
         for custom_field in play['custom_fields']:
-            if custom_field['id'] == 27 and (custom_field['value']):
+            if custom_field['id'] == 15 and (custom_field['value']):
                 technique_id = custom_field['value'][0]
                 technique_payload.append(
                     {"techniqueID": technique_id, "color": "#5AADFF", "comment": "", "enabled": "true", "metadata": []})
 
-    payload = {"name": "Playbook", "version": "2.1", "domain": "mitre-enterprise",
+    payload = {"name": "Playbook", "version": "2.2", "domain": "mitre-enterprise",
                "description": f"Current Coverage of Playbook - Updated {strftime('%Y-%m-%d %H:%M', gmtime())}",
                "filters": {"stages": ["act"], "platforms": ["windows"]}, "sorting": 0, "viewMode": 0,
                "hideDisabled": "false", "techniques": technique_payload,
