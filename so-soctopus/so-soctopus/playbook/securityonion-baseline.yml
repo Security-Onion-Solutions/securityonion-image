@@ -37,7 +37,7 @@ logsources:
 defaultindex: so-*
 fieldmappings:
     EventID: event.code
-    log_name: event.dataset
+    log_name: winlog.channel
     AccessMask: event_data.AccessMask
     AccountName: event_data.AccountName
     AllowedToDelegateTo: event_data.AllowedToDelegateTo
