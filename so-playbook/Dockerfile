@@ -9,7 +9,7 @@ ADD playbook/circle_theme.tar.bz2   /usr/src/redmine/public/themes
 
 RUN git clone https://github.com/suer/redmine_webhook.git /usr/src/redmine/plugins/redmine_webhook
 
-RUN git clone https://github.com/Security-Onion-Solutions/securityonion-playbook-plugin.git /usr/src/redmine/plugins/redmine_playbook
+RUN git clone https://github.com/Security-Onion-Solutions/securityonion-playbook-plugin.git /usr/src/redmine/plugins
 
 COPY playbook/passenger-nginx-config-template.erb /passenger-nginx-config-template.erb
 
