@@ -41,5 +41,5 @@ COPY --chown=elasticsearch:elasticsearch plugins/  /usr/share/elasticsearch/plug
 RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
     chmod 0750 bin/es-docker
 
-USER ${USERNAME}
+USER elasticsearch
 CMD ["/bin/bash", "bin/es-docker"]

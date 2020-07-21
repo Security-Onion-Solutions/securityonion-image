@@ -1,20 +1,6 @@
-# Copyright 2014-2020 Security Onion Solutions, LLC
+FROM centos:7
 
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-FROM python:3-alpine
-
+# Originally developed by Justin Henderson justin@hasecuritysolutions.com
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Domainstats running in Docker container for use with Security Onion"
 
@@ -35,17 +21,12 @@ RUN cd /opt && \
 	git clone -b domain_stats_1 https://github.com/MarkBaggett/domain_stats.git && \
 	mkdir /var/log/domain_stats && \
 	ln -sf /dev/stderr /var/log/domain_stats/domain_stats.log && \
-	chown -R ${UID}:${GID} /opt/domain_stats
+	chown -R domainstats: /opt/domain_stats
 
-RUN pip install --no-cache-dir six python-whois
-RUN apk del .build-deps
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+USER domainstats
 
 EXPOSE 20000
+
 STOPSIGNAL SIGTERM
 
-USER ${USERNAME}
-
-ENTRYPOINT [ "/entrypoint.sh" ]
+CMD /usr/bin/python3 /opt/domain_stats/domain_stats.py -ip 0.0.0.0 20000 -a /opt/domain_stats/top-1m.csv --preload 0
