@@ -17,6 +17,10 @@ FROM oraclelinux:7-slim
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="MySQL Server running in Docker container for use with Security Onion"
 
+ARG GID=939
+ARG UID=939
+ARG USERNAME=socore
+
 ARG MYSQL_SERVER_PACKAGE=mysql-community-server-minimal-5.7.24
 ARG MYSQL_SHELL_PACKAGE=mysql-shell-8.0.13
 
@@ -32,9 +36,9 @@ RUN yum install -y https://repo.mysql.com/mysql-community-minimal-release-el7.rp
   && mkdir /docker-entrypoint-initdb.d
 
 # Create socore user.
-RUN groupadd --gid 939 socore && \
-      adduser --uid 939 --gid 939 \
-      --home-dir /opt/so --no-create-home socore
+RUN groupadd --gid ${GID} ${USERNAME} && \
+    useradd --uid ${UID} --gid ${GID} \
+    --home-dir /opt/so --no-create-home ${USERNAME}
 
 VOLUME /var/lib/mysql
 
