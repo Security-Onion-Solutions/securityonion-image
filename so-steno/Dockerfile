@@ -1,24 +1,37 @@
+# Copyright 2014-2020 Security Onion Solutions, LLC
+
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 FROM centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Google Stenographer running in a docker for use with Security Onion."
 
+# Common CentOS layer
 RUN yum update -y && \
+    yum -y install epel-release bash libpcap iproute && \
     yum clean all
 
 # Install epel
-RUN yum -y install epel-release bash libpcap iproute tcpdump && yum clean all
 RUN yum -y install https://repo.ius.io/ius-release-el7.rpm
-RUN yum -y install snappy leveldb jq libaio libseccomp golang which openssl python36u python36u-pip
+RUN yum -y install snappy leveldb tcpdump jq libaio libseccomp golang which openssl python36u python36u-pip
+
 RUN /usr/bin/pip3.6 install
 RUN yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
 # Install the steno package
 RUN rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/stenographer_20180316/stenographer-0-1.20180316git57b88aa.el7.centos.x86_64.rpm
-RUN mkdir -p /opt/sensoroni 
-
-RUN curl -L https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/Sensoroni-1.3.0/sensoroni -o /opt/sensoroni/sensoroni
-RUN chmod +x /opt/sensoroni/sensoroni
 
 # setcap
 RUN setcap 'CAP_NET_RAW+ep CAP_NET_ADMIN+ep CAP_IPC_LOCK+ep CAP_SETGID+ep' /usr/bin/stenotype
@@ -27,7 +40,6 @@ RUN setcap 'CAP_NET_RAW+ep CAP_NET_ADMIN+ep CAP_IPC_LOCK+ep CAP_SETGID+ep' /usr/
 RUN mkdir -p /nsm/pcap/files \
     && mkdir -p /nsm/pcap/index \
     && chown -R 941:941 /nsm/pcap \
-    && chown -R 941:941 /opt/sensoroni \
     && mkdir -p /etc/stenographer/certs \
     && mkdir -p /var/log/stenographer \
     && usermod -s /bin/bash stenographer

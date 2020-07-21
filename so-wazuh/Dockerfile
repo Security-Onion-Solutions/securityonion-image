@@ -1,57 +1,66 @@
-# Based off of https://github.com/wazuh/wazuh-docker
-FROM centos:7
+# Copyright 2014-2020 Security Onion Solutions, LLC
+
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+FROM ubuntu:18.04
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Wazuh Manager and API running in Docker container for use with Security Onion"
 
 ENV WAZUH_VERSION="3.10.2-1"
 
-RUN yum update -y
+# Common Ubuntu layer
+RUN apt-get update && \
+    apt-get --no-install-recommends --no-install-suggests -y install \
+        curl \
+        ca-certificates \
+        build-essential
 
-# Install pre-reqs
-RUN yum install -y initscripts expect logrotate openssl
-
-# Creating ossec users
 RUN groupadd -g 945 ossec && \
     useradd -u 943 -g 945 -d /var/ossec -s /sbin/nologin ossecm && \
     useradd -u 944 -g 945 -d /var/ossec -s /sbin/nologin ossecr && \
     useradd -u 945 -g 945 -d /var/ossec -s /sbin/nologin ossec
 
-# Add Wazuh repo
-ADD config/repos.bash /repos.bash
-RUN chmod +x /repos.bash
-RUN /repos.bash
+RUN apt-get --no-install-recommends --no-install-suggests -y install \
+    gpg gpg-agent \
+    apt-transport-https \
+    lsb-release 
 
-# Download wazuh-manager pkg
-#RUN rpm -i https://packages.wazuh.com/yum/el/7/x86_64/wazuh-manager-2.0.1-1.el7.x86_64.rpm
+RUN curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key add -
+RUN echo "deb https://packages.wazuh.com/3.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list
 
-# Install wazuh-manager
-RUN yum install -y wazuh-manager-$WAZUH_VERSION
-
-# Install nodejs and wazuh-api
-RUN curl -sL https://rpm.nodesource.com/setup_8.x | bash -
-RUN yum install -y nodejs
-
-#RUN rpm -i https://packages.wazuh.com/yum/el/7/x86_64/wazuh-api-2.0.1-1.el7.x86_64.rpm
-RUN yum install -y wazuh-api-$WAZUH_VERSION
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends --no-install-suggests -y install openssl postfix bsd-mailx python3-boto python3-pip  \
+    apt-transport-https vim expect nodejs python3-cryptography mailutils libsasl2-modules wazuh-manager=${WAZUH_VERSION} \
+    wazuh-api=${WAZUH_VERSION} && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && rm -f \
+    /var/ossec/logs/alerts/*/*/*.log && rm -f /var/ossec/logs/alerts/*/*/*.json && rm -f \
+    /var/ossec/logs/archives/*/*/*.log && rm -f /var/ossec/logs/archives/*/*/*.json && rm -f \
+    /var/ossec/logs/firewall/*/*/*.log && rm -f /var/ossec/logs/firewall/*/*/*.json
 
 # Add OSSEC config
-ADD config/securityonion_rules.xml /var/ossec/ruleset/rules/securityonion_rules.xml
-ADD config/ossec.conf /var/ossec/etc/ossec.conf
+COPY config/securityonion_rules.xml /var/ossec/ruleset/rules/securityonion_rules.xml
+COPY config/ossec.conf /var/ossec/etc/ossec.conf
 
 # Adding first run script.
-ADD config/data_dirs.env /data_dirs.env
-ADD config/init.bash /init.bash
+COPY config/data_dirs.env /data_dirs.env
+COPY config/init.bash /init.bash
 
-# Sync calls are due to https://github.com/docker/docker/issues/9547
-RUN chmod 755 /init.bash &&\
-    sync && /init.bash &&\
+RUN chmod 755 /init.bash && \
+    sync && /init.bash && \
     sync && rm /init.bash
 
-# Adding entrypoint
-ADD config/entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
-
-RUN yum clean all
 
 ENTRYPOINT ["/entrypoint.sh"]

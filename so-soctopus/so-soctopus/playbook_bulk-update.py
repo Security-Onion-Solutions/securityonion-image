@@ -28,12 +28,12 @@ playbook_url = parser.get("playbook", "playbook_url")
 
 
 # Which ruleset categories should be imported / updated?
-# ruleset_categories = ['sysmon','malware','other','powershell','process_creation']
-ruleset_categories = ['sysmon','process_creation']
+# rulesets = ['application','apt','cloud','compliance','generic','linux','network', 'proxy', 'web', 'windows']
+rulesets = ['application','apt','cloud','compliance','generic','linux','network', 'proxy', 'web', 'windows']
 
 ##############################################################
 # update_play(raw_sigma, repo_sigma, ruleset)
-# This function compares the uuid of the current signature
+# This function compares the uuid of the current rule
 # against the Playbook plays. If there is no match, then it
 # creates a new play in Playbook.
 # If there is a match, it then compares a hash of the sigma:
@@ -41,7 +41,7 @@ ruleset_categories = ['sysmon','process_creation']
 #    Hash doesn't match --> update the play in playbook
 # inputs:  raw sigma, sigma dict, and the playbook name
 # returns: the status of the play: update / nop / new
-def update_play(raw_sigma, repo_sigma, ruleset):
+def update_play(raw_sigma, repo_sigma, ruleset, ruleset_group):
     for play in plays:
         if repo_sigma['id'] == play['sigma_id']:
             repo_hash = hashlib.sha256(
@@ -61,16 +61,55 @@ def update_play(raw_sigma, repo_sigma, ruleset):
             break
 
     else:
-        print('No Current Play - Create New Play in PB')
+        print('No Current Play - Create New Play in Playbook')
         play_status = "new"
-        creation_status = playbook.play_create(raw_sigma, repo_sigma,"community",ruleset)
+        creation_status = playbook.play_create(raw_sigma, repo_sigma,"community", ruleset, ruleset_group, "DRL-1.0")
         print (creation_status)
 
     return play_status
 
+def rule_update(rulesets):
+    global play_update_counter
+    global play_new_counter
+    global play_noupdate_counter
+    ruleset_path = f"./sigma/rules/{rulesets}"
+    for filename in Path(ruleset_path).glob('**/*.yml'):
+        if "deprecated" in str(filename):
+            print(f"\n\n - Not Loading - rule Deprecated - {filename}")
+        else:
+            print(f"\n\n{filename}")
+            sub_group = re.search(rf"{rulesets}\/(.*)\/",str(filename))
+            if sub_group != None:
+                ruleset_group = sub_group.group(1)
+            else:
+                ruleset_group = None
+
+            with open(filename, encoding="utf-8") as fpi2:
+                raw = fpi2.read()
+            try:
+                repo_sigma = yaml.load(raw)
+                #if folder == 'process_creation':
+                    #folder = 'proc' 
+                play_status = update_play(raw, repo_sigma, rulesets, ruleset_group)
+                print(play_status)
+                if play_status == "updated":
+                    play_update_counter += 1
+                elif play_status == "new":
+                    play_new_counter += 1
+                elif play_status == "nop":
+                    play_noupdate_counter += 1
+            except Exception as e:
+                print('Error - Sigma rule skipped \n' + str(e))
+    
+    return 
+
+# Starting up....
+print(
+    f"\n\n-= Creating/Updating Plays based on the following categories: {rulesets} -=\n\n")
 
 # Get all the current plays from Playbook & parse out metadata
 print(f"\n\n-= Parsing current Plays in Playbook -=\n\n")
+time.sleep(20)
 url = f"{playbook_url}/issues.json?offset=0&tracker_id=1&limit=100"
 response = requests.get(url, headers=playbook_headers, verify=False).json()
 
@@ -89,53 +128,32 @@ while offset < response['total_count']:
 
 print(f"\n-= Parsed Playbook Plays: {len(plays)} -=\n")
 
-print(
-    f"\n\n-= Creating/Updating Plays based on the following categories: {ruleset_categories} -=\n\n")
-time.sleep(3)
 
 # Create / Update the community Sigma repo
 sigma_repo = f"sigma/README.md"
 if os.path.exists(sigma_repo):
     git_status = subprocess.run(
-        ["git", "--git-dir=sigma/.git", "--work-tree=sigma", "pull"], stdout=subprocess.PIPE, encoding='ascii')
+        ["git", "--git-dir=sigma/.git", "pull"], stdout=subprocess.PIPE, encoding='ascii')
 else:
     git_status = subprocess.run(
-        ["git", "clone", "https://github.com/Neo23x0/sigma.git"], stdout=subprocess.PIPE, encoding='ascii')
+        ["git", "clone", "https://github.com/Security-Onion-Solutions/sigma.git"], stdout=subprocess.PIPE, encoding='ascii')
 
 
 '''
-Next, loop through each sigma signature in the folder
-Compare the uuid of the current signature against the Playbook plays
+Next, loop through each sigma rule in the folder
+Compare the uuid of the current rule against the Playbook plays
 If no match, then create a new play in playbook
 If there is a match, compare a hash of the sigma:
     Hash matches --> no update needed
     Hash doesn't match --> update the play in playbook
 '''
-
-for folder in ruleset_categories:
-    ruleset_path = f"./sigma/rules/windows/{folder}"
-    for filename in Path(ruleset_path).glob('**/*.yml'):
-        print(f"\n\n{filename}")
-        with open(filename, encoding="utf-8") as fpi2:
-            raw = fpi2.read()
-        try:
-            repo_sigma = yaml.load(raw)
-            if folder == 'process_creation':
-                folder = 'proc' 
-            play_status = update_play(raw, repo_sigma, f"win-{folder}")
-            print(play_status)
-            if play_status == "updated":
-                play_update_counter += 1
-            elif play_status == "new":
-                play_new_counter += 1
-            elif play_status == "nop":
-                play_noupdate_counter += 1
-        except Exception as e:
-            print('Error - Sigma Signature skipped \n' + str(e))
+for ruleset in rulesets:
+    rule_update(ruleset)
+    print (ruleset)
 
 # Finally, print a summary of new or updated plays
 summary = (
     f"\n\n-= Update Summary =-\n\nSigma Community Repo:\n {git_status.stdout.strip()}\n\nUpdated Plays: {play_update_counter}\n"
-    f"New Plays: {play_new_counter}\nNo Updates Needed: {play_noupdate_counter}\n\nEnabled Rulesets:\n{ruleset_categories}\n")
+    f"New Plays: {play_new_counter}\nNo Updates Needed: {play_noupdate_counter}\n\nEnabled Rulesets:\n{rulesets}\n")
 print (summary)
     

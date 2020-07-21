@@ -23,26 +23,31 @@ yaml = ruamel.yaml.YAML(typ='safe')
 
 playbook_headers = {'X-Redmine-API-Key': parser.get("playbook", "playbook_key"), 'Content-Type': 'application/json'}
 playbook_url = parser.get("playbook", "playbook_url")
+playbook_external_url = parser.get("playbook", "playbook_ext_url")
+playbook_unit_test_index = parser.get("playbook", "playbook_unit_test_index")
+playbook_verifycert = parser.getboolean('playbook', 'playbook_verifycert', fallback=False)
 
 hive_headers = {'Authorization': f"Bearer {parser.get('hive', 'hive_key')}", 'Accept': 'application/json, text/plain',
                 'Content-Type': 'application/json;charset=utf-8'}
 
-playbook_verifycert = parser.getboolean('playbook', 'playbook_verifycert', fallback=False)
+es_url = parser.get("es", "es_url")
+es_ip = parser.get("es", "es_ip")
+es_verifycert = parser.getboolean('es', 'es_verifycert', fallback=False)
 
 def navigator_update():
     # Get play data from Redmine
-    url = f"{playbook_url}/issues.json?status_id=3"
+    url = f"{playbook_url}/issues.json?status_id=3&limit=100"
     response_data = requests.get(url, headers=playbook_headers, verify=playbook_verifycert).json()
-
+ 
     technique_payload = []
     for play in response_data['issues']:
         for custom_field in play['custom_fields']:
-            if custom_field['id'] == 27 and (custom_field['value']):
+            if custom_field['id'] == 15 and (custom_field['value']):
                 technique_id = custom_field['value'][0]
                 technique_payload.append(
                     {"techniqueID": technique_id, "color": "#5AADFF", "comment": "", "enabled": "true", "metadata": []})
 
-    payload = {"name": "Playbook", "version": "2.1", "domain": "mitre-enterprise",
+    payload = {"name": "Playbook", "version": "2.2", "domain": "mitre-enterprise",
                "description": f"Current Coverage of Playbook - Updated {strftime('%Y-%m-%d %H:%M', gmtime())}",
                "filters": {"stages": ["act"], "platforms": ["windows"]}, "sorting": 0, "viewMode": 0,
                "hideDisabled": "false", "techniques": technique_payload,
@@ -76,29 +81,44 @@ def thehive_casetemplate_update(issue_id):
         tasks.insert(0, {"order": 0, "title": f"Analyzer - {minimal_name}", "description": minimal_name})
 
     # Build the case template
-    case_template = {"name": play_meta['playid'], "severity": 2, "tlp": 3, "metrics": {}, "customFields": { \
-        "playObjective": {"string": sigma_meta['description']}, \
-        "playbookLink": {"string": f"{playbook_url}/issues/{issue_id}"}}, \
-                     "description": sigma_meta['description'], \
-                     "tasks": tasks}
+    case_template = \
+        {
+            "name": play_meta['playid'], 
+            "severity": 2, 
+            "tlp": 3, 
+            "metrics": {}, 
+            "customFields": {
+                "playObjective": {
+                    "string": sigma_meta['description']
+                },
+                "playbookLink": {
+                    "string": f"{playbook_url}/issues/{issue_id}"
+                }
+            },
+            "description": sigma_meta['description'],
+            "tasks": tasks
+        }
 
     # Is there a Case Template already created?
     if play_meta['hiveid']:
         # Case Template exists - let's update it
-        url = f"{parser.get('hive', 'hive_url')}/api/case/template/{play_meta['hiveid']}"
+        url = f"{parser.get('hive', 'hive_url')}api/case/template/{play_meta['hiveid']}"
         requests.patch(url, data=json.dumps(case_template), headers=hive_headers,
                        verify=parser.getboolean('hive', 'hive_verifycert', fallback=False)).json()
-
     else:
         # Case Template does not exist - let's create it
-        url = f"{parser.get('hive', 'hive_url')}/api/case/template"
+        url = f"{parser.get('hive', 'hive_url')}api/case/template"
         r = requests.post(url, data=json.dumps(case_template), headers=hive_headers,
-                          verify=parser.getboolean('hive', 'hive_verifycert', fallback=False)).json()
+                          verify=parser.getboolean('hive', 'hive_verifycert', fallback=False))
 
-        # Update Play (on Redmine) with Case Template ID
-        url = f"{playbook_url}/issues/{issue_id}.json"
-        data = '{"issue":{"custom_fields":[{"id":7,"value":"' + r['id'] + '"}]}}'
-        requests.put(url, data=data, headers=playbook_headers, verify=playbook_verifycert)
+        if r.status_code != 201:    
+            print(f"TheHive Template Creation Failed: {r.__dict__}", file=sys.stderr)
+        else:
+            # Update Play (on Redmine) with Case Template ID
+            r = r.json()
+            url = f"{playbook_url}/issues/{issue_id}.json"
+            data = '{"issue":{"custom_fields":[{"id":7,"value":"' + r['id'] + '"}]}}'
+            requests.put(url, data=data, headers=playbook_headers, verify=playbook_verifycert)
 
     return 200, "success"
 
@@ -116,31 +136,57 @@ def elastalert_update(issue_id):
     if os.path.exists(play_file):
         os.remove(play_file)
 
-    if sigma_meta['level'] == "medium" or sigma_meta['level'] == "low":
-        shutil.copy('/etc/playbook-rules/es-generic.template', play_file)
-        for line in fileinput.input(play_file, inplace=True):
-            line = re.sub(r'\/6000', f"/{issue_id}", line.rstrip())
-            line = re.sub(r'play_title:.\"\"', f"play_title: \"{sigma_meta['title']}\"", line.rstrip())
-            line = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n{ea_config_raw}",
-                          line.rstrip())
-            print(line)
-    else:
-        try:
-            if sigma_meta['product'] == 'osquery':
-                shutil.copy('/etc/playbook-rules/osquery.template', play_file)
-            else:
-                shutil.copy('/etc/playbook-rules/generic.template', play_file)
-            for line in fileinput.input(play_file, inplace=True):
-                line = re.sub(r'-\s''', f"- {play_meta['playbook']}", line.rstrip())
-                line = re.sub(r'tags:.*$', f"tags: ['playbook','{play_meta['playid']}','{play_meta['playbook']}']",
-                              line.rstrip())
-                line = re.sub(r'\/6000', f"/{issue_id}", line.rstrip())
-                line = re.sub(r'caseTemplate:.*', f"caseTemplate: '{play_meta['playid']}'\n{ea_config_raw}",
-                              line.rstrip())
-                print(line)
+    if sigma_meta['level'] == "low":
+        event_severity = 1
+    elif sigma_meta['level'] == "medium":
+        event_severity = 2
+    elif sigma_meta['level'] == "high":
+        event_severity = 3
+    elif sigma_meta['level'] == "critical":
+        event_severity = 4
 
-        except FileNotFoundError:
-            print("ElastAlert Template File not found")
+    if play_meta['group'] != None:
+        rule_category = play_meta['group']
+    elif play_meta['ruleset'] != None:
+        rule_category = play_meta['ruleset']
+    else:
+        rule_category = "None"
+        
+    try:
+        if sigma_meta['product'] == 'osquery':
+            shutil.copy('/etc/playbook-rules/osquery.template', play_file)
+        else:
+            shutil.copy('/etc/playbook-rules/generic.template', play_file)
+        with open(play_file, 'r+') as f:
+            content = f.read()
+            f.seek(0)
+            f.truncate()
+            # If Severity is High (3) or Critical (4), substitute Play metadata in TheHive alerter
+            if event_severity >= 3:
+                # Sub Severity 
+                content = re.sub(r' severity:.*', f" severity: {event_severity}", content.rstrip())
+                # Sub Playbook Name
+                content = re.sub(r'-\s''', f"- {play_meta['playbook']}", content.rstrip())
+                # Sub Play Tags
+                content = re.sub(r'tags:.*$', f"tags: ['playbook','{play_meta['playid']}','{play_meta['playbook']}']",
+                            content.rstrip())
+                # Sub Redmine IssueID
+                content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
+                # Sub Case Template
+                content = re.sub(r'caseTemplate:.*', f"caseTemplate: '{play_meta['playid']}'", content.rstrip())
+            else:
+                # This is a low Severity alert - Remove TheHive alerter 
+                content = re.sub(r"alert: hivealerter[\s\S]*5000'", "", content.rstrip()) 
+            # Sub details in the ES_Alerter - play URL, etc
+            content = re.sub(r'rule\.category:.*', f"rule.category: \"{rule_category}\"", content.rstrip())
+            content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
+            content = re.sub(r'play_title:.\"\"', f"play_title: \"{sigma_meta['title']}\"", content.rstrip())
+            content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
+            content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n{ea_config_raw}", content.rstrip())
+            f.write(content)
+
+    except FileNotFoundError:
+        print("ElastAlert Template File not found")
 
     return 200, "success"
 
@@ -164,7 +210,7 @@ def play_update(issue_id):
         {"id": 1, "name": "Title", "value": sigma_meta['title']}, \
         {"id": 10, "name": "Level", "value": sigma_meta['level']}, \
         {"id": 6, "name": "ElastAlert Config", "value": sigma_meta['esquery']}, \
-        {"id": 14, "name": "Product", "value": sigma_meta['product']}, \
+        {"id": 20, "name": "Product", "value": sigma_meta['product']}, \
         {"id": 3, "name": "Objective", "value": sigma_meta['description']}, \
         {"id": 2, "name": "Author", "value": sigma_meta['author']}, \
         {"id": 8, "name": "References", "value": sigma_meta['references']}, \
@@ -194,8 +240,14 @@ def play_metadata(issue_id):
             play['playbook'] = item['value']
         elif item['name'] == "Case Analyzers":
             play['case_analyzers'] = item['value']
-        elif item['name'] == "Signature ID":
+        elif item['name'] == "Rule ID":
             play['sigma_id'] = item['value']
+        elif item['name'] == "Target Log":
+            play['target_log'] = item['value']
+        elif item['name'] == "Ruleset":
+            play['ruleset'] = item['value']
+        elif item['name'] == "Group":
+            play['group'] = item['value']
 
     # Cleanup the Sigma data to get it ready for parsing
     sigma_raw = re.sub(
@@ -211,7 +263,10 @@ def play_metadata(issue_id):
         'sigma_formatted': f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{sigma_raw}\n</code></pre>\n}}}}',
         'sigma_id': play.get('sigma_id'),
         'playbook': play.get('playbook'),
-        'case_analyzers': play.get('case_analyzers')
+        'case_analyzers': play.get('case_analyzers'),
+        'target_log': play.get('target_log'),
+        'ruleset': play.get('ruleset'),
+        'group': play.get('group')
     }
 
 
@@ -271,7 +326,7 @@ def sigma_metadata(sigma_raw, sigma):
     }
 
 
-def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
+def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group="", license=""):
     # Expects Sigma in dict format
 
     # Extract out all the relevant metadata from the Sigma YAML
@@ -293,16 +348,18 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
                              {"id": 13, "name": "Playbook", "value": playbook},
                              {"id": 6, "name": "ElastAlert Config", "value": play['esquery']},
                              {"id": 10, "name": "Level", "value": play['level']},
-                             {"id": 14, "name": "Product", "value": play['product']},
+                             {"id": 20, "name": "Product", "value": play['product']},
                              {"id": 3, "name": "Objective", "value": play['description']},
                              {"id": 2, "name": "Author", "value": play['author']},
                              {"id": 8, "name": "References", "value": play['references']},
                              {"id": 5, "name": "Analysis", "value": f"{play['falsepositives']}{play['logfields']}"},
                              {"id": 11, "name": "PlayID", "value": play_id[0:9]},
                              {"id": 15, "name": "Tags", "value": play['tags']},
-                             {"id": 12, "name": "Signature ID", "value": play['sigid']},
+                             {"id": 12, "name": "Rule ID", "value": play['sigid']},
                              {"id": 9, "name": "Sigma", "value": play['sigma']},
-                             {"id": 16, "name": "Category", "value": ruleset}
+                             {"id": 18, "name": "Ruleset", "value": ruleset},
+                             {"id": 19, "name": "Group", "value": group},
+                             {"id": 26, "name": "License", "value": license}
                              ]}}
 
     # POST the payload to Redmine to create the Play (ie Redmine issue)
@@ -318,7 +375,7 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
         r = requests.put(url, data=json.dumps(notes_payload), headers=playbook_headers, verify=playbook_verifycert)
         # Notate success & Play URL
         play_creation = 201
-        play_url = f"{playbook_url}/issues/{new_issue_id['issue']['id']}"
+        play_url = f"{playbook_external_url}/issues/{new_issue_id['issue']['id']}"
     # If Play creation was not successful, return the status code
     else:
         print("Play Creation Error - " + r.text, file=sys.stderr)
@@ -328,6 +385,152 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset=""):
     return {
         'play_creation': play_creation,
         'play_url': play_url
+    }
+
+
+def play_unit_test (issue_id,unit_test_trigger,only_normalize=False):
+
+    # Get Play metadata
+    play_meta = play_metadata(issue_id)
+
+    if not play_meta['target_log']:
+        return "No Target Log"
+
+    # Get Sigma metadata
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'])
+
+    # If needed, normalize the Target Log if the trigger is "Target Log Updated"
+    if unit_test_trigger == "Target Log Updated":
+        if not "collapse(View Log)" in play_meta['target_log']:
+            play_unit_test_normalize_log(play_meta['target_log'],issue_id,sigma_meta['title'])
+            if only_normalize:
+                return "only_normalize = True"
+            
+    # Insert the Target Log into Elasticsearch
+    insert_log = play_unit_test_insert_log (play_meta['target_log'],play_meta['playid'])
+    if insert_log['status_code'] != 201:
+        play_unit_test_closeout(issue_id,"Failed",unit_test_trigger,f"Target Log insert into Elasticsearch failed: {insert_log['debug'] }")
+        return
+  
+    # Tweak Play Elastalert alert for use with elastalert-test-rule & output to a temp file
+    newline = '\n'
+    elastalert_alert = f"es_host: {es_ip}{newline}es_port: 9200{newline}{sigma_meta['raw_elastalert']}{newline}alert: debug"
+    elastalert_alert = re.sub(r"index: .*", f"index: {playbook_unit_test_index}", elastalert_alert)
+
+    temp_file = tempfile.NamedTemporaryFile(mode='w+t')
+    print(elastalert_alert, file=temp_file)
+    temp_file.seek(0)
+
+    # Run elastalert-test-rule
+    elastalert_output = subprocess.run(["elastalert-test-rule", "--config", "playbook_elastalert_config.yaml", temp_file.name, "--formatted-output"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
+
+    if elastalert_output.returncode != 0:
+        play_unit_test_closeout(issue_id,"Failed",unit_test_trigger,f"Stage - elastalert-test-rule execution failed: {elastalert_output}")
+        return
+
+    # Cleanup stdout, just leaving the status in JSON format
+    elastalert_output = json.loads(f"{{{elastalert_output.stdout.strip().split('{', 1)[-1]}")
+
+    if elastalert_output.get('writeback', {}).get('elastalert_error'):
+        play_unit_test_closeout(issue_id,"Failed",unit_test_trigger,f"Stage - elastalert-test-rule: {elastalert_output['writeback']}")
+    elif elastalert_output.get('writeback', {}).get('elastalert_status'):
+        if  elastalert_output['writeback']['elastalert_status']['hits'] >= 1:
+            print ("Passed")
+            elastalert_status = "Passed"
+            unit_test_debug = "N/A"
+        else:
+            print ("Failed")
+            elastalert_status = "Failed"
+            unit_test_debug = f"Stage - elastalert-test-rule: {elastalert_output['writeback']}"
+    else:
+        print ("Failed")
+        elastalert_status = "Failed"
+        unit_test_debug = f"Stage - elastalert-test-rule: {elastalert_output['writeback']}"
+
+    # Closeout the unit test
+    play_unit_test_closeout(issue_id,elastalert_status,unit_test_trigger,unit_test_debug)
+
+    return {
+        'unit_test_status': elastalert_status
+    }
+
+def play_unit_test_normalize_log (target_log, issue_id, play_name): 
+
+    normalized_log =  f'{{{{collapse(View Log)\n<pre><code class="json">\n\n{target_log}\n</code></pre>\n}}}}',
+    normalized_string = ''.join(normalized_log)
+
+    payload = {"issue": {"project_id": 1, "tracker": "Play", "subject":play_name, "custom_fields": [ \
+    {"id": 21, "value": normalized_string}]}}
+
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return r
+
+def play_unit_test_insert_log (target_log, playid):
+    
+    now_timestamp = strftime("%Y-%m-%d"'T'"%H:%M:%S", gmtime())
+
+    target_log = re.sub("{{collapse\(View Log\)|<pre><code class=\"json\">|</code></pre>|}}", "",target_log)
+    target_log = re.sub(r"@timestamp\":.\".*?,", f"@timestamp\": \"{now_timestamp}\",", target_log)
+    target_log = json.loads(target_log).pop("_source")
+
+    headers = {'Content-Type': 'application/json'}
+    url = f"http://{es_ip}:9200/{playbook_unit_test_index}/_doc"
+    r = requests.post(url, data=json.dumps(target_log), headers=headers, verify=es_verifycert)
+
+    return { 
+        'status_code': r.status_code,
+        'debug': r.__dict__
+    }
+
+def play_unit_test_closeout (issue_id, status, unit_test_trigger, unit_test_debug="N/A"):
+    newline = '\n'
+    now_timestamp = strftime("%Y-%m-%d"'T'"%H:%M:%S", gmtime())
+    play_note = f"Unit Test {status} - {now_timestamp}{newline}Test Triggered by: {unit_test_trigger}{newline}Debug: {unit_test_debug}"
+
+    # Update Play Notes with details of the unit test's outcome
+    play_update_notes(issue_id,play_note)
+
+    # Update Play Unit-Test field with the status of the unit test (Passed|Failed)
+    play_update_unit_test_field(issue_id,status)
+
+    return
+
+
+def play_update_notes (issue_id, play_notes):
+    
+    notes_payload = {"issue": {"notes": play_notes}}
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(notes_payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return {
+        r.status_code
+    }
+
+def play_update_unit_test_field (issue_id, unit_test_status):
+   
+    payload = {"issue": {"project_id": 1, "tracker": "Play", "custom_fields": [ \
+        {"id": 22, "value": unit_test_status}]}}
+
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return {
+        r.status_code
+    }
+
+
+def play_update_custom_field (issue_id, field_id, field_value, play_name):
+   
+    payload = {"issue": {"project_id": 1, "tracker": "Play", "subject":play_name, "custom_fields": [ \
+        {"id": field_id, "value": field_value}]}}
+
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(payload), headers=playbook_headers, verify=playbook_verifycert)
+
+    return {
+        r.status_code
     }
 
 

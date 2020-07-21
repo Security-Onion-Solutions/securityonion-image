@@ -87,7 +87,7 @@ def createHiveAlert(esid):
                 "dhcp": "DHCP",
                 "dnp3": "DNP3",
                 "dns": "DNS",
-                "files": "Files",
+                "file": "Files",
                 "ftp": "FTP",
                 "http": "HTTP",
                 "intel": "Intel",
@@ -486,9 +486,11 @@ def playbookWebhook(webhook_content):
         detection_updated = False
         for item in journal_details:
             # Check to see if the Sigma field has changed
-            if item['prop_key'] == '21':
-                # Sigma field updated --> Call function - Update Play metadata
+            if item['prop_key'] == '9':
+                # Sigma field updated (Sigma field ID is 9) --> Call function - Update Play metadata
                 playbook.play_update(issue_id)
+                # Run Play Unit Test (If Target Log exists)
+                playbook.play_unit_test(issue_id,"Sigma Updated")
                 # Create/Update ElastAlert config
                 if issue_status_name == "Active" and not detection_updated:
                     detection_updated = True
@@ -513,6 +515,13 @@ def playbookWebhook(webhook_content):
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
                     playbook.navigator_update()
+            # Check to see if the Play Target Log (Field ID 21) has been updated - if so, run a Unit Test
+            elif item['prop_key'] == '21' and item['old_value'] == "":
+                # First time Target Log has been updated - Normalize log only
+                playbook.play_unit_test(issue_id,"Target Log Updated",True)
+            elif item['prop_key'] == '21' and item['old_value'] != "":
+                # Normalize log (if needed) & run Play unit test
+                playbook.play_unit_test(issue_id,"Target Log Updated")
     return "success"
 
 

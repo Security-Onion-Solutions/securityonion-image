@@ -1,15 +1,18 @@
 FROM ubuntu:18.04
 
-#Install the packages we need
+# Common Ubuntu layer
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
+    apt-get --no-install-recommends --no-install-suggests -y install \
+        curl \
+        ca-certificates \
+        build-essential
+
+RUN apt-get install -y --no-install-recommends \
     gcab \
     msitools \
     ruby \
     ruby-dev \ 
     rubygems \ 
-    build-essential \
     cpio \
     binutils \
     cpio \

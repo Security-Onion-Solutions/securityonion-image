@@ -1,27 +1,38 @@
-FROM centos:7
+# Copyright 2014-2020 Security Onion Solutions, LLC
+
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+FROM python:3-alpine
 
 LABEL maintainer "Security Onion Solutions, LLC"
 
-# Create a common centos update layer
-RUN yum update -y && \
-    yum clean all
+ARG GID=934
+ARG UID=934
+ARG USERNAME=curator
 
-# Create user
-RUN groupadd --gid 934 curator && \
-      adduser --uid 934 --gid 934 \
-      --home-dir /usr/share/curator --no-create-home \
-      curator && \
-    rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+ENV LC_ALL=en_US.UTF-8
 
-COPY ./files/curator.repo /etc/yum.repos.d/curator.repo
+RUN apk add --no-cache curl grep gawk coreutils shadow bash
 
-RUN yum update -y && \
-    yum install -y elasticsearch-curator && \
-    chown -R curator: /opt/elasticsearch-curator /usr/bin/curator* && \
-    yum clean all
+RUN groupadd --gid ${GID} ${USERNAME} && \
+    useradd --uid ${UID} --gid ${GID} --no-create-home ${USERNAME}
+
+RUN pip install elasticsearch-curator
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 USER curator
 
-ENV LC_ALL en_US.UTF-8
-
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT [ "/entrypoint.sh" ]
