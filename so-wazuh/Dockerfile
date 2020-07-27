@@ -18,7 +18,7 @@ FROM ubuntu:18.04
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Wazuh Manager and API running in Docker container for use with Security Onion"
 
-ENV WAZUH_VERSION="3.10.2-1"
+ENV WAZUH_VERSION="3.13.1-1"
 
 # Common Ubuntu layer
 RUN apt-get update && \
