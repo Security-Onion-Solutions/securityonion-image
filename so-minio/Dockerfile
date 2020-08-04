@@ -1,4 +1,4 @@
-FROM minio/minio
+FROM minio/minio:latest
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=939
