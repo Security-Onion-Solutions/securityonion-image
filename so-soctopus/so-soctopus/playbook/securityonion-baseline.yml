@@ -5,10 +5,10 @@ title: SO configs
 logsources:
   osquery:
     product: osquery
-    index: so-osquery-*
+    index: "*:so-osquery-*"
   windows:
     product: windows
-    index: so-*
+    index: "*:so-*"
   windows-application:
     product: windows
     service: application
@@ -34,7 +34,7 @@ logsources:
     service: driver-framework
     conditions:
       source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
-defaultindex: so-*
+defaultindex: "*:so-*"
 fieldmappings:
     EventID: event.code
     log_name: winlog.channel
