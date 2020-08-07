@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os
 import re
@@ -104,6 +105,8 @@ def rule_update(rulesets):
     return 
 
 # Starting up....
+print(f"\n-= Started: {datetime.now()}-=\n")
+
 print(
     f"\n\n-= Creating/Updating Plays based on the following categories: {rulesets} -=\n\n")
 
@@ -156,4 +159,5 @@ summary = (
     f"\n\n-= Update Summary =-\n\nSigma Community Repo:\n {git_status.stdout.strip()}\n\nUpdated Plays: {play_update_counter}\n"
     f"New Plays: {play_new_counter}\nNo Updates Needed: {play_noupdate_counter}\n\nEnabled Rulesets:\n{rulesets}\n")
 print (summary)
-    
+
+print (f"\n\n-= Completed: {datetime.now()}-=\n")    
