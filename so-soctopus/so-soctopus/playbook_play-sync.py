@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import urllib3
 import os
@@ -17,6 +18,9 @@ offset = 0
 playbook_headers = {'X-Redmine-API-Key': parser.get(
     "playbook", "playbook_key"), 'Content-Type': 'application/json'}
 playbook_url = parser.get("playbook", "playbook_url")
+
+
+print(f"\n-= Started: {datetime.now()}-=\n")
 
 # Get active plays from Playbook - id = 3
 url = f"{playbook_url}/issues.json?offset=0&tracker_id=1&limit=100&status_id=3"
@@ -88,4 +92,5 @@ print(f"\n\n-= Maintenance Summary =-\n\n"
       f"Missing HiveIDs: {active_hive_counter}\n\n"
       f"Inactive Plays: {inactive_plays['total_count']}\n"
       f"-----------------\n"
-      f"Out of Sync ElastAlert Configs: {inactive_elastalert_counter}")
+      f"Out of Sync ElastAlert Configs: {inactive_elastalert_counter}"
+      f"\n\n-= Completed: {datetime.now()}-=\n")
