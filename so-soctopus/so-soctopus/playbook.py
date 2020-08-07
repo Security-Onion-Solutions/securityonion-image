@@ -144,6 +144,8 @@ def elastalert_update(issue_id):
         event_severity = 3
     elif sigma_meta['level'] == "critical":
         event_severity = 4
+    elif sigma_meta['level'] == "":
+        event_severity = 2
 
     if play_meta['group'] != None:
         rule_category = play_meta['group']
@@ -166,7 +168,8 @@ def elastalert_update(issue_id):
                 # Sub Severity 
                 content = re.sub(r' severity:.*', f" severity: {event_severity}", content.rstrip())
                 # Sub Playbook Name
-                content = re.sub(r'-\s''', f"- {play_meta['playbook']}", content.rstrip())
+                #content = re.sub(r'-\s''', f"- {play_meta['playbook']}", content.rstrip())
+                content = re.sub(r' title:.*', f" title: '{{rule[name]}} - {play_meta['playbook']}'", content.rstrip())                
                 # Sub Play Tags
                 content = re.sub(r'tags:.*$', f"tags: ['playbook','{play_meta['playid']}','{play_meta['playbook']}']",
                             content.rstrip())
@@ -176,7 +179,7 @@ def elastalert_update(issue_id):
                 content = re.sub(r'caseTemplate:.*', f"caseTemplate: '{play_meta['playid']}'", content.rstrip())
             else:
                 # This is a low Severity alert - Remove TheHive alerter 
-                content = re.sub(r"alert: hivealerter[\s\S]*5000'", "", content.rstrip()) 
+                content = re.sub(r"- \"hivealerter\"[\s\S]*5000'", "", content.rstrip()) 
             # Sub details in the ES_Alerter - play URL, etc
             content = re.sub(r'rule\.category:.*', f"rule.category: \"{rule_category}\"", content.rstrip())
             content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
