@@ -495,12 +495,10 @@ def playbookWebhook(webhook_content):
                 if issue_status_name == "Active" and not detection_updated:
                     detection_updated = True
                     playbook.elastalert_update(issue_id)
-                    playbook.navigator_update()
                     playbook.thehive_casetemplate_update(issue_id)
                 elif issue_status_name == "Inactive" and not detection_updated:
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
-                    playbook.navigator_update()
 
             # Check to see if the Play status has changed to Active or Inactive
             elif item['prop_key'] == 'status_id' and not detection_updated:
@@ -508,13 +506,11 @@ def playbookWebhook(webhook_content):
                     # Status = Active --> Enable EA & TheHive
                     detection_updated = True
                     playbook.elastalert_update(issue_id)
-                    playbook.navigator_update()
                     playbook.thehive_casetemplate_update(issue_id)
                 elif item['value'] == '4':
                     # Status = Inactive --> Disable EA
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
-                    playbook.navigator_update()
             # Check to see if the Play Target Log (Field ID 21) has been updated - if so, run a Unit Test
             elif item['prop_key'] == '21' and item['old_value'] == "":
                 # First time Target Log has been updated - Normalize log only

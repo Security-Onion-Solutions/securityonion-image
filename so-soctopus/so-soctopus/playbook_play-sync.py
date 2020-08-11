@@ -85,6 +85,9 @@ for play in inactive_plays['issues']:
         os.remove(play_file)
         inactive_elastalert_counter += 1
 
+# Refresh Playbook Navigator Layer
+playbook.navigator_update()
+
 print(f"\n\n-= Maintenance Summary =-\n\n"
       f"Active Plays: {response['total_count']}"
       f"\n-----------------\n"
