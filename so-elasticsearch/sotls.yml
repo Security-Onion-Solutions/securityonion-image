@@ -2,7 +2,7 @@ keystore.path: /usr/share/elasticsearch/config/sokeys
 keystore.password: changeit
 keystore.algorithm: SunX509
 
-truststore.path: /etc/pki/java/ca
+truststore.path: /etc/pki/java/cacerts
 truststore.password: changeit
 truststore.algorithm: PKIX
 
@@ -12,5 +12,5 @@ protocols:
 ciphers:
 - TLS_RSA_WITH_AES_128_CBC_SHA256
 
-transport.encrypted: true
+transport.encrypted: false
 http.encrypted: false
