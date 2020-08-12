@@ -64,12 +64,6 @@ def sendRTIR(esid):
 def sendSlack(esid):
     return createSlackAlert(esid)
 
-
-@app.route("/strelka/filescan/<esid>")
-def sendStrelka(esid):
-    return createStrelkaScan(esid)
-
-
 @app.route("/playbook/webhook", methods=['POST'])
 def sendPlaybook():
     webhook_content = request.get_json()

@@ -544,24 +544,6 @@ def playbookCreatePlay(sigma_raw, sigma_dict):
 
     return jsonify(play_data)
 
-
-def createStrelkaScan(esid):
-    search = get_hits(esid)
-    for result in search['hits']['hits']:
-        result = result['_source']
-        extracted_file = result['extracted']
-        conn_id = result['log']['id']['uid'][0]
-        sensorsearch = get_conn(conn_id)
-
-        for result in sensorsearch['hits']['hits']:
-            result = result['_source']
-            sensor = result['observer']['name'].rsplit('-', 1)[0]
-            strelka_scan_drop = "echo " + sensor + "," + extracted_file + " >>  /tmp/soctopus/strelkaq.log"
-            os.system(strelka_scan_drop)
-
-            return render_template('strelka.html', extracted_file=extracted_file, sensor=sensor)
-
-
 def showESResult(esid):
     search = get_hits(esid)
     for result in search['hits']['hits']:
