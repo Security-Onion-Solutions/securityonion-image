@@ -34,12 +34,15 @@ RUN set -ex && for esdirs in config data logs; do \
         chown -R elasticsearch:elasticsearch "$esdirs"; \
     done
 
-COPY elasticsearch.yml log4j2.properties config/
-COPY bin/es-docker bin/es-docker
+COPY *.yml log4j2.properties config/
+COPY bin bin
 COPY --chown=elasticsearch:elasticsearch plugins/  /usr/share/elasticsearch/plugins/
 
 RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
     chmod 0750 bin/es-docker
+
+COPY plugins-src /plugins-src
+RUN bin/build-plugins /plugins-src plugins/
 
 USER ${USERNAME}
 CMD ["/bin/bash", "bin/es-docker"]

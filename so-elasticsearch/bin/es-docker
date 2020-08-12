@@ -1,27 +1,5 @@
 #!/bin/bash
 
-# Run Elasticsearch and allow setting default settings via env vars
-#
-# e.g. Setting the env var cluster.name=testcluster
-#
-# will cause Elasticsearch to be invoked with -Ecluster.name=testcluster
-#
-# see https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html#_setting_default_settings
-
-#declare -a es_opts
-
-#while IFS='=' read -r envvar_key envvar_value
-#do
-    # Elasticsearch env vars need to have at least two dot separated lowercase words, e.g. `cluster.name`
-#    if [[ "$envvar_key" =~ ^[a-z]+\.[a-z]+ ]]
-#    then
-#        if [[ ! -z $envvar_value ]]; then
-#          es_opt="-E${envvar_key}=${envvar_value}"
-#          es_opts+=("${es_opt}")
-#        fi
-#    fi
-#done < <(env)
-
 # The virtual file /proc/self/cgroup should list the current cgroup
 # membership. For each hierarchy, you can follow the cgroup path from
 # this file to the cgroup filesystem (usually /sys/fs/cgroup/) and
@@ -35,5 +13,12 @@
 # that cgroup statistics are available for the container this process
 # will run in.
 export ES_JAVA_OPTS="-Des.cgroups.hierarchy.override=/ $ES_JAVA_OPTS"
+
+ES_DIR=/usr/share/elasticsearch
+
+if [ -f $ES_DIR/config/elasticsearch.p12 ]; then
+    echo "Importing PKCS12 keypair into Java keystore"
+    jdk/bin/keytool -importkeystore -destkeystore $ES_DIR/config/sokeys -deststorepass changeit -srckeystore $ES_DIR/config/elasticsearch.p12 -srcstoretype pkcs12 -srcstorepass "" -noprompt
+fi
 
 exec bin/elasticsearch #"${es_opts[@]}"
