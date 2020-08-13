@@ -3,7 +3,7 @@
 from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
 from destinations import createHiveAlert, createMISPEvent, createSlackAlert, createFIREvent, createGRRFlow, \
-    createRTIRIncident, createStrelkaScan, showESResult, playbookWebhook, eventModifyFields, eventUpdateFields, \
+    createRTIRIncident, showESResult, playbookWebhook, eventModifyFields, eventUpdateFields, \
     sendHiveAlert, processHiveReq, playbookSigmac, playbookCreatePlay
 import ruamel.yaml
 import sys
