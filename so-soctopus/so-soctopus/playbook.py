@@ -131,8 +131,7 @@ def elastalert_update(issue_id):
     sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
 
     play_file = f"/etc/playbook-rules/{play_meta['playid']}.yaml"
-    ea_config_raw = re.sub("{{collapse\(View ElastAlert Config\)|<pre><code class=\"yaml\">|</code></pre>|}}", "",
-                           sigma_meta['esquery'])
+
     if os.path.exists(play_file):
         os.remove(play_file)
 
@@ -186,7 +185,8 @@ def elastalert_update(issue_id):
             content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
             content = re.sub(r'play_title:.\"\"', f"play_title: \"{sigma_meta['title']}\"", content.rstrip())
             content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
-            content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n{ea_config_raw}", content.rstrip())
+            content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n", content.rstrip())
+            content = f"{content}\n{sigma_meta['raw_elastalert']}"
             f.write(content)
             f.close()
 
