@@ -356,14 +356,16 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group=""
     # Extract out all the relevant metadata from the Sigma YAML
     play = sigma_metadata(sigma_raw, sigma_dict, play_id[0:9])
 
-    # If ElastAlert config = "", set the play status to Disabled (id=6) else set it to Draft (id=2)
-    # Also add a note to the play to make it clear as to why the status is Disabled
-    play_status = "6" if play['raw_elastalert'] == "" else "2"
-    play_notes = "Play status set to Disabled - Sigmac error when generating ElastAlert config." \
-        if play['raw_elastalert'] == "" else "Play imported successfully."
+    # If ElastAlert config = "", return with an error
+    if play['raw_elastalert'] == "":
+        return "Sigmac error when generating ElastAlert config"
+    play_notes = "Play imported successfully."
+    #play_status = "6" if play['raw_elastalert'] == "" else "2"
+    #play_notes = "Play status set to Disabled - Sigmac error when generating ElastAlert config." \
+    #    if play['raw_elastalert'] == "" else "Play imported successfully."
 
     # Create the payload
-    payload = {"issue": {"subject": play['title'], "project_id": 1, "status_id": play_status, "tracker": "Play",
+    payload = {"issue": {"subject": play['title'], "project_id": 1, "status_id": "2", "tracker": "Play",
                          "custom_fields": [
                              {"id": 1, "name": "Title", "value": play['title']},
                              {"id": 13, "name": "Playbook", "value": playbook},
