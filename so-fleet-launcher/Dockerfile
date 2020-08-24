@@ -24,7 +24,8 @@ RUN gem install --no-ri --no-rdoc fpm && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN curl -L https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/launcher-1.2.2/launcher.tar.gz -o /tmp/launcher.tgz
+# Download tar that includes: generate-packages.sh, config files & base packages
+RUN curl -L https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/launcher-packages-2.1.0/launcher.tar.gz  -o /tmp/launcher.tgz
 RUN tar xf /tmp/launcher.tgz -C /var && \
     cp -fr /var/launcher/src/tools/* /usr/local/bin/
 

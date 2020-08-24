@@ -5,10 +5,10 @@ title: SO configs
 logsources:
   osquery:
     product: osquery
-    index: so-osquery-*
+    index: "*:so-osquery-*"
   windows:
     product: windows
-    index: so-*
+    index: "*:so-*"
   windows-application:
     product: windows
     service: application
@@ -34,79 +34,80 @@ logsources:
     service: driver-framework
     conditions:
       source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
-defaultindex: so-*
+defaultindex: "*:so-*"
 fieldmappings:
     EventID: event.code
     log_name: winlog.channel
-    AccessMask: event_data.AccessMask
-    AccountName: event_data.AccountName
-    AllowedToDelegateTo: event_data.AllowedToDelegateTo
-    AttributeLDAPDisplayName: event_data.AttributeLDAPDisplayName
-    AuditPolicyChanges: event_data.AuditPolicyChanges
-    AuthenticationPackageName: event_data.AuthenticationPackageName
-    CallingProcessName: event_data.CallingProcessName
-    CallTrace: event_data.CallTrace
+    AccessMask: winlog.event_data.AccessMask
+    AccountName: winlog.event_data.AccountName
+    AllowedToDelegateTo: winlog.event_data.AllowedToDelegateTo
+    AttributeLDAPDisplayName: winlog.event_data.AttributeLDAPDisplayName
+    AuditPolicyChanges: winlog.event_data.AuditPolicyChanges
+    AuthenticationPackageName: winlog.event_data.AuthenticationPackageName
+    CallingProcessName: winlog.event_data.CallingProcessName
+    CallTrace: winlog.event_data.CallTrace
     CommandLine: process.command_line
-    Company: event_data.Company
-    ComputerName: event_data.ComputerName
-    CurrentDirectory: process.working_directory"
+    Company: process.pe.company
+    ComputerName: winlog.event_data.ComputerName
+    CurrentDirectory: process.working_directory
     Description: process.pe.description
     DestinationHostname: destination.hostname
     DestinationIp: destination.ip
-    DestinationIsIpv6: event_data.DestinationIsIpv6
+    DestinationIsIpv6: winlog.event_data.DestinationIsIpv6
     DestinationPort: destination.port
-    Details: event_data.Details
-    EngineVersion: event_data.EngineVersion
-    EventType: event_data.EventType
-    FailureCode: event_data.FailureCode
-    FileName: event_data.FileName
+    Details: winlog.event_data.Details
+    EngineVersion: winlog.event_data.EngineVersion
+    EventType: winlog.event_data.EventType
+    FailureCode: winlog.event_data.FailureCode
+    FileName: winlog.event_data.FileName
     FileVersion: process.pe.file_version
-    GrantedAccess: event_data.GrantedAccess
-    GroupName: event_data.GroupName
-    Hashes: event_data.Hashes
-    HiveName: event_data.HiveName
-    HostVersion: event_data.HostVersion
+    GrantedAccess: winlog.event_data.GrantedAccess
+    GroupName: winlog.event_data.GroupName
+    Hashes: winlog.event_data.Hashes
+    HiveName: winlog.event_data.HiveName
+    HostVersion: winlog.event_data.HostVersion
     Image: process.executable
-    ImageLoaded: event_data.ImageLoaded
-    ImagePath: event_data.ImagePath
-    Imphash: event_data.Imphash
-    Initiated: event_data.Initiated
-    LogonProcessName: event_data.LogonProcessName
-    LogonType: event_data.LogonType
-    NewProcessName: event_data.NewProcessName
-    ObjectClass: event_data.ObjectClass
-    ObjectName: event_data.ObjectName
-    ObjectType: event_data.ObjectType
-    ObjectValueName: event_data.ObjectValueName
+    ImageLoaded: winlog.event_data.ImageLoaded
+    ImagePath: winlog.event_data.ImagePath
+    Imphash: winlog.event_data.Imphash
+    Initiated: winlog.event_data.Initiated
+    LogonProcessName: winlog.event_data.LogonProcessName
+    LogonType: winlog.event_data.LogonType
+    NewProcessName: winlog.event_data.NewProcessName
+    ObjectClass: winlog.event_data.ObjectClass
+    ObjectName: winlog.event_data.ObjectName
+    ObjectType: winlog.event_data.ObjectType
+    ObjectValueName: winlog.event_data.ObjectValueName
     OriginalFileName: process.pe.original_file_name
     ParentCommandLine: process.parent.command_line
     ParentImage: process.parent.executable
-    Path: event_data.Path
-    PipeName: event_data.PipeName
-    ProcessName: event_data.ProcessName
-    Properties: event_data.Properties
-    ServiceFileName: event_data.ServiceFileName
-    ServiceName: event_data.ServiceName
-    ShareName: event_data.ShareName
-    Signature: event_data.Signature
-    Source: event_data.Source
-    SourceImage: event_data.SourceImage
+    Path: winlog.event_data.Path
+    PipeName: winlog.event_data.PipeName
+    ProcessName: winlog.event_data.ProcessName
+    ProcessId: process.pid
+    Properties: winlog.event_data.Properties
+    ServiceFileName: winlog.event_data.ServiceFileName
+    ServiceName: winlog.event_data.ServiceName
+    ShareName: winlog.event_data.ShareName
+    Signature: winlog.event_data.Signature
+    Source: winlog.event_data.Source
+    SourceImage: winlog.event_data.SourceImage
     SourceIP: source.ip
     SourcePort: source.port
     SourceHostname: source.hostname
-    StartModule: event_data.StartModule
-    Status: event_data.Status
+    StartModule: winlog.event_data.StartModule
+    Status: winlog.event_data.Status
     SubjectUserName: user.name
     TargetFilename: file.target
-    TargetImage: event_data.TargetImage
-    TargetObject: event_data.TargetObject
-    TicketEncryptionType: event_data.TicketEncryptionType
-    TicketOptions: event_data.TicketOptions
+    TargetImage: winlog.event_data.TargetImage
+    TargetObject: winlog.event_data.TargetObject
+    TicketEncryptionType: winlog.event_data.TicketEncryptionType
+    TicketOptions: winlog.event_data.TicketOptions
     User: user.name
-    WorkstationName: event_data.WorkstationName
+    WorkstationName: winlog.event_data.WorkstationName
     Product: process.pe.product
-    GroupSid: event_data.GroupSid    
-    RelativeTargetName: event_data.RelativeTargetName
+    GroupSid: winlog.event_data.GroupSid    
+    RelativeTargetName: winlog.event_data.RelativeTargetName
     qid: osquery.columns.qid
     hostname: osquery.result.hostname
     counter: osquery.result.counter

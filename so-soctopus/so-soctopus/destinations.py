@@ -495,12 +495,10 @@ def playbookWebhook(webhook_content):
                 if issue_status_name == "Active" and not detection_updated:
                     detection_updated = True
                     playbook.elastalert_update(issue_id)
-                    playbook.navigator_update()
                     playbook.thehive_casetemplate_update(issue_id)
                 elif issue_status_name == "Inactive" and not detection_updated:
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
-                    playbook.navigator_update()
 
             # Check to see if the Play status has changed to Active or Inactive
             elif item['prop_key'] == 'status_id' and not detection_updated:
@@ -508,13 +506,11 @@ def playbookWebhook(webhook_content):
                     # Status = Active --> Enable EA & TheHive
                     detection_updated = True
                     playbook.elastalert_update(issue_id)
-                    playbook.navigator_update()
                     playbook.thehive_casetemplate_update(issue_id)
                 elif item['value'] == '4':
                     # Status = Inactive --> Disable EA
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
-                    playbook.navigator_update()
             # Check to see if the Play Target Log (Field ID 21) has been updated - if so, run a Unit Test
             elif item['prop_key'] == '21' and item['old_value'] == "":
                 # First time Target Log has been updated - Normalize log only
@@ -543,24 +539,6 @@ def playbookCreatePlay(sigma_raw, sigma_dict):
     play_data = playbook.play_create(sigma_raw, sigma_dict)
 
     return jsonify(play_data)
-
-
-def createStrelkaScan(esid):
-    search = get_hits(esid)
-    for result in search['hits']['hits']:
-        result = result['_source']
-        extracted_file = result['extracted']
-        conn_id = result['log']['id']['uid'][0]
-        sensorsearch = get_conn(conn_id)
-
-        for result in sensorsearch['hits']['hits']:
-            result = result['_source']
-            sensor = result['observer']['name'].rsplit('-', 1)[0]
-            strelka_scan_drop = "echo " + sensor + "," + extracted_file + " >>  /tmp/soctopus/strelkaq.log"
-            os.system(strelka_scan_drop)
-
-            return render_template('strelka.html', extracted_file=extracted_file, sensor=sensor)
-
 
 def showESResult(esid):
     search = get_hits(esid)

@@ -64,7 +64,7 @@ def thehive_casetemplate_update(issue_id):
     play_meta = play_metadata(issue_id)
 
     # Generate Sigma metadata
-    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'])
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
 
     # Check to see if there are any tasks - if so, get them formatted
     tasks = []
@@ -128,11 +128,10 @@ def elastalert_update(issue_id):
     play_meta = play_metadata(issue_id)
 
     # Generate Sigma metadata
-    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'])
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
 
     play_file = f"/etc/playbook-rules/{play_meta['playid']}.yaml"
-    ea_config_raw = re.sub("{{collapse\(View ElastAlert Config\)|<pre><code class=\"yaml\">|</code></pre>|}}", "",
-                           sigma_meta['esquery'])
+
     if os.path.exists(play_file):
         os.remove(play_file)
 
@@ -144,6 +143,8 @@ def elastalert_update(issue_id):
         event_severity = 3
     elif sigma_meta['level'] == "critical":
         event_severity = 4
+    elif sigma_meta['level'] == "":
+        event_severity = 2
 
     if play_meta['group'] != None:
         rule_category = play_meta['group']
@@ -165,10 +166,12 @@ def elastalert_update(issue_id):
             if event_severity >= 3:
                 # Sub Severity 
                 content = re.sub(r' severity:.*', f" severity: {event_severity}", content.rstrip())
-                # Sub Playbook Name
-                content = re.sub(r'-\s''', f"- {play_meta['playbook']}", content.rstrip())
+                # Sub Play Name & Play ID for Elastalert Rule Name
+                content = re.sub(r' title:.*', f" title: '{{rule[name]}} - {play_meta['playbook']}'", content.rstrip())          
+                # Sub Play Name and Playbook Name for TheHive Alert Title
+                content = re.sub(r'\btitle: .*', f"title: \"{sigma_meta['title']} - {play_meta['playbook']}\"", content.rstrip())          
                 # Sub Play Tags
-                content = re.sub(r'tags:.*$', f"tags: ['playbook','{play_meta['playid']}','{play_meta['playbook']}']",
+                content = re.sub(r'tags:.*', f"tags: ['playbook','playid-{play_meta['playid']}','{play_meta['playbook']}']",
                             content.rstrip())
                 # Sub Redmine IssueID
                 content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
@@ -176,17 +179,34 @@ def elastalert_update(issue_id):
                 content = re.sub(r'caseTemplate:.*', f"caseTemplate: '{play_meta['playid']}'", content.rstrip())
             else:
                 # This is a low Severity alert - Remove TheHive alerter 
-                content = re.sub(r"alert: hivealerter[\s\S]*5000'", "", content.rstrip()) 
+                content = re.sub(r"- \"hivealerter\"[\s\S]*5000'", "", content.rstrip()) 
             # Sub details in the ES_Alerter - play URL, etc
             content = re.sub(r'rule\.category:.*', f"rule.category: \"{rule_category}\"", content.rstrip())
             content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
             content = re.sub(r'play_title:.\"\"', f"play_title: \"{sigma_meta['title']}\"", content.rstrip())
             content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
-            content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n{ea_config_raw}", content.rstrip())
+            content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n", content.rstrip())
+            content = f"{content}\n{sigma_meta['raw_elastalert']}"
             f.write(content)
+            f.close()
+
+            # Check newly-written elastalert config file to make sure it is valid
+            elastalert_config_status = "invalid"
+            file = open(play_file, "r")
+            for line in file:
+                if re.search('realert', line):
+                    elastalert_config_status = "valid"
+
+            if elastalert_config_status != "valid":
+                print ("Elastalert rule file invalid - deleting it")
+                os.remove(play_file)
 
     except FileNotFoundError:
         print("ElastAlert Template File not found")
+    except:
+        print("Something else went wrong")
+        if os.path.exists(play_file):
+            os.remove(play_file)
 
     return 200, "success"
 
@@ -204,7 +224,7 @@ def play_update(issue_id):
     play_meta = play_metadata(issue_id)
 
     # Generate Sigma metadata
-    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'])
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
 
     payload = {"issue": {"subject": sigma_meta['title'], "project_id": 1, "tracker": "Play", "custom_fields": [ \
         {"id": 1, "name": "Title", "value": sigma_meta['title']}, \
@@ -284,7 +304,7 @@ def sigmac_generate(sigma):
     return es_query
 
 
-def sigma_metadata(sigma_raw, sigma):
+def sigma_metadata(sigma_raw, sigma, play_id):
     play = dict()
 
     # Call sigmac tool to generate ElastAlert config
@@ -299,7 +319,9 @@ def sigma_metadata(sigma_raw, sigma):
                              stdout=subprocess.PIPE, encoding='ascii')
 
     ea_config = re.sub(r'alert:\n.*filter:\n', 'filter:\n', esquery.stdout.strip(), flags=re.S)
-    ea_config = re.sub(r'name:\s\S*', f"name: {sigma.get('title')}", ea_config)
+
+    # Edit this to add the playid after the title - 
+    ea_config = re.sub(r'name:\s\S*', f"name: {sigma.get('title')} - {play_id}", ea_config)
 
     # Prep ATT&CK Tags
     tags = re.findall(r"t\d{4}", ''.join(
@@ -307,7 +329,6 @@ def sigma_metadata(sigma_raw, sigma):
     play['tags'] = [element.upper() for element in tags]
 
     return {
-        'playid': play.get('playid'),
         'references': '\n'.join(sigma.get('references')) if sigma.get('references') else 'none',
         'title': sigma.get('title') if sigma.get('title') else 'none',
         'description': sigma.get('description') if sigma.get('description') else 'none',
@@ -329,20 +350,22 @@ def sigma_metadata(sigma_raw, sigma):
 def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group="", license=""):
     # Expects Sigma in dict format
 
-    # Extract out all the relevant metadata from the Sigma YAML
-    play = sigma_metadata(sigma_raw, sigma_dict)
-
     # Generate a unique ID for the Play
     play_id = uuid.uuid4().hex
 
-    # If ElastAlert config = "", set the play status to Disabled (id=6) else set it to Draft (id=2)
-    # Also add a note to the play to make it clear as to why the status is Disabled
-    play_status = "6" if play['raw_elastalert'] == "" else "2"
-    play_notes = "Play status set to Disabled - Sigmac error when generating ElastAlert config." \
-        if play['raw_elastalert'] == "" else "Play imported successfully."
+    # Extract out all the relevant metadata from the Sigma YAML
+    play = sigma_metadata(sigma_raw, sigma_dict, play_id[0:9])
+
+    # If ElastAlert config = "", return with an error
+    if play['raw_elastalert'] == "":
+        return "Sigmac error when generating ElastAlert config"
+    play_notes = "Play imported successfully."
+    #play_status = "6" if play['raw_elastalert'] == "" else "2"
+    #play_notes = "Play status set to Disabled - Sigmac error when generating ElastAlert config." \
+    #    if play['raw_elastalert'] == "" else "Play imported successfully."
 
     # Create the payload
-    payload = {"issue": {"subject": play['title'], "project_id": 1, "status_id": play_status, "tracker": "Play",
+    payload = {"issue": {"subject": play['title'], "project_id": 1, "status_id": "2", "tracker": "Play",
                          "custom_fields": [
                              {"id": 1, "name": "Title", "value": play['title']},
                              {"id": 13, "name": "Playbook", "value": playbook},
@@ -397,7 +420,7 @@ def play_unit_test (issue_id,unit_test_trigger,only_normalize=False):
         return "No Target Log"
 
     # Get Sigma metadata
-    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'])
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
 
     # If needed, normalize the Target Log if the trigger is "Target Log Updated"
     if unit_test_trigger == "Target Log Updated":

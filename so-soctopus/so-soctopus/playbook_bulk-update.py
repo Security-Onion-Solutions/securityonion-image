@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os
 import re
@@ -29,7 +30,7 @@ playbook_url = parser.get("playbook", "playbook_url")
 
 # Which ruleset categories should be imported / updated?
 # rulesets = ['application','apt','cloud','compliance','generic','linux','network', 'proxy', 'web', 'windows']
-rulesets = ['application','apt','cloud','compliance','generic','linux','network', 'proxy', 'web', 'windows']
+rulesets = ['windows']
 
 ##############################################################
 # update_play(raw_sigma, repo_sigma, ruleset)
@@ -104,6 +105,8 @@ def rule_update(rulesets):
     return 
 
 # Starting up....
+print(f"\n-= Started: {datetime.now()}-=\n")
+
 print(
     f"\n\n-= Creating/Updating Plays based on the following categories: {rulesets} -=\n\n")
 
@@ -156,4 +159,5 @@ summary = (
     f"\n\n-= Update Summary =-\n\nSigma Community Repo:\n {git_status.stdout.strip()}\n\nUpdated Plays: {play_update_counter}\n"
     f"New Plays: {play_new_counter}\nNo Updates Needed: {play_noupdate_counter}\n\nEnabled Rulesets:\n{rulesets}\n")
 print (summary)
-    
+
+print (f"\n\n-= Completed: {datetime.now()}-=\n")    

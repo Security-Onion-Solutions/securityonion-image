@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+# Copyright 2020 Security Onion Solutions, LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+PLUGIN_SRC_DIR=$1
+PLUGIN_DST_DIR=$2
+
+ES_DIR=$(dirname $0)/..
+
+CP="${ES_DIR}/lib/*"
+
+for DIR in $(ls ${ES_DIR}/modules); do
+    CP=$CP:${ES_DIR}/modules/$DIR/*
+done
+
+for NAME in $(ls $PLUGIN_SRC_DIR); do
+    echo "Building plugin: $NAME"
+    SRC_DIR=$PLUGIN_SRC_DIR/$NAME
+    OBJ_DIR=$PLUGIN_DST_DIR/$NAME/classes
+
+    mkdir -p $OBJ_DIR
+
+    "${ES_DIR}/jdk/bin/javac" -cp "$CP" -d "$OBJ_DIR" $(find "$SRC_DIR" -name '*.java')
+
+    "${ES_DIR}/jdk/bin/jar" cf ${PLUGIN_DST_DIR}/${NAME}/${NAME}.jar -C ${PLUGIN_DST_DIR}/${NAME}/classes .
+    cp ${SRC_DIR}/*.properties ${PLUGIN_DST_DIR}/${NAME}/
+    cp ${SRC_DIR}/*.policy ${PLUGIN_DST_DIR}/${NAME}/
+    cp ${ES_DIR}/modules/transport-netty4/*.jar ${PLUGIN_DST_DIR}/${NAME}/
+done

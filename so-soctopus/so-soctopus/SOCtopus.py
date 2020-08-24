@@ -3,7 +3,7 @@
 from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
 from destinations import createHiveAlert, createMISPEvent, createSlackAlert, createFIREvent, createGRRFlow, \
-    createRTIRIncident, createStrelkaScan, showESResult, playbookWebhook, eventModifyFields, eventUpdateFields, \
+    createRTIRIncident, showESResult, playbookWebhook, eventModifyFields, eventUpdateFields, \
     sendHiveAlert, processHiveReq, playbookSigmac, playbookCreatePlay
 import ruamel.yaml
 import sys
@@ -63,12 +63,6 @@ def sendRTIR(esid):
 @app.route("/slack/<esid>")
 def sendSlack(esid):
     return createSlackAlert(esid)
-
-
-@app.route("/strelka/filescan/<esid>")
-def sendStrelka(esid):
-    return createStrelkaScan(esid)
-
 
 @app.route("/playbook/webhook", methods=['POST'])
 def sendPlaybook():
