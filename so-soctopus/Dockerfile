@@ -29,10 +29,12 @@ RUN mkdir -p /SOCtopus/playbook
 RUN mkdir -p /var/log/SOCtopus
 
 COPY ./so-soctopus/requirements.txt /SOCtopus/
-RUN pip install -r requirements.txt 
+RUN pip install -r requirements.txt
 RUN pip install gunicorn
+
+# Used for hashing passwords for new fleet users
+RUN pip install bcrypt
 
 COPY ./so-soctopus /SOCtopus
 
 ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:7000", "wsgi:app"]
-
