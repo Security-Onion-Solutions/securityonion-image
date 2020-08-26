@@ -29,14 +29,15 @@ import org.elasticsearch.http.HttpChannel;
 import org.elasticsearch.http.HttpHandlingSettings;
 import org.elasticsearch.http.netty4.Netty4HttpServerTransport;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.SharedGroupFactory;
 
 public class SoTlsNettyHttpServerTransport extends Netty4HttpServerTransport {
   private static final Logger logger = LogManager.getLogger(SoTlsNettyHttpServerTransport.class);
   private final SslEngineFactory sslFactory;
 
   public SoTlsNettyHttpServerTransport(SslEngineFactory sslFactory, Settings settings, NetworkService networkService, BigArrays bigArrays, ThreadPool threadPool,
-                                     NamedXContentRegistry xContentRegistry, Dispatcher dispatcher, ClusterSettings clusterSettings) {
-    super(settings, networkService, bigArrays, threadPool, xContentRegistry, dispatcher, clusterSettings);
+                                     NamedXContentRegistry xContentRegistry, Dispatcher dispatcher, ClusterSettings clusterSettings, SharedGroupFactory groupFactory) {
+    super(settings, networkService, bigArrays, threadPool, xContentRegistry, dispatcher, clusterSettings, groupFactory);
     this.sslFactory = sslFactory;
   }
 

@@ -23,6 +23,8 @@ ES_DIR=$(dirname $0)/..
 
 CP="${ES_DIR}/lib/*"
 
+set -e
+
 for DIR in $(ls ${ES_DIR}/modules); do
     CP=$CP:${ES_DIR}/modules/$DIR/*
 done
