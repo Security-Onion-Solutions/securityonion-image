@@ -1,4 +1,4 @@
-FROM jertel/elastalert-docker:0.2.4
+FROM jertel/elastalert-docker:latest-jertelfork
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=933
@@ -9,7 +9,7 @@ RUN addgroup -g ${GID} ${USERNAME} && \
     adduser -D --uid ${UID} --ingroup ${USERNAME} \
       --home /opt/elastalert --no-create-home ${USERNAME}
 
-COPY ./files/* /usr/local/lib/python3.6/site-packages/elastalert/
+COPY ./files/* /opt/elastalert/elastalert/
 
 USER ${USERNAME}
 ENTRYPOINT ["/opt/elastalert/run.sh", "--verbose"]
