@@ -30,7 +30,7 @@ playbook_url = parser.get("playbook", "playbook_url")
 
 # Which ruleset categories should be imported / updated?
 # rulesets = ['application','apt','cloud','compliance','generic','linux','network', 'proxy', 'web', 'windows']
-rulesets = ['windows']
+rulesets = parser.get('playbook', 'playbook_rulesets').split(",")
 
 ##############################################################
 # update_play(raw_sigma, repo_sigma, ruleset)
