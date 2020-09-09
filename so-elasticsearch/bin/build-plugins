@@ -30,9 +30,18 @@ for DIR in $(ls ${ES_DIR}/modules); do
 done
 
 for NAME in $(ls $PLUGIN_SRC_DIR); do
-    echo "Building plugin: $NAME"
     SRC_DIR=$PLUGIN_SRC_DIR/$NAME
     OBJ_DIR=$PLUGIN_DST_DIR/$NAME/classes
+
+    if [[ -f "$SRC_DIR/FLAVOR" ]]; then
+        REQUIRED_FLAVOR=$(cat "$SRC_DIR/FLAVOR")
+        if [[ "$FLAVOR" != "$REQUIRED_FLAVOR" ]]; then
+            echo "Skipping plugin due to unmatched flavor ($FLAVOR != $REQUIRED_FLAVOR): $NAME"
+            continue
+        fi
+    fi
+
+    echo "Building plugin: $NAME"
 
     mkdir -p $OBJ_DIR
 
