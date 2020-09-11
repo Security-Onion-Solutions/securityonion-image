@@ -9,7 +9,9 @@ RUN addgroup -g ${GID} ${USERNAME} && \
     adduser -D --uid ${UID} --ingroup ${USERNAME} \
       --home /opt/elastalert --no-create-home ${USERNAME}
 
-COPY ./files/* /usr/local/lib/python3.6/site-packages/elastalert/
+COPY ./files /custom
+
+RUN cp -fr /custom/* $(find /usr -name elastalert -type d) && rm -fr /custom
 
 USER ${USERNAME}
 ENTRYPOINT ["/opt/elastalert/run.sh", "--verbose"]
