@@ -32,6 +32,7 @@ import org.elasticsearch.common.util.PageCacheRecycler;
 import org.elasticsearch.indices.breaker.CircuitBreakerService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.netty4.Netty4Transport;
+import org.elasticsearch.transport.SharedGroupFactory;
 
 public class SoTlsNettyTransport extends Netty4Transport {
   private static final Logger logger = LogManager.getLogger(SoTlsNettyTransport.class);
@@ -40,8 +41,8 @@ public class SoTlsNettyTransport extends Netty4Transport {
 
   public SoTlsNettyTransport(SslEngineFactory sslFactory, Settings settings, Version version, ThreadPool threadPool, NetworkService networkService,
                            PageCacheRecycler pageCacheRecycler, NamedWriteableRegistry namedWriteableRegistry,
-                           CircuitBreakerService circuitBreakerService) {
-    super(settings, version, threadPool, networkService, pageCacheRecycler, namedWriteableRegistry, circuitBreakerService);
+                           CircuitBreakerService circuitBreakerService, SharedGroupFactory groupFactory) {
+    super(settings, version, threadPool, networkService, pageCacheRecycler, namedWriteableRegistry, circuitBreakerService, groupFactory);
     this.sslFactory = sslFactory;
   }
 

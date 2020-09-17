@@ -11,6 +11,8 @@ RUN git clone https://github.com/suer/redmine_webhook.git /usr/src/redmine/plugi
 
 RUN git clone https://github.com/Security-Onion-Solutions/securityonion-playbook-plugin.git /usr/src/redmine/plugins/redmine_playbook
 
+RUN bundle install --gemfile /usr/src/redmine/Gemfile
+
 COPY playbook/passenger-nginx-config-template.erb /passenger-nginx-config-template.erb
 
 CMD ["passenger", "start", "--nginx-config-template", "/passenger-nginx-config-template.erb"]

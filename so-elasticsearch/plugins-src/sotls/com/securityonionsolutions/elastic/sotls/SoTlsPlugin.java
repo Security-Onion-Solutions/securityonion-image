@@ -34,6 +34,7 @@ import org.elasticsearch.plugins.NetworkPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.Transport;
+import org.elasticsearch.transport.SharedGroupFactory;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -59,6 +60,8 @@ public class SoTlsPlugin extends Plugin implements NetworkPlugin {
   public static final String HTTP_TRANSPORT_NAME = "sotls";
   private final SoTlsConfig config;
   private final SslEngineFactory sslFactory;
+  private final Object sharedGroupFactoryLock = new Object();
+  private SharedGroupFactory sharedGroupFactory;
 
   public SoTlsPlugin(final Settings settings, final Path configPath) {
     this.config = new SoTlsConfig(new Environment(settings, configPath));
@@ -82,6 +85,17 @@ public class SoTlsPlugin extends Plugin implements NetworkPlugin {
     return builder.build();
   }
 
+  protected SharedGroupFactory getSharedGroupFactory(Settings settings) {
+    if (this.sharedGroupFactory == null) {
+      synchronized(this.sharedGroupFactoryLock) {
+        if (this.sharedGroupFactory == null) {
+          this.sharedGroupFactory = new SharedGroupFactory(settings);
+        }
+      }
+    }
+    return this.sharedGroupFactory;
+  }
+
   @Override
   public Map<String, Supplier<Transport>> getTransports(Settings settings, ThreadPool threadPool, PageCacheRecycler pageCacheRecycler,
                                                         CircuitBreakerService circuitBreakerService,
@@ -89,7 +103,7 @@ public class SoTlsPlugin extends Plugin implements NetworkPlugin {
     if (this.config.isTransportEncrypted()) {
       return Collections.singletonMap(TRANSPORT_NAME, 
         () -> new SoTlsNettyTransport(this.sslFactory, settings, Version.CURRENT, threadPool,
-          networkService, pageCacheRecycler, namedWriteableRegistry, circuitBreakerService));
+          networkService, pageCacheRecycler, namedWriteableRegistry, circuitBreakerService, this.getSharedGroupFactory(settings)));
     } else {
       return Collections.emptyMap();
     }
@@ -106,7 +120,7 @@ public class SoTlsPlugin extends Plugin implements NetworkPlugin {
     if (this.config.isHttpEncrypted()) {
       return Collections.singletonMap(HTTP_TRANSPORT_NAME,
         () -> new SoTlsNettyHttpServerTransport(this.sslFactory, settings, networkService, bigArrays, threadPool, xContentRegistry, dispatcher,
-          clusterSettings));
+          clusterSettings, this.getSharedGroupFactory(settings)));
     } else {
       return Collections.emptyMap();
     }
