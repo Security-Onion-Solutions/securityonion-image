@@ -31,7 +31,7 @@ RUN /usr/bin/pip3.6 install
 RUN yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
 # Install the steno package
-RUN rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/Steno/stenographer-0-1.20200922gite8db1ee.el7.x86_64.rpm
+RUN rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/Stenoupgrade/stenographer-0-1.20200922gite8db1ee.el7.x86_64.rpm
 
 # setcap
 RUN setcap 'CAP_NET_RAW+ep CAP_NET_ADMIN+ep CAP_IPC_LOCK+ep CAP_SETGID+ep' /usr/bin/stenotype
