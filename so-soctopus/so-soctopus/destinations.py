@@ -47,7 +47,10 @@ def createHiveCase(esid):
         artifacts = []
         event = result['event']
         src = srcport = dst = dstport = None
-        title = f'New {event["module"].capitalize()} {event["dataset"].capitalize()} Event From Security Onion'
+        if event['dataset'] == 'alert':
+            title = result['rule']['name']
+        else:
+            title = f'New {event["module"].capitalize()} {event["dataset"].capitalize()} Event'
         form = DefaultForm()
         #artifact_string = jsonpickle.encode(artifacts)
         return render_template('hive.html', title=title, description=description, severity=severity, form=form) 
