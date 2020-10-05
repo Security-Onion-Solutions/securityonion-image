@@ -184,6 +184,7 @@ def elastalert_update(issue_id):
             content = re.sub(r'rule\.category:.*', f"rule.category: \"{rule_category}\"", content.rstrip())
             content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
             content = re.sub(r'play_title:.\"\"', f"play_title: \"{sigma_meta['title']}\"", content.rstrip())
+            content = re.sub(r'play_id:.\"\"', f"play_id: \"{play_meta['playid']}\"", content.rstrip())            
             content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
             content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n", content.rstrip())
             content = f"{content}\n{sigma_meta['raw_elastalert']}"
