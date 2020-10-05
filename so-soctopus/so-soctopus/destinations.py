@@ -39,9 +39,12 @@ def createHiveCase(esid):
     severity = 2
     for item in search['hits']['hits']:
         result = item['_source']
-        message = result['message']
         es_id = item['_id']
-        description = str(message)
+        try:
+          message = result['message']
+          description = str(message)
+        except:
+          description = str(result)
         sourceRef = str(uuid.uuid4())[0:6]
         tags = ["SecurityOnion"]
         artifacts = []
