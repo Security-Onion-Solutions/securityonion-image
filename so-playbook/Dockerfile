@@ -21,8 +21,8 @@ RUN bundle install --gemfile /usr/src/redmine/Gemfile
 # Set up passenger config + entrypoint
 RUN mkdir /passenger && \
     chown -R socore:socore /passenger
-COPY ./playbook/passenger-nginx-config-template.erb /passenger/passenger-nginx-config-template.erb
-COPY ./playbook/run.sh /passenger/run.sh
-RUN chmod +x /passenger/run.sh
+COPY ./playbook/passenger-nginx-config-template.erb /passenger-nginx-config-template.erb
+COPY ./playbook/run.sh ./run.sh
+RUN chmod +x ./run.sh
 
-CMD [ "/passenger/run.sh" ]
+CMD [ "/usr/src/redmine/run.sh" ]

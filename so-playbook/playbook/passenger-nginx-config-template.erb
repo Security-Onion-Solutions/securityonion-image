@@ -40,11 +40,6 @@ http {
             passenger_enabled on;
         }
     }
-
-    passenger_user socore;
-    passenger_group socore;
-    passenger_default_user socore;
-    passenger_default_group socore;
-
+    
     passenger_pre_start http://0.0.0.0:3000/;
 }
