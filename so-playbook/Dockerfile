@@ -19,12 +19,13 @@ RUN git clone https://github.com/Security-Onion-Solutions/securityonion-playbook
 RUN bundle install --gemfile /usr/src/redmine/Gemfile
 
 # Set up passenger config + entrypoint
-COPY ./playbook/passenger-nginx-config-template.erb /passenger-nginx-config-template.erb
-COPY ./playbook/entrypoint.sh ./entrypoint.sh
-RUN chmod +x /usr/src/redmine/entrypoint.sh
+RUN mkdir /passenger && \
+    chown -R socore:socore /passenger
+COPY ./playbook/passenger-nginx-config-template.erb /passenger/passenger-nginx-config-template.erb
+COPY ./playbook/entrypoint.sh /passenger/entrypoint.sh
+RUN chmod +x /passenger/entrypoint.sh
 
 # Run app as user socore
-RUN chown -R socore:socore /usr/src/redmine
 USER socore
 
-ENTRYPOINT [ "/usr/src/redmine/entrypoint.sh" ]
+ENTRYPOINT [ "/passenger/entrypoint.sh" ]
