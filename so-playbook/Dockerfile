@@ -19,7 +19,10 @@ RUN git clone https://github.com/Security-Onion-Solutions/securityonion-playbook
 RUN bundle install --gemfile /usr/src/redmine/Gemfile
 COPY playbook/passenger-nginx-config-template.erb /passenger-nginx-config-template.erb
 
-RUN mkdir /playbook
+RUN mkdir /playbook && \
+    chown socore:socore /playbook && \
+    chmod 0770 /playbook
+
 # Add redirect to /dev/null of the CMD output to prevent logging to docker logs
 RUN sed -i '$s/$/ \&>\/dev\/null/' /docker-entrypoint.sh
 
