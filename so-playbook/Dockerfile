@@ -22,8 +22,8 @@ RUN bundle install --gemfile /usr/src/redmine/Gemfile
 RUN mkdir /passenger && \
     chown -R socore:socore /passenger
 COPY ./playbook/passenger-nginx-config-template.erb /passenger/passenger-nginx-config-template.erb
-COPY ./playbook/entrypoint.sh /passenger/entrypoint.sh
-RUN chmod +x /passenger/entrypoint.sh
+COPY ./playbook/run.sh /passenger/run.sh
+RUN chmod +x /passenger/run.sh
 
 # Run app as user socore
 USER socore
