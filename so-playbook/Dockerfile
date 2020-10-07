@@ -28,4 +28,4 @@ RUN chmod +x /passenger/entrypoint.sh
 # Run app as user socore
 USER socore
 
-ENTRYPOINT [ "/passenger/entrypoint.sh" ]
+CMD [ "/passenger/run.sh" ]
