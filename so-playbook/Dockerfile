@@ -25,7 +25,4 @@ COPY ./playbook/passenger-nginx-config-template.erb /passenger/passenger-nginx-c
 COPY ./playbook/run.sh /passenger/run.sh
 RUN chmod +x /passenger/run.sh
 
-# Run app as user socore
-USER socore
-
 CMD [ "/passenger/run.sh" ]
