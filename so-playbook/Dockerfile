@@ -1,4 +1,4 @@
-FROM redmine:4-passenger
+FROM redmine:4.1.1-passenger
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Playbook running in Docker container for use with Security Onion"
