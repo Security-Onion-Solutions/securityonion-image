@@ -13,7 +13,7 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
 RUN usermod -aG socore redmine
 
 WORKDIR /usr/src/redmine
-COPY playbook/circle_theme.tar.bz2   /usr/src/redmine/public/themes
+ADD playbook/circle_theme.tar.bz2   /usr/src/redmine/public/themes
 RUN git clone https://github.com/suer/redmine_webhook.git /usr/src/redmine/plugins/redmine_webhook
 RUN git clone https://github.com/Security-Onion-Solutions/securityonion-playbook-plugin.git /usr/src/redmine/plugins/redmine_playbook
 RUN bundle install --gemfile /usr/src/redmine/Gemfile
