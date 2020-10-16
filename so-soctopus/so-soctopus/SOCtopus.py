@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
-from destinations import createHiveAlert, createMISPEvent, createSlackAlert, createFIREvent, createGRRFlow, \
+from destinations import createHiveAlert, createHiveCase, createMISPEvent, createSlackAlert, createFIREvent, createGRRFlow, \
     createRTIRIncident, showESResult, playbookWebhook, eventModifyFields, eventUpdateFields, \
-    sendHiveAlert, processHiveReq, playbookSigmac, playbookCreatePlay
+    sendHiveAlert, sendHiveCase, processHiveReq, playbookSigmac, playbookCreatePlay
 import ruamel.yaml
 import sys
 import random
@@ -30,12 +30,15 @@ def sendGRR(esid, flow_name):
 
 
 @app.route("/thehive/alert/<esid>")
-def createHive(esid):
+def createAlertHive(esid):
     return createHiveAlert(esid)
 
+@app.route("/thehive/case/<esid>")
+def createCaseHive(esid):
+    return createHiveCase(esid)
 
 @app.route("/thehive/alert/send", methods=['POST'])
-def sendHive():
+def sendAlertHive():
     if request.method == 'POST':
         if request.form['submit_button'] == 'Submit':
             result = request.form.to_dict()
@@ -49,6 +52,21 @@ def sendHive():
         else:
             return render_template("cancel.html")
 
+@app.route("/thehive/case/send", methods=['POST'])
+def sendCaseHive():
+    if request.method == 'POST':
+        if request.form['submit_button'] == 'Submit':
+            result = request.form.to_dict()
+            title = result['title']
+            #tlp = result['tlp']
+            description = result['description'].strip('\"')
+            #tags = result['tags']
+            #artifact_string = result['artifact_string']
+            #sourceRef = result['sourceRef']
+            severity = result['severity']
+            return sendHiveCase(title, description, severity)
+        else:
+            return render_template("cancel.html")
 
 @app.route("/misp/event/<esid>")
 def sendMISP(esid):

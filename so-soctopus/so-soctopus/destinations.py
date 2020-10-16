@@ -33,6 +33,31 @@ def hiveInit():
     return TheHiveApi(hive_url, hive_key, cert=hive_verifycert)
 
 
+def createHiveCase(esid):
+    search = get_hits(esid)
+    tlp = int(parser.get('hive', 'hive_tlp'))
+    severity = 2
+    for item in search['hits']['hits']:
+        result = item['_source']
+        es_id = item['_id']
+        try:
+          message = result['message']
+          description = str(message)
+        except:
+          description = str(result)
+        sourceRef = str(uuid.uuid4())[0:6]
+        tags = ["SecurityOnion"]
+        artifacts = []
+        event = result['event']
+        src = srcport = dst = dstport = None
+        if event['dataset'] == 'alert':
+            title = result['rule']['name']
+        else:
+            title = f'New {event["module"].capitalize()} {event["dataset"].capitalize()} Event'
+        form = DefaultForm()
+        #artifact_string = jsonpickle.encode(artifacts)
+        return render_template('hive.html', title=title, description=description, severity=severity, form=form) 
+     
 def createHiveAlert(esid):
     search = get_hits(esid)
     # Hive Stuff
@@ -241,6 +266,30 @@ def sendHiveAlert(title, tlp, tags, description, sourceRef, artifact_string):
 
     # Redirect to TheHive instance
     return redirect(hive_url + '/index.html#!/alert/list')
+
+
+
+def sendHiveCase(title, description, severity):
+    soc_url = parser.get('soc', 'soc_url')
+    description = str(description.strip('"'))
+    
+    headers = {
+      'Content-Type': 'application/json',
+    }
+  
+    data = {"title": title, "description": description, "severity": int(severity)}
+
+    response = requests.post(soc_url + '/api/case', headers=headers, json=data, verify=False)
+    if response.status_code == 200:
+        print(json.dumps(response.json(), indent=4, sort_keys=True))
+        print('')
+
+    else:
+        print('ko: {}/{}'.format(response.status_code, response.text))
+        sys.exit(0)
+
+    # Redirect to TheHive instance
+    return redirect(hive_url + '/index.html')
 
 
 def createMISPEvent(esid):
