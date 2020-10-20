@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM python:3-alpine
+FROM bobrik/curator
 
 LABEL maintainer "Security Onion Solutions, LLC"
 
@@ -23,12 +23,10 @@ ARG USERNAME=curator
 
 ENV LC_ALL=en_US.UTF-8
 
-RUN apk add --no-cache curl grep gawk coreutils shadow bash
+USER root
 
-RUN groupadd --gid ${GID} ${USERNAME} && \
-    useradd --uid ${UID} --gid ${GID} --no-create-home ${USERNAME}
-
-RUN pip install elasticsearch-curator
+RUN addgroup -g ${GID} ${USERNAME} && \
+    adduser -u ${UID} -G ${USERNAME} -D -H ${USERNAME}
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
