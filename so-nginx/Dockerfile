@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM node:alpine as navigator-builder
+FROM node:14-alpine as navigator-builder
 
 ARG NAVIGATOR_VERSION=2.3.2
 
