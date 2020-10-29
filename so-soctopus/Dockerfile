@@ -37,4 +37,4 @@ RUN pip install bcrypt
 
 COPY ./so-soctopus /SOCtopus
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:7000", "wsgi:app", '--log-file', '/var/log/SOCtopus/soctopus.log']
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:7000", "wsgi:app", "--log-file", "/var/log/SOCtopus/soctopus.log"]
