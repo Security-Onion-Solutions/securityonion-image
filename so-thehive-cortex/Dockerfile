@@ -34,7 +34,8 @@ RUN apt-get --no-install-recommends --no-install-suggests -y install \
     git \
     gpg gpg-agent \
     exiftool \
-    locales
+    locales \
+    libmagic1
 
 RUN locale-gen en_US.UTF-8
 
