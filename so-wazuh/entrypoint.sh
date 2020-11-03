@@ -121,6 +121,9 @@ chmod -R g+rw ${DATA_PATH}
 # Start wazuh-manager
 /var/ossec/bin/ossec-control start
 
+# Start agent registration service
+/var/ossec/bin/ossec-authd
+
 # Start wazuh-api
 node /var/ossec/api/app.js &
 
