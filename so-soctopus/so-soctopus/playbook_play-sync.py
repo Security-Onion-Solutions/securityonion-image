@@ -77,7 +77,7 @@ for i in inactive_response['issues']:
 
 while offset < inactive_response['total_count']:
     offset += 100
-    url = f"{playbook_url}/issues.json?offset={offset}&tracker_id=1&limit=100&status_id=3"
+    url = f"{playbook_url}/issues.json?offset={offset}&tracker_id=1&limit=100&status_id=4"
     inactive_response = requests.get(url, headers=playbook_headers, verify=False).json()
     print(f"Inactive offset: {offset}")
     for i in inactive_response['issues']:
