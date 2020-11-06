@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM alpine
+FROM ghcr.io/security-onion-solutions/alpine:3.12.1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Fleet running in Docker container for use with Security Onion"
 
