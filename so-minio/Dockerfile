@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/minio/minio:latest
+FROM ghcr.io/security-onion-solutions/minio:latest
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=939
