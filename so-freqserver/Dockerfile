@@ -1,4 +1,4 @@
-FROM python:3-alpine
+FROM ghcr.io/security-onion-solutions/python:3-alpine
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Freqserver running in Docker container for use with Security Onion"

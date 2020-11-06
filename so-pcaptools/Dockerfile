@@ -1,4 +1,4 @@
-FROM alpine:latest AS builder
+FROM ghcr.io/security-onion-solutions/alpine:latest AS builder
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Tools for use with PCAP files"
@@ -12,7 +12,7 @@ RUN wget http://f00l.de/pcapfix/pcapfix-${PCAPFIX_VERSION}.tar.gz && \
     make && \
     make install
 
-FROM alpine:latest
+FROM ghcr.io/security-onion-solutions/alpine:latest
 
 RUN apk add wireshark-common 
 

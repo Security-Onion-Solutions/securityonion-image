@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ghcr.io/security-onion-solutions/ubuntu:18.04
 
 # Common Ubuntu layer
 RUN apt-get update && \

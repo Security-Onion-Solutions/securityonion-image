@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM centos:7
+FROM ghcr.io/security-onion-solutions/centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Replay PCAPs to sniffing interface(s)"
