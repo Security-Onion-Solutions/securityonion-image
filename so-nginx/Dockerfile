@@ -16,7 +16,7 @@
 # Navigator build stage
 FROM node:14-alpine as navigator-builder
 
-ARG NAVIGATOR_VERSION=2.3.2
+ARG NAVIGATOR_VERSION=3.1
 
 RUN apk add git && \
     git config --global advice.detachedHead false && \
