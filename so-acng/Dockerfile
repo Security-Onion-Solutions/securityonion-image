@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ghcr.io/security-onion-solutions/ubuntu:18.04
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="apt-cacher running in Docker container for use with Security Onion"
