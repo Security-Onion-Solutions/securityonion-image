@@ -24,6 +24,11 @@ logsources:
     service: sysmon
     conditions:
       log_name: 'Microsoft-Windows-Sysmon/Operational'
+  windows-powershell:
+    product: windows
+    service: powershell
+    conditions:
+      log_name: 'Microsoft-Windows-Powershell/Operational'
   windows-dns-server:
     product: windows
     service: dns-server
