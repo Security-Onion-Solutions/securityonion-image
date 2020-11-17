@@ -30,7 +30,7 @@ RUN apt-get --no-install-recommends --no-install-suggests -y install \
   gpg gpg-agent dirmngr \
   apt-transport-https
   
-RUN echo 'deb https://deb.thehive-project.org release main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
+RUN echo 'deb https://deb.thehive-project.org stable main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
     curl -s https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add - > /dev/null 2>&1
 
 RUN apt-get update \
