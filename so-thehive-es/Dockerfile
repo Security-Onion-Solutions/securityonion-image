@@ -28,9 +28,8 @@ WORKDIR /usr/share/elasticsearch
 RUN groupadd -g 939 socore && adduser -u 939 -g 939 -d /usr/share/elasticsearch socore
 RUN set -ex && for esdirs in config data logs; do \
         mkdir -p "$esdirs"; \
-        chown -R socore:socore "$esdirs"; \
-        chown -R /usr/share/elasticsearch; \
-    done
+    done \
+    chown -R socore:score /usr/share/elasticsearch
 
 USER socore
 
