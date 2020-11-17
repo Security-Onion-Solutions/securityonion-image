@@ -31,7 +31,7 @@ RUN set -ex && for esdirs in config data logs; do \
         chown -R socore:socore "$esdirs"; \
     done
 
-USER socore
+USER elasticsearch
 
 COPY elasticsearch.yml config/
 COPY log4j2.properties config/
@@ -42,5 +42,5 @@ USER root
 RUN chown socore:socore config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
     chmod 0750 bin/es-docker
 
-USER socore
+USER elasticsearch
 CMD ["/bin/bash", "bin/es-docker"]
