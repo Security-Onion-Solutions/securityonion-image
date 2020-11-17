@@ -29,7 +29,6 @@ RUN groupadd -g 939 socore && adduser -u 939 -g 939 -d /usr/share/elasticsearch 
 RUN set -ex && for esdirs in config data logs; do \
         mkdir -p "$esdirs"; \
         chown -R socore:socore "$esdirs"; \
-        chown -R /usr/share/elasticsearch;
     done
 
 USER socore
