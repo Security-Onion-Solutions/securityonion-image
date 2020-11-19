@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM python:3-alpine
+FROM ghcr.io/security-onion-solutions/python:3-alpine
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="IDSTools for downloading rules"

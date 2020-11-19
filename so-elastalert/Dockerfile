@@ -1,4 +1,4 @@
-FROM jertel/elastalert-docker:latest-alt
+FROM ghcr.io/security-onion-solutions/elastalert-docker:latest-alt
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=933

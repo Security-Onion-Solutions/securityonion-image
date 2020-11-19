@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM ghcr.io/security-onion-solutions/alpine
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="InfluxDB running in Docker container for use with Security Onion"
 

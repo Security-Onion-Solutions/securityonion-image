@@ -57,9 +57,11 @@ RUN chmod 0755 /usr/local/bin/docker-entrypoint && \
 
 USER logstash
 
-RUN cd /usr/share/logstash && LOGSTASH_PACK_URL=https://artifacts.elastic.co/downloads/logstash-plugins logstash-plugin install logstash-filter-translate && \
+RUN cd /usr/share/logstash && LOGSTASH_PACK_URL=https://artifacts.elastic.co/downloads/logstash-plugins && \
+  logstash-plugin install logstash-filter-translate && \
   logstash-plugin install logstash-filter-tld && \
   logstash-plugin install logstash-filter-elasticsearch && \
-  logstash-plugin install logstash-filter-rest
+  logstash-plugin install logstash-filter-rest && \
+  logstash-plugin install logstash-output-syslog
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]

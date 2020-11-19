@@ -136,7 +136,7 @@ print(f"\n-= Parsed Playbook Plays: {len(plays)} -=\n")
 sigma_repo = f"sigma/README.md"
 if os.path.exists(sigma_repo):
     git_status = subprocess.run(
-        ["git", "--git-dir=sigma/.git", "pull"], stdout=subprocess.PIPE, encoding='ascii')
+        ["git", "pull"], stdout=subprocess.PIPE, encoding='ascii',cwd='/SOCtopus/sigma')
 else:
     git_status = subprocess.run(
         ["git", "clone", "https://github.com/Security-Onion-Solutions/sigma.git"], stdout=subprocess.PIPE, encoding='ascii')

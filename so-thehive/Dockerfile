@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ubuntu:18.04
+FROM ghcr.io/security-onion-solutions/ubuntu:18.04
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="TheHive Docker container for use with Security Onion"
@@ -29,11 +29,12 @@ RUN apt-get update && \
 RUN apt-get --no-install-recommends --no-install-suggests -y install \
   gpg gpg-agent dirmngr \
   apt-transport-https
+  
+RUN echo 'deb https://deb.thehive-project.org stable main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
+    curl -s https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add - > /dev/null 2>&1
 
-RUN echo 'deb https://dl.bintray.com/thehive-project/debian-stable any main' | tee -a /etc/apt/sources.list.d/thehive-project.list
-RUN curl https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add -
-RUN apt-get update
-RUN apt-get -y install thehive
+RUN apt-get update \
+  && apt-get -y install thehive
 
 RUN groupmod -g 939 thehive \
   && usermod -u 939 -g 939 thehive \

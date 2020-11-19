@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-FROM oraclelinux:7-slim
+FROM ghcr.io/security-onion-solutions/oraclelinux:7-slim
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="MySQL Server running in Docker container for use with Security Onion"

@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ghcr.io/security-onion-solutions/ubuntu:18.04
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG YARA_VERSION=3.11.0

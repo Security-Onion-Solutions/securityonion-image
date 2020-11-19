@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM python:3-slim
+FROM ghcr.io/security-onion-solutions/python:3-slim
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="API for automating SOC-related functions"
@@ -37,4 +37,4 @@ RUN pip install bcrypt
 
 COPY ./so-soctopus /SOCtopus
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:7000", "wsgi:app"]
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:7000", "wsgi:app", "--log-file", "/var/log/SOCtopus/soctopus.log"]

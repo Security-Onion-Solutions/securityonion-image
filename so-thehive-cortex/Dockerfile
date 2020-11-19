@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ubuntu:18.04
+FROM ghcr.io/security-onion-solutions/ubuntu:18.04
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Cortex Docker container for use with Security Onion"
@@ -34,14 +34,15 @@ RUN apt-get --no-install-recommends --no-install-suggests -y install \
     git \
     gpg gpg-agent \
     exiftool \
-    locales
+    locales \
+    libmagic1
 
 RUN locale-gen en_US.UTF-8
 
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-RUN echo 'deb https://dl.bintray.com/thehive-project/debian-stable any main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
+RUN echo 'deb https://deb.thehive-project.org stable main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
     curl -s https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add - > /dev/null 2>&1
 
 RUN apt-get update && apt-get --no-install-recommends --no-install-suggests -y install cortex

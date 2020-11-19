@@ -45,18 +45,47 @@ def navigator_update():
             if custom_field['id'] == 15 and (custom_field['value']):
                 technique_id = custom_field['value'][0]
                 technique_payload.append(
-                    {"techniqueID": technique_id, "color": "#5AADFF", "comment": "", "enabled": "true", "metadata": []})
+                    {"techniqueID": technique_id, "color": "#5AADFF", "comment": "", "enabled": True, "metadata": []})
 
-    payload = {"name": "Playbook", "version": "2.2", "domain": "mitre-enterprise",
-               "description": f"Current Coverage of Playbook - Updated {strftime('%Y-%m-%d %H:%M', gmtime())}",
-               "filters": {"stages": ["act"], "platforms": ["windows"]}, "sorting": 0, "viewMode": 0,
-               "hideDisabled": "false", "techniques": technique_payload,
-               "gradient": {"colors": ["#ff6666", "#ffe766", "#8ec843"], "minValue": 0, "maxValue": 100},
-               "metadata": [], "showTacticRowBackground": "false", "tacticRowBackground": "#dddddd",
-               "selectTechniquesAcrossTactics": "true"}
-    nav_layer = open('/etc/playbook/nav_layer_playbook.json', 'w')
-    print(json.dumps(payload), file=nav_layer)
-    nav_layer.close()
+    try:
+        with open('/etc/playbook/nav_layer_playbook.json') as nav_layer_r:
+            curr_json = json.load(nav_layer_r)
+        curr_json['version'] = "3.0"
+        curr_json['description'] = f'Current Coverage of Playbook - Updated {strftime("%Y-%m-%d %H:%M", gmtime())}'
+        curr_json['techniques'] = technique_payload
+
+    except FileNotFoundError as e:
+        curr_json = \
+            {
+                "name": "Playbook",
+                "version": "3.0",
+                "domain": "mitre-enterprise",
+                "description": f'Current Coverage of Playbook - Updated {strftime("%Y-%m-%d %H:%M", gmtime())}',
+                "filters": {
+                    "stages": ["act"],
+                    "platforms": [
+                        "windows",
+                        "linux",
+                        "mac"
+                    ]
+                },
+                "sorting": 0,
+                "viewMode": 0,
+                "hideDisabled": False,
+                "techniques": technique_payload,
+                "gradient": {
+                    "colors": ["#ff6666", "#ffe766", "#8ec843"],
+                    "minValue": 0,
+                    "maxValue": 100
+                },
+                "metadata": [],
+                "showTacticRowBackground": False,
+                "tacticRowBackground": "#dddddd",
+                "selectTechniquesAcrossTactics": False
+            }
+    
+    with open('/etc/playbook/nav_layer_playbook.json', 'w+') as nav_layer_w:
+        json.dump(curr_json, nav_layer_w)
 
 
 def thehive_casetemplate_update(issue_id):
