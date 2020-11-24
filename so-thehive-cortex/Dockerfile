@@ -42,7 +42,7 @@ RUN locale-gen en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-RUN echo 'deb https://deb.thehive-project.org stable main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
+RUN echo 'deb https://deb.thehive-project.org release main' | tee -a /etc/apt/sources.list.d/thehive-project.list && \
     curl -s https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add - > /dev/null 2>&1
 
 RUN apt-get update && apt-get --no-install-recommends --no-install-suggests -y install cortex
