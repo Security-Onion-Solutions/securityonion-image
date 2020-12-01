@@ -53,4 +53,4 @@ RUN chmod +x /run.sh
 
 USER socore
 WORKDIR /
-ENTRYPOINT [ "/run.sh" ]
+ENTRYPOINT [ "/run.sh" ] 
