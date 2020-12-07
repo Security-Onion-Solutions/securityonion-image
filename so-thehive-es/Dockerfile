@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-FROM docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.7
+FROM docker.elastic.co/elasticsearch/elasticsearch-oss:7.9.3
 
 LABEL maintainer "Security Onion Solutions, LLC"
 
@@ -28,10 +28,10 @@ WORKDIR /usr/share/elasticsearch
 RUN groupadd -g 939 socore && adduser -u 939 -g 939 -d /usr/share/elasticsearch socore
 RUN set -ex && for esdirs in config data logs; do \
         mkdir -p "$esdirs"; \
-        chown -R socore:socore "$esdirs"; \
-    done
+    done; \
+    chown -R socore:socore /usr/share/elasticsearch
 
-USER elasticsearch
+USER socore
 
 COPY elasticsearch.yml config/
 COPY log4j2.properties config/
@@ -42,5 +42,5 @@ USER root
 RUN chown socore:socore config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
     chmod 0750 bin/es-docker
 
-USER elasticsearch
+USER socore
 CMD ["/bin/bash", "bin/es-docker"]
