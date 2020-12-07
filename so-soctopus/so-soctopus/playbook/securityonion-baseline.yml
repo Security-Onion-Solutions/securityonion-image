@@ -9,6 +9,12 @@ logsources:
   windows:
     product: windows
     index: "*:so-*"
+  suricata-alerts:
+    product: suricata
+    service: alert
+    conditions:
+      event.module: 'suricata'
+      event.dataset: 'alert'
   windows-application:
     product: windows
     service: application
@@ -29,6 +35,11 @@ logsources:
     service: powershell
     conditions:
       log_name: 'Microsoft-Windows-Powershell/Operational'
+  windows-defender:
+    product: windows
+    service: defender
+    conditions:
+      log_name: 'Microsoft-Windows-Windows Defender/Operational'
   windows-dns-server:
     product: windows
     service: dns-server
@@ -121,3 +132,4 @@ fieldmappings:
     username: user.name
     uid: user.uid
     Protocol: network.transport
+    sid: rule.uuid
