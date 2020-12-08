@@ -42,7 +42,7 @@ def play_template_backup(issue_id):
 
     play_meta = play_metadata(issue_id)
     if play_meta['playbook'] == "community":
-        if play_meta['auto_update_sigma'] == "0":
+        if play_meta['auto_update_sigma'] == "0": # Do not autoupdate Sigma is checked
             source = str(play_meta['sigma_file'])
             fileloc = source.rfind('/')
             file = source[source.rfind('/') + 1:]

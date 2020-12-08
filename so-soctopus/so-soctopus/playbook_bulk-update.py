@@ -46,16 +46,16 @@ rulesets = parser.get('playbook', 'playbook_rulesets').split(",")
 def update_play(raw_sigma, repo_sigma, ruleset, ruleset_group, filename): 
     sigma_url = filename.replace('/SOCtopus/sigma/', 'https://github.com/Security-Onion-Solutions/sigma/tree/master/')
     for play in plays:
-        if repo_sigma['id'] == play['sigma_id']:
+        if repo_sigma['id'] == play['sigma_id']: # Match sigma UUID
             repo_hash = hashlib.sha256(
                 str(repo_sigma).encode('utf-8')).hexdigest()
             playbook_hash = hashlib.sha256(
                 str(play['sigma_dict']).encode('utf-8')).hexdigest()
-            if repo_hash != playbook_hash:
+            if repo_hash != playbook_hash: # Check if hashes match
                     file = filename[filename.rfind('/')+1:]
                     backup_path = "/SOCtopus/custom/sigma/" + file
                     
-                    if os.path.exists(backup_path):
+                    if os.path.exists(backup_path): # Does the sigma file exist in /SOCtopus/custom/sigma/? If yes, this means Auto-Update is disabled
                         try:
                             with open(backup_path, encoding="utf-8") as fpi2:
                                 raw = fpi2.read()
@@ -65,10 +65,10 @@ def update_play(raw_sigma, repo_sigma, ruleset, ruleset_group, filename):
                         except Exception as e:
                             print('Error - Unable to load backup copy' + str(e))
 
-                        if repo_hash != backup_hash:
+                        if repo_hash != backup_hash: # Does the sigma repo hash match the backup hash? If not, then an update is available
                             play_status = "available"
                             update_payload = {"issue": {"subject": repo_sigma['title'], "project_id": 1, "tracker": "Play", "custom_fields": [ 
-                                {"id": 28, "name": "Update Available", "value": "1"}]}} 
+                                {"id": 31, "name": "Update Available", "value": "1"}]}} 
                             url = f"{playbook_url}/issues/{play['issue_id']}.json"
                             r = requests.put(url, data=json.dumps(
                                 update_payload), headers=playbook_headers, verify=False)
