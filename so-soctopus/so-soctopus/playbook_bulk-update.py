@@ -20,6 +20,7 @@ updated_plays = dict()
 play_update_counter = 0
 play_new_counter = 0
 play_noupdate_counter = 0
+play_update_available_counter = 0  
 plays = []
 offset = 0
 
@@ -42,21 +43,48 @@ rulesets = parser.get('playbook', 'playbook_rulesets').split(",")
 #    Hash doesn't match --> update the play in playbook
 # inputs:  raw sigma, sigma dict, and the playbook name
 # returns: the status of the play: update / nop / new
-def update_play(raw_sigma, repo_sigma, ruleset, ruleset_group):
+def update_play(raw_sigma, repo_sigma, ruleset, ruleset_group, filename): 
+    sigma_url = filename.replace('/SOCtopus/sigma/', 'https://github.com/Security-Onion-Solutions/sigma/tree/master/')
     for play in plays:
-        if repo_sigma['id'] == play['sigma_id']:
+        if repo_sigma['id'] == play['sigma_id']: # Match sigma UUID
             repo_hash = hashlib.sha256(
                 str(repo_sigma).encode('utf-8')).hexdigest()
             playbook_hash = hashlib.sha256(
                 str(play['sigma_dict']).encode('utf-8')).hexdigest()
-            if repo_hash != playbook_hash:
-                play_status = "updated"
-                formatted_sigma = f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{raw_sigma}\n</code></pre>\n}}}}'
-                update_payload = {"issue": {"subject": repo_sigma['title'], "project_id": 1, "status": "Disabled", "tracker": "Play", "custom_fields": [
-                    {"id": 9, "name": "Sigma", "value": formatted_sigma.strip()}]}}
-                url = f"{playbook_url}/issues/{play['issue_id']}.json"
-                r = requests.put(url, data=json.dumps(
-                    update_payload), headers=playbook_headers, verify=False)
+            if repo_hash != playbook_hash: # Check if hashes match
+                    file = filename[filename.rfind('/')+1:]
+                    backup_path = "/SOCtopus/custom/sigma/" + file
+                    
+                    if os.path.exists(backup_path): # Does the sigma file exist in /SOCtopus/custom/sigma/? If yes, this means Auto-Update is disabled
+                        try:
+                            with open(backup_path, encoding="utf-8") as fpi2:
+                                raw = fpi2.read()
+                            backup_rule = yaml.load(raw)
+                            backup_hash = hashlib.sha256(str(backup_rule).encode('utf-8')).hexdigest()
+                            
+                        except Exception as e:
+                            print('Error - Unable to load backup copy' + str(e))
+
+                        if repo_hash != backup_hash: # Does the sigma repo hash match the backup hash? If not, then an update is available
+                            play_status = "available"
+                            update_payload = {"issue": {"subject": repo_sigma['title'], "project_id": 1, "tracker": "Play", "custom_fields": [ 
+                                {"id": 31, "name": "Update Available", "value": "1"}]}} 
+                            url = f"{playbook_url}/issues/{play['issue_id']}.json"
+                            r = requests.put(url, data=json.dumps(
+                                update_payload), headers=playbook_headers, verify=False)
+                            playbook.play_template_backup(play['issue_id'])
+                        else:
+                            play_status = "nop"
+                    else:
+                        play_status = "updated"
+                        formatted_sigma = f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{raw_sigma}\n</code></pre>\n}}}}'
+                        update_payload = {"issue": {"subject": repo_sigma['title'], "project_id": 1, "status": "Disabled", "tracker": "Play", "custom_fields": [ 
+                            {"id": 9, "name": "Sigma", "value": formatted_sigma.strip()}, \
+                            {"id": 28, "name": "Sigma URL", "value": sigma_url.strip()}, \
+                            {"id": 27, "name": "Sigma File", "value": filename.strip()}]}} 
+                        url = f"{playbook_url}/issues/{play['issue_id']}.json"
+                        r = requests.put(url, data=json.dumps(
+                            update_payload), headers=playbook_headers, verify=False)
             else:
                 play_status = "nop"
             break
@@ -64,17 +92,20 @@ def update_play(raw_sigma, repo_sigma, ruleset, ruleset_group):
     else:
         print('No Current Play - Create New Play in Playbook')
         play_status = "new"
-        creation_status = playbook.play_create(raw_sigma, repo_sigma,"community", ruleset, ruleset_group, "DRL-1.0")
+        creation_status = playbook.play_create(raw_sigma, repo_sigma,"community", ruleset, ruleset_group, "DRL-1.0", filename, sigma_url)
         print (creation_status)
 
     return play_status
+
 
 def rule_update(rulesets):
     global play_update_counter
     global play_new_counter
     global play_noupdate_counter
+    global play_update_available_counter
     ruleset_path = f"./sigma/rules/{rulesets}"
     for filename in Path(ruleset_path).glob('**/*.yml'):
+        filepath = "/SOCtopus/" + str(filename)
         if "deprecated" in str(filename):
             print(f"\n\n - Not Loading - rule Deprecated - {filename}")
         else:
@@ -91,7 +122,7 @@ def rule_update(rulesets):
                 repo_sigma = yaml.load(raw)
                 #if folder == 'process_creation':
                     #folder = 'proc' 
-                play_status = update_play(raw, repo_sigma, rulesets, ruleset_group)
+                play_status = update_play(raw, repo_sigma, rulesets, ruleset_group, filepath)
                 print(play_status)
                 if play_status == "updated":
                     play_update_counter += 1
@@ -99,6 +130,8 @@ def rule_update(rulesets):
                     play_new_counter += 1
                 elif play_status == "nop":
                     play_noupdate_counter += 1
+                elif play_status == "available":
+                    play_update_available_counter += 1
             except Exception as e:
                 print('Error - Sigma rule skipped \n' + str(e))
     
@@ -157,7 +190,7 @@ for ruleset in rulesets:
 # Finally, print a summary of new or updated plays
 summary = (
     f"\n\n-= Update Summary =-\n\nSigma Community Repo:\n {git_status.stdout.strip()}\n\nUpdated Plays: {play_update_counter}\n"
-    f"New Plays: {play_new_counter}\nNo Updates Needed: {play_noupdate_counter}\n\nEnabled Rulesets:\n{rulesets}\n")
+    f"Updates Available: {play_update_available_counter}\nNew Plays: {play_new_counter}\nNo Updates Needed: {play_noupdate_counter}\n\nEnabled Rulesets:\n{rulesets}\n")
 print (summary)
 
 print (f"\n\n-= Completed: {datetime.now()}-=\n")    
