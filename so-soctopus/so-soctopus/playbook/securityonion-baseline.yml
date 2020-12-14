@@ -15,6 +15,10 @@ logsources:
     conditions:
       event.module: 'suricata'
       event.dataset: 'alert'
+  strelka-logs:
+    product: strelka
+    conditions:
+      event.module: 'strelka'
   windows-application:
     product: windows
     service: application
