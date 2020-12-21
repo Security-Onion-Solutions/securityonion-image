@@ -567,6 +567,25 @@ def playbookWebhook(webhook_content):
             elif item['prop_key'] == '21' and item['old_value'] != "":
                 # Normalize log (if needed) & run Play unit test
                 playbook.play_unit_test(issue_id,"Target Log Updated")
+            if item['prop_key'] == '30':  
+                playbook.play_template_backup(issue_id)
+            if item['prop_key'] == '27':  
+               playbook.elastalert_update(issue_id)
+
+    #New section added for Sigma Option Changes
+    if action == 'updated' and issue_tracker_name == 'Sigma Options': 
+        journal_details = webhook_content['payload']['journal']['details']
+        for item in journal_details:
+            if item['prop_key'] == '37' and item['value'] == '1':
+                playbook.play_backup(issue_id)
+            if item['prop_key'] == '38' and item['value'] == '1':
+                playbook.play_import(issue_id)
+            if item['prop_key'] == '39' and item['value'] == '1':
+                playbook.play_clear_update_available(issue_id)
+
+    #New Section added for email option changes
+    if action == 'updated' and issue_tracker_name == 'Email Options':    
+        playbook.smtp_update(issue_id)
     return "success"
 
 

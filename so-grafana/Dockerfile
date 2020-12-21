@@ -2,7 +2,7 @@ FROM ghcr.io/security-onion-solutions/ubuntu:18.04
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Grafana running in Docker container for use with Security Onion"
 
-ARG GRAFANA_URL="https://dl.grafana.com/oss/release/grafana-7.0.5.linux-amd64.tar.gz"
+ARG GRAFANA_URL="https://dl.grafana.com/oss/release/grafana-7.3.4.linux-amd64.tar.gz"
 ARG GF_UID="939"
 ARG GF_GID="939"
 
@@ -53,4 +53,4 @@ RUN chmod +x /run.sh
 
 USER socore
 WORKDIR /
-ENTRYPOINT [ "/run.sh" ]
+ENTRYPOINT [ "/run.sh" ] 

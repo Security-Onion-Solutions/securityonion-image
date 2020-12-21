@@ -10,6 +10,8 @@ import uuid
 from time import gmtime, strftime
 import sys
 import tempfile
+import glob
+from pathlib import Path
 
 import requests
 
@@ -33,6 +35,191 @@ hive_headers = {'Authorization': f"Bearer {parser.get('hive', 'hive_key')}", 'Ac
 es_url = parser.get("es", "es_url")
 es_ip = parser.get("es", "es_ip")
 es_verifycert = parser.getboolean('es', 'es_verifycert', fallback=False)
+
+# Moves a community rule into /custom/sigma/ for hash comparison for rule updates
+# This function is called when a user selects to disable auto update rules
+def play_template_backup(issue_id): 
+
+    play_meta = play_metadata(issue_id)
+    if play_meta['playbook'] == "community":
+        if play_meta['auto_update_sigma'] == "0": # Do not autoupdate Sigma is checked
+            source = str(play_meta['sigma_file'])
+            fileloc = source.rfind('/')
+            file = source[source.rfind('/') + 1:]
+            dst = "/SOCtopus/custom/sigma/" + file
+            shutil.copyfile(source, dst)
+        else:
+            source = str(play_meta['sigma_file'])
+            file = source[source.rfind('/') + 1:]
+            dst = "/SOCtopus/custom/sigma/" + file
+            if os.path.exists(dst):
+                os.remove(dst)
+    else:
+        update_payload = {"issue": {"project_id": 3, "tracker": "Play", "custom_fields": [ 
+        {"id": 30, "name": "Auto Update Sigma", "value": 0}]}} #changed adding filename to sigma after importing
+        url = f"{playbook_url}/issues/{issue_id}.json"
+        r = requests.put(url, data=json.dumps(update_payload), headers=playbook_headers, verify=False)
+
+    return
+
+# Updates the SMTP template when an SMTP option is changed
+def smtp_update(issue_id): 
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    smtp_tls = "false"
+    r = requests.get(url, headers=playbook_headers, verify=playbook_verifycert).json()
+
+
+    for item in r['issue']['custom_fields']:
+        if item['name'] == "SMTP Server":
+            smtp_host = re.sub(r'["\']', '', item['value'])
+        elif item['name'] == "SMTP Port":
+            smtp_port = re.sub(r'["\']', '', item['value'])
+        elif item['name'] == "SMTP TLS Enabled":
+            if item['value'] == "1":
+                smtp_tls = "true"
+        elif item['name'] == "Alert From Email Address":
+            smtp_from = re.sub(r'["\']', '', item['value'])
+        elif item['name'] == "Alert Email Address":
+            smtp_to = re.sub(r'["\']', '', item['value'])
+
+
+    f = open("/etc/playbook-rules/generic_email.template", 'r+')
+    content = f.read()
+    f.seek(0)
+    f.truncate()
+    content = re.sub(r'email:.*', f"email: \"{smtp_to}\"", content.rstrip())
+    content = re.sub(r'from_addr:.*', f"from_addr: \"{smtp_from}\"", content.rstrip())
+    content = re.sub(r'smtp_host:.*', f"smtp_host: \"{smtp_host}\"", content.rstrip())
+    content = re.sub(r'smtp_port:.*', f"smtp_port: {smtp_port}", content.rstrip())
+    content = re.sub(r'smtp_ssl:.*', f"smtp_ssl: {smtp_tls}", content.rstrip())
+    f.write(content)
+    f.close()
+
+  
+    success = smtp_update_rule()
+ 
+    return
+
+# Recreates elastalert rule for any play with email notifications enabled - this will update the SMTP configuration in the rule
+# Called from smtp_update when a SMTP option is changed 
+def smtp_update_rule():
+    plays = []
+
+    plays = get_plays()
+
+    for play in plays:
+        if play['email_notifications'] == "1" and play['status'] == "Active":     
+            elastalert_update(play['issue_id'])          
+            
+    return success
+
+def get_plays():
+    plays = []
+    offset = 0
+    url = f"{playbook_url}/issues.json?offset=0&tracker_id=1&limit=100"
+    response = requests.get(url, headers=playbook_headers, verify=False).json()
+
+    for i in response['issues']:
+        play_meta = play_metadata(i['id'])
+        plays.append(play_meta)
+
+    while offset < response['total_count']:
+        offset += 100
+        url = f"{playbook_url}/issues.json?offset={offset}&tracker_id=1&limit=100"
+        response = requests.get(url, headers=playbook_headers, verify=False).json()
+        print(f"offset: {offset}")
+
+        for i in response['issues']:
+            play_meta = play_metadata(i['id'])
+            plays.append(play_meta)
+
+    return plays
+
+# Imports rules when Sigma Options -> Import Rules is selected in Redmine
+# If a rule (matched by rule id) exists, the rule is updated with the imported rule, if not a new rule is created
+# Template is moved to /custom/sigma/ as well
+def play_import(issue_id):
+    plays = []
+    ruleset_path = "/SOCtopus/custom/import/"
+    filen = ""
+
+    plays = get_plays()
+
+    for filename in Path(ruleset_path).glob('*.yml'):
+        filen = str(filename)
+        with open(filename, encoding="utf-8") as fpi2:
+            raw = fpi2.read()
+        repo_sigma = yaml.load(raw)
+        
+        #if folder == 'process_creation':
+            #folder = 'proc' 
+        for play in plays:
+            if repo_sigma['id'] == play['sigma_id']:
+                formatted_sigma = f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{raw}\n</code></pre>\n}}}}'
+                update_payload = {"issue": {"subject": repo_sigma['title'], "project_id": 1, "status": "Disabled", "tracker": "Play", "custom_fields": [ 
+                    {"id": 9, "name": "Sigma", "value": formatted_sigma.strip()}, \
+                    {"id": 30, "name": "Auto Update Sigma", "value": "0"}, \
+                    {"id": 13, "name": "Playbook", "value": "imported"}, \
+                    {"id": 27, "name": "Sigma File", "value": filen.strip()}]}} #changed adding filename to sigma after importing
+                url = f"{playbook_url}/issues/{play['issue_id']}.json"
+                r = requests.put(url, data=json.dumps(
+                    update_payload), headers=playbook_headers, verify=False)
+                break
+        else:
+            creation_status = play_create(raw, repo_sigma,"imported", "import", "import", "DRL-1.0", filen, "NA") #changed filename added to play_create
+        
+        fileloc = filen.rfind('/')
+        file = filen[filen.rfind('/') + 1:]
+        dst = "/SOCtopus/custom/sigma/" + file
+        shutil.copyfile(filen, dst)
+        
+
+    update_payload = {"issue": {"subject": "Sigma Options", "project_id": 3, "tracker": "Sigma Options", "custom_fields": [ 
+        {"id": 38, "name": "Import Custom Sigmas", "value": 0}]}} #changed adding filename to sigma after importing
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(update_payload), headers=playbook_headers, verify=False)
+
+    return 
+
+# Imports rules when Sigma Options -> Backup is selected - backs up up all non community rules or community rules with auto update disabled 
+# Backed up to /custom/backup
+def play_backup(issue_id):
+    plays = []
+    
+    plays = get_plays()
+    
+    for play in plays:
+        if play['playbook'] != "community" or play['auto_update_sigma'] == "0":
+            file = ("/SOCtopus/custom/backup/" + play['title'] + ".yml").replace(" ", "_")
+            with open(file, 'w') as f:
+                f.write(play['sigma_raw'])
+
+    update_payload = {"issue": {"subject": "Sigma Options", "project_id": 3, "tracker": "Sigma Options", "custom_fields": [ 
+        {"id": 37, "name": "Backup Custom Sigmas", "value": 0}]}} #changed adding filename to sigma after importing
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(update_payload), headers=playbook_headers, verify=False)
+    return
+
+# Removes the update available flag when Sigma Options - Remove update available (all) is run
+# If a major Sigma update is implemented on all rules (format change for instance), users may want to run this to remove the udpate available flag on all rules
+def play_clear_update_available(issue_id):
+    plays = []
+
+    plays = get_plays()
+
+    for play in plays:
+        if play['update_available'] == "1":
+            update_payload = {"issue": {"custom_fields": [ 
+                {"id": 31, "name": "Update Available", "value": 0}]}} #changed adding filename to sigma after importing
+            url = f"{playbook_url}/issues/{play['issue_id']}.json"
+            r = requests.put(url, data=json.dumps(update_payload), headers=playbook_headers, verify=False)
+
+    update_payload = {"issue": {"custom_fields": [ 
+        {"id": 39, "name": "Clear Update Status (all)", "value": 0}]}} #changed adding filename to sigma after importing
+    url = f"{playbook_url}/issues/{issue_id}.json"
+    r = requests.put(url, data=json.dumps(update_payload), headers=playbook_headers, verify=False)
+
+    return
 
 def navigator_update():
     # Get play data from Redmine
@@ -185,6 +372,8 @@ def elastalert_update(issue_id):
     try:
         if sigma_meta['product'] == 'osquery':
             shutil.copy('/etc/playbook-rules/osquery.template', play_file)
+        elif sigma_meta['product'] != 'osquery' and play_meta['email_notifications'] == "1":
+            shutil.copy('/etc/playbook-rules/generic_email.template', play_file)
         else:
             shutil.copy('/etc/playbook-rules/generic.template', play_file)
         with open(play_file, 'r+') as f:
@@ -278,7 +467,10 @@ def play_metadata(issue_id):
     url = f"{playbook_url}/issues/{issue_id}.json"
 
     r = requests.get(url, headers=playbook_headers, verify=playbook_verifycert).json()
-
+    if r['issue']['status']['name'] == "Active":
+        status = "Active"
+    else:
+        status = "Not_Active" 
     for item in r['issue']['custom_fields']:
         if item['name'] == "Sigma":
             sigma_raw = item['value']
@@ -298,7 +490,18 @@ def play_metadata(issue_id):
             play['ruleset'] = item['value']
         elif item['name'] == "Group":
             play['group'] = item['value']
-
+        elif item['name'] == "Email Notifications":
+            play['email_notifications'] = item['value']
+        elif item['name'] == "Auto Update Sigma":
+            play['auto_update_sigma'] = item['value']
+        elif item['name'] == "Update Available":
+            play['update_available'] = item['value']
+        elif item['name'] == "Sigma File":
+            play['sigma_file'] = item['value']
+        elif item['name'] == "Sigma File":
+            play['sigma_file'] = item['value']
+        elif item['name'] == "Title":
+            play['title'] = item['value']
     # Cleanup the Sigma data to get it ready for parsing
     sigma_raw = re.sub(
         "{{collapse\(View Sigma\)|<pre><code class=\"yaml\">|</code></pre>|}}", "", sigma_raw)
@@ -316,7 +519,13 @@ def play_metadata(issue_id):
         'case_analyzers': play.get('case_analyzers'),
         'target_log': play.get('target_log'),
         'ruleset': play.get('ruleset'),
-        'group': play.get('group')
+        'group': play.get('group'),
+        'email_notifications': play.get('email_notifications'),
+        'auto_update_sigma': play.get('auto_update_sigma'),
+        'update_available': play.get('update_available'),
+        'sigma_file': play.get('sigma_file'),
+        'title': play.get('title'),
+        'status': status
     }
 
 
@@ -377,7 +586,7 @@ def sigma_metadata(sigma_raw, sigma, play_id):
     }
 
 
-def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group="", license=""):
+def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group="", license="", filename="", sigma_url=""):
     # Expects Sigma in dict format
 
     # Generate a unique ID for the Play
@@ -412,8 +621,10 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group=""
                              {"id": 9, "name": "Sigma", "value": play['sigma']},
                              {"id": 18, "name": "Ruleset", "value": ruleset},
                              {"id": 19, "name": "Group", "value": group},
-                             {"id": 26, "name": "License", "value": license}
-                             ]}}
+                             {"id": 26, "name": "License", "value": license},
+                             {"id": 28, "name": "Sigma URL", "value": sigma_url},
+                             {"id": 27, "name": "Sigma File", "value": filename}]}} #changed added update of filename field
+
 
     # POST the payload to Redmine to create the Play (ie Redmine issue)
     url = f"{playbook_url}/issues.json"

@@ -62,6 +62,7 @@ RUN cd /usr/share/logstash && LOGSTASH_PACK_URL=https://artifacts.elastic.co/dow
   logstash-plugin install logstash-filter-tld && \
   logstash-plugin install logstash-filter-elasticsearch && \
   logstash-plugin install logstash-filter-rest && \
+  logstash-plugin install logstash-integration-kafka && \
   logstash-plugin install logstash-output-syslog
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
