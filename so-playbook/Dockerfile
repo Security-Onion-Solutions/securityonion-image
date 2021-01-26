@@ -23,4 +23,7 @@ RUN mkdir -p /playbook/log && \
     chown -R socore:socore /playbook && \
     chmod -R 0770 /playbook
 
-CMD ["passenger", "start", "--nginx-config-template", "/passenger-nginx-config-template.erb", "--log-file", "/playbook/log/playbook.log"]
+# Since Passenger always logs to stdout anyway, just redirect output to log file instead of specifying the log-file argument
+RUN sed -i '$s/$/ \& > \/playbook\/log\/playbook.log/' /docker-entrypoint.sh
+
+CMD ["passenger", "start", "--nginx-config-template", "/passenger-nginx-config-template.erb"]
