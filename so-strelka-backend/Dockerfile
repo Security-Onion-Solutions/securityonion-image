@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ghcr.io/security-onion-solutions/ubuntu:20.04
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG DEBIAN_FRONTEND=noninteractive
