@@ -1,6 +1,7 @@
-FROM ghcr.io/security-onion-solutions/ubuntu:18.04
+FROM ubuntu:20.04
 LABEL maintainer "Security Onion Solutions, LLC"
 
+ARG DEBIAN_FRONTEND=noninteractive
 ARG YARA_VERSION=3.11.0
 ARG YARA_PYTHON_VERSION=3.11.0
 
