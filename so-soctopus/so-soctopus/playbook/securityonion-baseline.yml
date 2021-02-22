@@ -137,3 +137,4 @@ fieldmappings:
     uid: user.uid
     Protocol: network.transport
     sid: rule.uuid
+    SubjectUserSid: winlog.event_data.SubjectUserSid
