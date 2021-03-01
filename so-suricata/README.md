@@ -1,1 +1,1 @@
-Suricata 5.0.3
+Suricata 6.0.1

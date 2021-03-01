@@ -17,7 +17,8 @@ RUN apt-get install -y --no-install-recommends \
     binutils \
     cpio \
     cabextract \
-    rpm
+    rpm \
+    git
 
 RUN gem install --no-ri --no-rdoc fpm && \
     apt-get -f -y --auto-remove remove build-essential autoconf libtool && \    

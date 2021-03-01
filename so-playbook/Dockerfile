@@ -23,7 +23,4 @@ RUN mkdir -p /playbook/log && \
     chown -R socore:socore /playbook && \
     chmod -R 0770 /playbook
 
-# Add redirect to /dev/null of the CMD output to prevent logging to docker logs
-RUN sed -i '$s/$/ \&>\/dev\/null/' /docker-entrypoint.sh
-
 CMD ["passenger", "start", "--nginx-config-template", "/passenger-nginx-config-template.erb", "--log-file", "/playbook/log/playbook.log"]

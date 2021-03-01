@@ -33,7 +33,7 @@ ENV PATH=/usr/share/kibana/bin:$PATH
 RUN mkdir /usr/share/kibana/dashboards
 
 # Add a self-signed SSL certificate for use in examples.
-ADD ssl/kibana.example.org.* /usr/share/kibana/config/
+#ADD ssl/kibana.example.org.* /usr/share/kibana/config/
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
