@@ -1,6 +1,0 @@
-grant codeBase "file:/usr/share/elasticsearch/plugins/sotls/*" {
-   permission java.io.FilePermission "/etc/pki/java/*", "read";
-   permission java.io.FilePermission "/proc/sys/net/core/somaxconn", "read";
-   permission java.net.SocketPermission "*", "accept,connect,resolve";
-   permission java.lang.RuntimePermission "*", "setContextClassLoader";
-};
