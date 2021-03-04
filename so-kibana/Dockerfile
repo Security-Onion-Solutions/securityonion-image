@@ -21,8 +21,13 @@ ARG VERSION
 FROM docker.elastic.co/kibana/$FLAVOR:$VERSION
 
 USER root
-RUN groupmod -g 932 kibana && \
-    usermod -u 932 -g 932 kibana
+
+# Files are owned by 1000:1000 by default.
+# This causes Kibana to fail on startup.
+# Set ownership to kibana:kibana.
+RUN chown --recursive 932:932 /usr/share/kibana/*
+
+RUN groupmod -g 932 kibana && usermod -u 932 -g 932 kibana
 
 WORKDIR /usr/share/kibana
 RUN  ln -s /usr/share/kibana /opt/kibana
@@ -42,11 +47,6 @@ ADD bin/kibana-docker /usr/local/bin/
 # Add our custom Security Onion Entry Script
 ADD bin/so-kibana.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/so-kibana.sh
-
-# Files are owned by 1000:1000 by default.
-# This causes Kibana to fail on startup.
-# Set ownership to kibana:kibana.
-RUN chown --recursive kibana:kibana /usr/share/kibana/*
 
 ## Switch to limited user and run process.
 USER kibana
