@@ -20,20 +20,17 @@ LABEL description="API for automating SOC-related functions"
 
 WORKDIR /SOCtopus
 
-RUN apt-get update && apt-get install -y --no-install-recommends git libmagic1 gcc python3-dev && rm -rf /var/lib/apt/lists/*
-
-RUN git clone https://github.com/Security-Onion-Solutions/sigma.git
-
-RUN mkdir -p /SOCtopus/templates
-RUN mkdir -p /SOCtopus/playbook
-RUN mkdir -p /var/log/SOCtopus
+RUN apt-get update && apt-get install -y --no-install-recommends git libmagic1 gcc python3-dev && rm -rf /var/lib/apt/lists/* && \
+    git clone https://github.com/Security-Onion-Solutions/sigma.git && \
+    mkdir -p /SOCtopus/templates && \
+    mkdir -p /SOCtopus/playbook && \
+    mkdir -p /var/log/SOCtopus
 
 COPY ./so-soctopus/requirements.txt /SOCtopus/
-RUN pip install -r requirements.txt
-RUN pip install gunicorn
 
-# Used for hashing passwords for new fleet users
-RUN pip install bcrypt
+RUN pip install -r requirements.txt && \
+    pip install gunicorn && \
+    pip install bcrypt
 
 COPY ./so-soctopus /SOCtopus
 
