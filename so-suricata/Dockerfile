@@ -27,7 +27,7 @@ RUN yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
 # Install the Suricata package
-RUN rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-suricata-6.0.2-0/securityonion-suricata-6.0.2.0.rpm
+RUN rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-suricata-6.0.2.0/securityonion-suricata-6.0.2.0.rpm
 # Create Suricata User.
 RUN groupadd --gid 940 suricata && \
     adduser --uid 940 --gid 940 \
