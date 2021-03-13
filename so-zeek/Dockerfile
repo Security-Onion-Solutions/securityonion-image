@@ -13,17 +13,46 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+FROM ghcr.io/security-onion-solutions/centos:7 as builder
+
+RUN yum update -y && \
+    yum -y install epel-release bash libpcap iproute && \
+    yum -y install jemalloc numactl libnl3 libdnet gdb GeoIP python-ipaddress python3 && \
+    yum -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
+    yum group install -y "Development Tools" && \
+    pip3 install GitPython semantic-version && \
+    yum -y install centos-release-scl && \
+    yum -y install devtoolset-7-gcc-c++ cmake3 wget && \
+    yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
+
+ENV ZEEKVER=4.0.0
+ARG BUILD_TYPE=Release
+
+RUN mkdir /zeekbuild
+
+WORKDIR /zeekbuild
+
+RUN wget https://old.zeek.org/downloads/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
+RUN source scl_source enable devtoolset-7 && cd zeek-$ZEEKVER && \
+    ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
+    make -j8 && make install 
+RUN yes | /opt/zeek/bin/zkg install ja3
+RUN yes | /opt/zeek/bin/zkg install hassh
+RUN source scl_source enable devtoolset-7 && yes | /opt/zeek/bin/zkg install https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master
+RUN source scl_source enable devtoolset-7 && yes | /opt/zeek/bin/zkg install zeek-community-id
+
 FROM ghcr.io/security-onion-solutions/centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in a docker with AF_Packet 1.4 for use with Security Onion."
 
+COPY --from=builder /nsm/zeek /nsm/zeek
+COPY --from=builder /opt/zeek /opt/zeek
 # Common CentOS layer
 RUN yum update -y && \
     yum -y install epel-release bash libpcap iproute && \
     yum -y install jemalloc numactl libnl3 libdnet gdb GeoIP python-ipaddress python3 && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
-    rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-zeek-3.0.13.0/securityonion-zeek-3.0.13.0.rpm && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
     chown -R 937:937 /opt/zeek && \
