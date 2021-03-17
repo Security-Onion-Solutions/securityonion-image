@@ -155,3 +155,4 @@ fieldmappings:
     c-uri: http.uri
     c-useragent: http.useragent
     cs-version: http.version
+    IpAddress: winlog.event_data.IpAddress
