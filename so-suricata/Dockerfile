@@ -19,22 +19,13 @@ LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Suricata 6.0.1 running in a docker for use with Security Onion."
 
 # Common CentOS layer
-RUN yum update -y && \
-    yum -y install epel-release bash libpcap iproute && \
-    yum clean all
-
-RUN yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
-    yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
-
-# Install the Suricata package
-RUN rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-suricata-6.0.1-0/securityonion-suricata-6.0.1.0.rpm
-# Create Suricata User.
-RUN groupadd --gid 940 suricata && \
-    adduser --uid 940 --gid 940 \
-    --home-dir /etc/suricata --no-create-home suricata
-
-# Fix those perms.. big worm
-RUN chown -R 940:940 /etc/suricata && \
+RUN yum -y install epel-release bash libpcap iproute && \
+    yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
+    yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
+    rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-suricata-6.0.2.0/securityonion-suricata-6.0.2.0.rpm && \
+    groupadd --gid 940 suricata && \
+    adduser --uid 940 --gid 940 --home-dir /etc/suricata --no-create-home suricata && \
+    chown -R 940:940 /etc/suricata && \
     chown -R 940:940 /var/log/suricata
 
 # Copy over the entry script.

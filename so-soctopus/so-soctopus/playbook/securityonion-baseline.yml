@@ -6,6 +6,8 @@ logsources:
   osquery:
     product: osquery
     index: "*:so-osquery-*"
+    conditions:
+      event.module: 'osquery'
   windows:
     product: windows
     index: "*:so-*"
@@ -15,6 +17,11 @@ logsources:
     conditions:
       event.module: 'suricata'
       event.dataset: 'alert'
+  zeek-rdp:
+    product: zeek
+    service: rdp
+    conditions:
+      event.dataset: 'rdp'
   strelka-logs:
     product: strelka
     conditions:
@@ -128,13 +135,24 @@ fieldmappings:
     Product: process.pe.product
     GroupSid: winlog.event_data.GroupSid    
     RelativeTargetName: winlog.event_data.RelativeTargetName
-    qid: osquery.columns.qid
-    hostname: osquery.result.hostname
-    counter: osquery.result.counter
-    column_name: osquery.columns.name
-    query_name: osquery.result.name
+    qid: result.columns.qid
+    hostname: result.hostname
+    counter: result.counter
+    column_name: columns.name
+    query_name: result.name
     username: user.name
     uid: user.uid
     Protocol: network.transport
     sid: rule.uuid
     SubjectUserSid: winlog.event_data.SubjectUserSid
+    query: query
+    answer: answers
+    src_ip: source.ip
+    src_port: source.port
+    dst_ip: destination.ip
+    dst_port: destination.port
+    cs-method: http.method
+    c-uri: http.uri
+    c-useragent: http.useragent
+    cs-version: http.version
+    IpAddress: winlog.event_data.IpAddress
