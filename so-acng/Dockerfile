@@ -14,7 +14,7 @@ ENV APT_CACHER_NG_VERSION=3.6 \
 
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-      apt-cacher-ng \
+      apt-cacher-ng ca-certificates\
  && rm -rf /var/lib/apt/lists/*
 
  # Create socore user.
