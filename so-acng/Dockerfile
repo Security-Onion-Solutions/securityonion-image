@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/ubuntu:18.04
+FROM ghcr.io/security-onion-solutions/ubuntu:20.04
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="apt-cacher running in Docker container for use with Security Onion"
@@ -7,14 +7,14 @@ ARG GID=939
 ARG UID=939
 ARG USERNAME=socore
 
-ENV APT_CACHER_NG_VERSION=3.1 \
+ENV APT_CACHER_NG_VERSION=3.6 \
     APT_CACHER_NG_CACHE_DIR=/var/cache/apt-cacher-ng \
     APT_CACHER_NG_LOG_DIR=/var/log/apt-cacher-ng \
     APT_CACHER_NG_USER=socore
 
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-      apt-cacher-ng=${APT_CACHER_NG_VERSION}* \
+      apt-cacher-ng ca-certificates\
  && rm -rf /var/lib/apt/lists/*
 
  # Create socore user.
