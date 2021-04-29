@@ -48,6 +48,7 @@ for NAME in $(ls $PLUGIN_SRC_DIR); do
     "${ES_DIR}/jdk/bin/javac" -cp "$CP:$SRC_DIR/*" -d "$OBJ_DIR" $(find "$SRC_DIR" -name '*.java')
 
     "${ES_DIR}/jdk/bin/jar" cf ${PLUGIN_DST_DIR}/${NAME}/${NAME}.jar -C ${PLUGIN_DST_DIR}/${NAME}/classes .
+    rm -fr $OBJ_DIR
     cp ${SRC_DIR}/*.properties ${PLUGIN_DST_DIR}/${NAME}/
     cp ${SRC_DIR}/*.policy ${PLUGIN_DST_DIR}/${NAME}/
     if ls ${SRC_DIR}/*.jar > /dev/null 2>&1 ; then
