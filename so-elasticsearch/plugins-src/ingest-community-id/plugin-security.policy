@@ -1,2 +1,0 @@
-grant codeBase "file:/usr/share/elasticsearch/plugins/ingest-community-id/*" {
-};
