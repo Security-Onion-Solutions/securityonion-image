@@ -58,9 +58,9 @@ RUN chown -R cortex /opt/cortex \
      
 RUN git clone https://github.com/TheHive-Project/Cortex-Analyzers
 
-RUN pip3 install setuptools wheel
-RUN for i in $(find Cortex-Analyzers -name 'requirements.txt'); do pip3 install -r $i || true; done
-     
+RUN pip3 install setuptools wheel && \
+    python3 -m pip install -U pip
+RUN for i in $(find Cortex-Analyzers -not -path  "Cortex-Analyzers/analyzers/MalwareClustering/*" -name 'requirements.txt'); do pip3 install -r $i || exit 1 ; done     
 USER cortex
 
 ENTRYPOINT ["/opt/cortex/bin/cortex"]
