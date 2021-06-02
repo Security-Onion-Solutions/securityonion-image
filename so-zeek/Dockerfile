@@ -32,7 +32,7 @@ RUN mkdir /zeekbuild
 
 WORKDIR /zeekbuild
 
-RUN wget https://old.zeek.org/downloads/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
+RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN source scl_source enable devtoolset-7 && cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
     make -j8 && make install 
