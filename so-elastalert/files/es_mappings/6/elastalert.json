@@ -5,15 +5,15 @@
     },
     "@timestamp": {
       "type": "date",
-      "format": "dateOptionalTime"
+      "format": "date_optional_time"
     },
     "alert_time": {
       "type": "date",
-      "format": "dateOptionalTime"
+      "format": "date_optional_time"
     },
     "match_time": {
       "type": "date",
-      "format": "dateOptionalTime"
+      "format": "date_optional_time"
     },
     "match_body": {
       "type": "object",
