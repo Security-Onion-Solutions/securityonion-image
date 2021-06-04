@@ -64,4 +64,5 @@ VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/e
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
 RUN chmod +x /usr/local/sbin/zeek.sh
 
+HEALTHCHECK --interval=10m CMD /opt/zeek/bin/zeekctl status || exit 1
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
