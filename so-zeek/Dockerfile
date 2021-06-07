@@ -25,14 +25,14 @@ RUN yum update -y && \
     yum -y install devtoolset-7-gcc-c++ cmake3 wget && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
-ENV ZEEKVER=4.0.1
+ENV ZEEKVER=4.0.2
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
 
 WORKDIR /zeekbuild
 
-RUN wget https://old.zeek.org/downloads/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
+RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN source scl_source enable devtoolset-7 && cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
     make -j8 && make install 
@@ -63,5 +63,7 @@ VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/e
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
 RUN chmod +x /usr/local/sbin/zeek.sh
+
+HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
