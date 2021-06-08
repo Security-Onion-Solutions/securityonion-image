@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/redmine:4.1.1-passenger
+FROM ghcr.io/security-onion-solutions/redmine:4.2.1-passenger
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Playbook running in Docker container for use with Security Onion"
