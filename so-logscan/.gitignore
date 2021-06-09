@@ -5,3 +5,6 @@
 *.log
 *.txt
 *.json
+
+# Virtual Enviorment
+venv/

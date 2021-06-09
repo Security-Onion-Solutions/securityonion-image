@@ -3,6 +3,7 @@ astunparse==1.6.3
 cachetools==4.2.2
 certifi==2020.12.5
 chardet==4.0.0
+click==8.0.1
 DateTime==4.3
 flatbuffers==1.12
 gast==0.4.0

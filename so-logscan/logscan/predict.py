@@ -25,19 +25,17 @@ def produce_alerts(model, dataset, split_data):
             start_time = start_time.strftime("%m-%d-%Y %-l:%M%p ") + tz_string
             end_time = end_time.strftime("%m-%d-%Y %-l:%M%p ") + tz_string
             
-            num_attempts = len(split_data[i])
-            percent_success = round(dataset[i][0], 3)
+            num_attempts = str(len(split_data[i]))
+            num_failed = str(dataset[i][1])
             
-            alert_data.append([source_ip, start_time, end_time, num_attempts, percent_success])
+            alert_data.append([source_ip, start_time, end_time, num_attempts, num_failed])
         
-    return np.vstack(alert_data)
+    return alert_data
 
 
-def write_json_alerts(alert_data, file_name):
-    IP = alert_data[:, 0].tolist()
-    ST = alert_data[:, 1].tolist()
-    ET = alert_data[:, 2].tolist()
-    N = alert_data[:, 3].tolist()
-    P = alert_data[:, 4].tolist()
-    with open(file_name, 'w') as outfile:
-        json.dump({'Alerts': [{'Source IP': ip, 'Start Time': st, 'End Time': et, 'Number of Login Attempts': n, 'Percentage of Login Attempts Successful': p} for ip, st, et, n, p in zip(IP, ST, ET, N, P)]}, outfile, indent=4)
+def write_json_alerts(alert_data, outfile_path):
+    lines = [json.dumps({'Source IP': i[0], 'Start Time': i[1], 'End Time': i[2], 'Number of Login Attempts': i[3], 'Number of Failed Login Attempts': i[4]}) for i in alert_data]
+    with open(outfile_path, 'w') as outfile:
+        [outfile.write(line + '\n') for line in lines]
+    
+    print(f'\n{len(alert_data)} alerts saved to {outfile_path}')
