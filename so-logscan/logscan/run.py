@@ -1,19 +1,25 @@
 from pathlib import Path
+import configparser
 
 import json
-import click
 
 from tensorflow import keras
 
 import predict
 import readkratos
 
-@click.command()
-@click.argument('log_path', required=True)
-def main(log_path: str) -> None:
-    data_dir = f'{Path(__file__).parent.absolute()}/data'
+def main() -> None:
+    config = configparser.ConfigParser()
+    config.read('logscan.conf')
+    for section in config.sections():
+        for key in config[section]:
+            print((key, config[section][key]))
 
-    model = keras.models.load_model(f'{data_dir}/saved_kff_model.h5')
+    # model_path = config.get('logscan', 'model_path')
+    # log_path = config.get('logscan', 'log_path')
+    # out_path = config.get('logscan', 'out_path')
+
+    model = keras.models.load_model(model_path)
 
     filtered_data = readkratos.filter_kratos(log_path)
     processed_data = readkratos.process_data(filtered_data)
@@ -21,8 +27,7 @@ def main(log_path: str) -> None:
     dataset = readkratos.build_dataset(split_data)
 
     alert_data = predict.produce_alerts(model, dataset, split_data)
-    outfile_path = f'{data_dir}/logscan.alerts'
-    predict.write_json_alerts(alert_data, outfile_path)
+    predict.write_json_alerts(alert_data, out_path)
 
 
 if __name__ == '__main__':
