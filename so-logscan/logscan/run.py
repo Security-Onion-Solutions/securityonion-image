@@ -1,5 +1,7 @@
 from pathlib import Path
 import configparser
+import datetime as dt
+import timeloop
 
 import json
 
@@ -8,16 +10,16 @@ from tensorflow import keras
 import predict
 import readkratos
 
+tl = timeloop.Timeloop()
+
+@tl.job(interval=dt.timedelta(seconds=5))
 def main() -> None:
     config = configparser.ConfigParser()
     config.read('logscan.conf')
-    for section in config.sections():
-        for key in config[section]:
-            print((key, config[section][key]))
 
-    # model_path = config.get('logscan', 'model_path')
-    # log_path = config.get('logscan', 'log_path')
-    # out_path = config.get('logscan', 'out_path')
+    model_path = config.get('logscan', 'model_path')
+    log_path = config.get('logscan', 'log_path')
+    out_path = config.get('logscan', 'out_path')
 
     model = keras.models.load_model(model_path)
 
@@ -31,4 +33,4 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    tl.start(block=True)
