@@ -1,11 +1,5 @@
-# Models
-*.h5
-
-# Data / Logs
+# Logs
 *.log
-*.txt
-*.json
-*.alerts
 
 # Virtual Enviorment
 venv/

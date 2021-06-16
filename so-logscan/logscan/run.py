@@ -1,36 +1,44 @@
-from pathlib import Path
-import configparser
-import datetime as dt
+import importlib
 import timeloop
+import logging
+import threading
+import sys
+import datetime as dt
+from pytimeparse.timeparse import timeparse
 
-import json
+from logscan.settings import __CONFIG_FILE, CONFIG
+from logscan.common import check_file
 
-from tensorflow import keras
 
-import predict
-import readkratos
+def __run_model(model):
+    try:
+        module = importlib.import_module(f'logscan.{model}.run')
+    except ImportError as e:
+        print(f'Error importing {model}:', file=sys.stderr, end=' ')
+        print(e, file=sys.stderr)
+        exit(1)
+    if hasattr(module, 'run'):
+        module.run()
+    else:
+        raise NotImplementedError('Module does not contain necessary run function.')
+
 
 tl = timeloop.Timeloop()
+@tl.job(interval=dt.timedelta(seconds=timeparse(CONFIG.get('global', 'scan_interval'))))
+def loop():
+    threads = []
+    for model in ['kff']:
+        thread = threading.Thread(target=__run_model, args=(model,))
+        threads.append(thread)
+        thread.start()
+    for thread in threads:
+        thread.join()
 
-@tl.job(interval=dt.timedelta(seconds=5))
-def main() -> None:
-    config = configparser.ConfigParser()
-    config.read('logscan.conf')
 
-    model_path = config.get('logscan', 'model_path')
-    log_path = config.get('logscan', 'log_path')
-    out_path = config.get('logscan', 'out_path')
-
-    model = keras.models.load_model(model_path)
-
-    filtered_data = readkratos.filter_kratos(log_path)
-    processed_data = readkratos.process_data(filtered_data)
-    split_data = readkratos.time_split(processed_data, seconds=300)
-    dataset = readkratos.build_dataset(split_data)
-
-    alert_data = predict.produce_alerts(model, dataset, split_data)
-    predict.write_json_alerts(alert_data, out_path)
-
+def main():
+    logging.getLogger("timeloop").setLevel(logging.CRITICAL)
+    check_file(__CONFIG_FILE)
+    tl.start(block=True)
 
 if __name__ == '__main__':
-    tl.start(block=True)
+    main()
