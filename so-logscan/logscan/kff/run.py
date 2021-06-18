@@ -52,12 +52,13 @@ def run(event: threading.Event):
             LOGGER.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')
             break
     alert_list.sort(key=lambda x: x.get('timestamp'))
-    LOGGER.info(f'Generated {len(alert_list)} alerts')
+    LOGGER.info(f'Generated {len(alert_list)} new alerts from kff model')
 
-    LOGGER.debug(f'Writing to {ALERT_LOG}')
-    for alert in alert_list:
-        __write_alert(alert, ALERT_LOG)
-    LOGGER.debug(f'Finished writing {len(alert_list)} lines')
+    if len(alert_list) > 0:
+        LOGGER.debug(f'Writing to {ALERT_LOG}')
+        for alert in alert_list:
+            __write_alert(alert, ALERT_LOG)
+        LOGGER.debug(f'Finished writing {len(alert_list)} lines')
 
 if __name__ == '__main__':
     run()

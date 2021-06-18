@@ -2,6 +2,7 @@ from functools import partial
 import importlib
 import os
 import logging
+import pathlib
 import threading
 import sys
 import schedule
@@ -9,7 +10,7 @@ import signal
 from schedule import every, repeat
 import time
 
-from logscan import APP_LOG, LOGGER, MAX_THREAD_TIME, SCAN_INTERVAL, __CONFIG_FILE
+from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR
 from logscan.common import check_file
 
 global threads
@@ -97,6 +98,8 @@ def main():
         print('Exiting...')
         exit(1)
 
+    if pathlib.Path(__OUTPUT_DIR).is_dir():
+        os.mkdir(__OUTPUT_DIR)
 
     LOGGER.info('Starting logscan...')
     print('Running logscan...')
