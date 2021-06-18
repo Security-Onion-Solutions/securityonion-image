@@ -98,7 +98,7 @@ def main():
         print('Exiting...')
         exit(1)
 
-    if pathlib.Path(__OUTPUT_DIR).is_dir():
+    if not pathlib.Path(__OUTPUT_DIR).is_dir():
         os.mkdir(__OUTPUT_DIR)
 
     LOGGER.info('Starting logscan...')
