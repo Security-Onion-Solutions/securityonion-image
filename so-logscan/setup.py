@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 HERE = pathlib.Path(__file__).parent
 
 with open(f'{HERE}/README.md') as f:
-  readme = f.read().splitlines()
+  readme = f.read()
 
 with open(f'{HERE}/requirements.txt') as f:
   required = f.read().splitlines()
