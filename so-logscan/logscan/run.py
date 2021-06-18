@@ -101,7 +101,7 @@ def main():
     LOGGER.info('Starting logscan...')
     print('Running logscan...')
 
-    LOGGER.info('Importing keras, will take a moment...')
+    LOGGER.debug('Importing keras, will take a moment...')
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable tensorflow stdout
     from tensorflow import keras
 
