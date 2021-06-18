@@ -2,13 +2,13 @@ import os
 import json
 import pathlib
 from typing import Dict, List
+from . import LOGGER
 import numpy as np
 import datetime as dt
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 from tensorflow import keras
 
-from .settings import PREDICTION_THRESHOLD, MODEL_FILENAME
+from . import PREDICTION_THRESHOLD, MODEL_FILENAME
 from ..common import format_datetime
 
 
@@ -26,9 +26,10 @@ def alert_on_anomaly(data: List, metadata: Dict) -> Dict:
     if y >= PREDICTION_THRESHOLD:
         return {
             'timestamp': format_datetime(dt.datetime.utcnow()),
-            'source_ip': metadata.get('ip'),
+            'model': metadata.get('model'),
+            'source_ip': metadata.get('source_ip'),
             'start_time': metadata.get('start_time'),
             'end_time': metadata.get('end_time'),
             'num_attempts': metadata.get('num_attempts'),
-            'num_failed': int(data[1])
+            'num_failed': metadata.get('num__failed')
         }

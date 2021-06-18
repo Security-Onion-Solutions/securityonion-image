@@ -5,7 +5,7 @@ import datetime as dt
 import time
 from itertools import groupby
 
-from logscan import settings as global_settings
+from logscan import KRATOS_SUCCESS_STR
 
 
 def filter_kratos_log(filepath: str) -> List:
@@ -18,7 +18,7 @@ def filter_kratos_log(filepath: str) -> List:
 def __create_sparse_entry(log_line: Dict):
     return [
         dt.datetime.strptime(log_line["time"], "%Y-%m-%dT%H:%M:%SZ").timestamp(),
-        1 if global_settings.KRATOS_SUCCESS_STR in log_line['msg'] else 0,
+        1 if KRATOS_SUCCESS_STR in log_line['msg'] else 0,
         log_line["http_request"]["headers"]["x-forwarded-for"].split(',')[-1]
     ]
 
