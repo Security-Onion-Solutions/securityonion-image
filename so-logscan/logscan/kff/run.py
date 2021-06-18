@@ -44,6 +44,10 @@ def run(event: threading.Event):
     LOGGER.debug('Generating alerts')
     for data, metadata in dataset:
         if not event.is_set():
+            if pathlib.Path(ALERT_LOG).is_file():
+                with open(ALERT_LOG, 'r') as f:
+                    if max(map(len, [[1 for k in json.loads(line) if k != 'timestamp' and k in metadata and json.loads(line)[k] == metadata[k]] for line in f.readlines()])) == len(metadata):
+                        continue
             alert = predict.alert_on_anomaly(data, metadata)
             if alert is not None:
                 LOGGER.debug(alert)
