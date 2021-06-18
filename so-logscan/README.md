@@ -20,3 +20,4 @@ pip3 install so-logscan # or pip3 install . if inside repo
 so-logscan '<model_module>'
 # or
 python3 logscan/run.py '<model_module>'
+```
