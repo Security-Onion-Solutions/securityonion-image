@@ -12,10 +12,11 @@ import time
 from logscan import APP_LOG, LOGGER, MAX_THREAD_TIME, SCAN_INTERVAL, __CONFIG_FILE
 from logscan.common import check_file
 
+global threads
 threads = []  # module-level thread list for signal handlers
 
 
-def __exit_handler(threads: list, signal_int, *_):
+def __exit_handler(signal_int, *_):
     LOGGER.info(f'Received {signal.Signals(signal_int).name}, starting shutdown...')
     print('')
     print('Trying to exit, wait a moment...', end='\r')
@@ -55,8 +56,8 @@ def __run_model(model, event):
         raise NotImplementedError('Module does not contain necessary run function.')
 
 
-@repeat(every(SCAN_INTERVAL).seconds, threads)  # Increase time later
-def __loop(threads):
+@repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
+def __loop():
     for model in ['kff']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event,))
@@ -64,8 +65,7 @@ def __loop(threads):
         thread.start()
     for thread, _ in threads:
         thread.join()
-        if thread in threads:
-            threads.remove(thread)
+        threads.remove([thread, _])
 
 
 def main():
@@ -79,11 +79,11 @@ def main():
 
     if os.name == 'nt':
         LOGGER.debug('Registering signal handler for (SIGBREAK, SIGINT)')
-        signal.signal(signal.SIGBREAK, partial(__exit_handler, threads))
+        signal.signal(signal.SIGBREAK, __exit_handler)
     elif os.name == 'posix':
         LOGGER.debug('Registering signal handler for (SIGTERM, SIGINT)')
-        signal.signal(signal.SIGTERM, partial(__exit_handler, threads))
-    signal.signal(signal.SIGINT, partial(__exit_handler, threads))
+        signal.signal(signal.SIGTERM, __exit_handler)
+    signal.signal(signal.SIGINT, __exit_handler)
     
     # Configure 3rd party log levels
     logging.getLogger('tensorflow').setLevel(logging.INFO)
