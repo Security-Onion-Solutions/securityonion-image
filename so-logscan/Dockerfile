@@ -8,9 +8,6 @@ VOLUME [ "/output", "/logs" ]
 # Set tensorflow log level
 ENV TF_CPP_MIN_LOG_LEVEL 3
 
-RUN mkdir /output && \
-    mkdir /logs
-
 WORKDIR /logscan
 
 # Install dependencies early to speed up subsequent build times
