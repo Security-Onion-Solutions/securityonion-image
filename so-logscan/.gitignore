@@ -1,5 +1,6 @@
 # Logs
 *.log
+*.alerts
 
 # Virtual Enviorment
 venv/
