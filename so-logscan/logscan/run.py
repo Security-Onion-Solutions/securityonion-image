@@ -51,7 +51,7 @@ def __run_model(model, event):
             module.run(event)
         except Exception as e:
             LOGGER.error(e)
-            LOGGER.error('Unexpected error occurred, quitting thread...', file=sys.stderr)
+            LOGGER.error('Unexpected error occurred, quitting thread...')
             exit(1)
     else:
         raise NotImplementedError('Module does not contain necessary run function.')
