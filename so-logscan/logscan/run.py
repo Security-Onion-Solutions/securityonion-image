@@ -10,7 +10,7 @@ import signal
 from schedule import every, repeat
 import time
 
-from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR
+from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR
 from logscan.common import check_file
 
 global threads
@@ -100,6 +100,9 @@ def main():
 
     if not pathlib.Path(__OUTPUT_DIR).is_dir():
         os.mkdir(__OUTPUT_DIR)
+
+    if not pathlib.Path(__DATA_DIR).is_dir():
+        os.mkdir(__DATA_DIR)
 
     LOGGER.info('Starting logscan...')
     print('Running logscan...')

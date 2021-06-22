@@ -10,7 +10,7 @@ import numpy as np
 from . import transform
 from . import predict
 from ..common import kratos_helper, check_file
-from .. import ALERT_LOG, CONFIG, LOG_BASE_DIR
+from .. import ALERT_LOG, HISTORY_LOG, CONFIG, LOG_BASE_DIR
 from . import TIME_SPLIT_SEC, LOGGER
 
 
@@ -44,10 +44,11 @@ def run(event: threading.Event):
     LOGGER.debug('Generating alerts')
     for data, metadata in dataset:
         if not event.is_set():
-            if pathlib.Path(ALERT_LOG).is_file():
-                with open(ALERT_LOG, 'r') as f:
-                    if max(map(len, [[1 for k in json.loads(line) if k != 'timestamp' and k in metadata and json.loads(line)[k] == metadata[k]] for line in f.readlines()])) == len(metadata):
-                        continue
+            with open(HISTORY_LOG, 'a+') as f:
+                f.seek(0)
+                if any([json.loads(line) == metadata for line in f.readlines()]):
+                    continue
+                f.write(f'{json.dumps(metadata)}\n')
             alert = predict.alert_on_anomaly(data, metadata)
             if alert is not None:
                 LOGGER.debug(alert)
