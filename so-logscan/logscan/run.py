@@ -64,6 +64,11 @@ def __loop():
         thread = threading.Thread(target=__run_model, args=(model, event,))
         threads.append([thread, event])
         thread.start()
+    for model in ['kl']:
+        event = threading.Event()
+        thread = threading.Thread(target=__run_model, args=(model, event,))
+        threads.append([thread, event])
+        thread.start()
     for thread, _ in threads:
         thread.join()
         threads.remove([thread, _])
