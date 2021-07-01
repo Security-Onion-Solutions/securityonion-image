@@ -4,6 +4,7 @@ import os
 import sys
 import threading
 from typing import Dict, List
+import time
 
 import numpy as np
 
@@ -19,6 +20,7 @@ def __write_alert(py_dict, outfile):
         outfile.write(f'{json.dumps(py_dict)}\n')
 
 def run(event: threading.Event):
+    tic = time.perf_counter()
     kratos_log = f'{LOG_BASE_DIR}/{CONFIG.get("kratos", "log_path")}'
     try:
         check_file(kratos_log)
@@ -66,6 +68,9 @@ def run(event: threading.Event):
         for alert in alert_list:
             __write_alert(alert, ALERT_LOG)
         LOGGER.debug(f'Finished writing {len(alert_list)} lines')
+
+    toc = time.perf_counter()
+    LOGGER.info(f'Module completed in {round(toc - tic, 2)} seconds')
 
 if __name__ == '__main__':
     run()

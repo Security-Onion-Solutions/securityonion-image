@@ -59,6 +59,7 @@ def __run_model(model, event):
 
 @repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
 def __loop():
+    tic = time.perf_counter()
     for model in ['kff', 'kl']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event,))
@@ -67,6 +68,9 @@ def __loop():
     for thread, _ in threads:
         thread.join()
         threads.remove([thread, _])
+    toc = time.perf_counter()
+    LOGGER.info(f'Full scan completed in {round(toc - tic, 2)} seconds')
+    LOGGER.debug('Waiting for next job...')
 
 
 def main():
@@ -107,9 +111,10 @@ def main():
     LOGGER.info('Starting logscan...')
     print('Running logscan...')
 
-    LOGGER.debug('Importing keras, will take a moment...')
+    LOGGER.debug('Importing keras...')
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable tensorflow stdout
     from tensorflow import keras
+    LOGGER.debug('Waiting for first job...')
 
     while True:
         try:
