@@ -16,13 +16,13 @@
 FROM ghcr.io/security-onion-solutions/centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="Suricata 6.0.1 running in a docker for use with Security Onion."
+LABEL description="Suricata 6.0.3 running in a docker for use with Security Onion."
 
 # Common CentOS layer
 RUN yum -y install epel-release bash libpcap iproute && \
     yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
-    rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-suricata-6.0.2.0/securityonion-suricata-6.0.2.0.rpm && \
+    rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-suricata-6.0.3.0/securityonion-suricata-6.0.3.0.rpm && \
     groupadd --gid 940 suricata && \
     adduser --uid 940 --gid 940 --home-dir /etc/suricata --no-create-home suricata && \
     chown -R 940:940 /etc/suricata && \

@@ -41,8 +41,9 @@ COPY bin bin
 RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
     chmod 0750 bin/es-docker
 
-COPY plugins-src /plugins-src
-RUN bin/build-plugins /plugins-src plugins/
+# Enable the following lines if custom plugins are to be included in this image.
+# COPY plugins-src /plugins-src
+# RUN bin/build-plugins /plugins-src plugins/
 
 USER ${USERNAME}
 CMD ["/bin/bash", "bin/es-docker"]

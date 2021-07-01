@@ -1,14 +1,13 @@
-urllib3>=1.25,<1.26
+urllib3>=1.26.5
 certifi>=2019.11
 flask-bootstrap>=3.3.7.0
 Flask>=1.1,<1.2
 Flask-WTF>=0.14,<0.15
-grr-api-client>=3.3
+grr-api-client>=3.4.3
 jsonpickle>=1.2
 pymisp>=2.4,<2.5
-requests>=2.23.0,<2.24
+requests>=2.25,<2.26
 rt>=2.0,<2.1
 ruamel.yaml>=0.16,<0.17
 sigmatools==0.18.1
 thehive4py>=1.6,<1.7
-elastalert==0.2.4
