@@ -34,6 +34,7 @@ def group_attempts_by_ip(sparse_data: List) -> List[List]:
 
 
 def split_attempts_seconds(attempt_list: List, seconds: int) -> List[List]:
+    attempt_list.sort()
     split_data = []
     sd_counter = 0
     time_split_group = []
