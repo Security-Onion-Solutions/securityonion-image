@@ -59,12 +59,7 @@ def __run_model(model, event):
 
 @repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
 def __loop():
-    for model in ['kff']:
-        event = threading.Event()
-        thread = threading.Thread(target=__run_model, args=(model, event,))
-        threads.append([thread, event])
-        thread.start()
-    for model in ['kl']:
+    for model in ['kff', 'kl']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event,))
         threads.append([thread, event])
