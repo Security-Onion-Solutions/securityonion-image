@@ -34,8 +34,12 @@ def run(event: threading.Event):
     time_split_attempts = kratos_helper.split_attempts_seconds(sparse_data, TIME_SPLIT_SEC)
 
     LOGGER.debug(f'Building dataset from attempts/{TIME_SPLIT_SEC}s')
+    temp_dataset = [transform.timesplit_to_d_md(time_group) for time_group in time_split_attempts]
     dataset = []
-    dataset += [transform.timesplit_to_d_md(time_group) for time_group in time_split_attempts]
+    for temp_data, temp_md in temp_dataset:
+        if any(np.isnan(temp_data)) or temp_data[1] < 3:
+            continue
+        dataset += [(temp_data, temp_md)]
     
     alert_list = []
 

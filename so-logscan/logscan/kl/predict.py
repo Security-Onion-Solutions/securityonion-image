@@ -32,5 +32,5 @@ def alert_on_anomaly(data: List, metadata: Dict) -> Dict:
             'end_time': metadata.get('end_time'),
             'num_attempts': metadata.get('num_attempts'),
             'num_failed': metadata.get('num_failed'),
-            'avg_time_interval': metadata.get('avg_time_interval')
+            'avg_failure_interval': metadata.get('avg_failure_interval')
         }
