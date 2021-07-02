@@ -48,9 +48,12 @@ def run(event: threading.Event):
         if not event.is_set():
             with open(HISTORY_LOG, 'a+') as f:
                 f.seek(0)
+                LOGGER.debug('Checking event history log')
                 if any([json.loads(line) == metadata for line in f.readlines()]):
                     continue
+                LOGGER.debug('Event not in history log, writing to log')
                 f.write(f'{json.dumps(metadata)}\n')
+            LOGGER.debug('Running event against model')
             alert = predict.alert_on_anomaly(data, metadata)
             if alert is not None:
                 LOGGER.debug(alert)
