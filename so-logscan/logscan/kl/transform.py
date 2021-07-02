@@ -4,6 +4,16 @@ import datetime as dt
 
 from ..common import format_datetime
 
+def check_split_attempts(split_data: List) -> List[List]:
+    checked_data = []
+    for time_split_group in split_data:
+        arr = np.asarray(time_split_group)[:, 1].astype(int)
+        if len(arr) - sum(arr) >= 3:
+            checked_data += [time_split_group]
+
+    return checked_data
+    
+
 def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     arr = np.asarray(time_group)[:, 1].astype(int)
     time_arr = np.asarray(time_group)
