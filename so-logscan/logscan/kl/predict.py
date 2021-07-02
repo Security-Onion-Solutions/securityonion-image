@@ -8,7 +8,7 @@ import datetime as dt
 
 from tensorflow import keras
 
-from . import PREDICTION_THRESHOLD, MODEL_FILENAME
+from . import PREDICTION_THRESHOLD
 from ..common import format_datetime
 
 
@@ -19,9 +19,7 @@ def __predict(model, dataset_entry):
     return Y
 
 
-def alert_on_anomaly(data: List, metadata: Dict) -> Dict:
-    here = pathlib.Path(__file__).parent
-    model = keras.models.load_model(f'{here}/{MODEL_FILENAME}')
+def alert_on_anomaly(data: List, metadata: Dict, model) -> Dict:
     y = __predict(model, [data])
     if y >= PREDICTION_THRESHOLD:
         return {

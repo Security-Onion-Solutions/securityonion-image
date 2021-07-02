@@ -7,8 +7,9 @@ from typing import Dict, List
 import time
 
 import numpy as np
+from tensorflow import keras
 
-from . import transform
+from . import MODEL_FILENAME, transform
 from . import predict
 from ..common import kratos_helper, check_file
 from .. import ALERT_LOG, HISTORY_LOG, CONFIG, LOG_BASE_DIR
@@ -21,6 +22,10 @@ def __write_alert(py_dict, outfile):
 
 def run(event: threading.Event):
     tic = time.perf_counter()
+
+    here = pathlib.Path(__file__).parent
+    model = keras.models.load_model(f'{here}/{MODEL_FILENAME}')
+
     kratos_log = f'{LOG_BASE_DIR}/{CONFIG.get("kratos", "log_path")}'
     try:
         check_file(kratos_log)
@@ -53,7 +58,7 @@ def run(event: threading.Event):
                 if any([json.loads(line) == metadata for line in f.readlines()]):
                     continue
                 f.write(f'{json.dumps(metadata)}\n')
-            alert = predict.alert_on_anomaly(data, metadata)
+            alert = predict.alert_on_anomaly(data, metadata, model)
             if alert is not None:
                 LOGGER.debug(alert)
                 alert_list.append(alert)
@@ -70,7 +75,7 @@ def run(event: threading.Event):
         LOGGER.debug(f'Finished writing {len(alert_list)} lines')
 
     toc = time.perf_counter()
-    LOGGER.info(f'Module completed in {round(toc - tic, 2)} seconds')
+    LOGGER.debug(f'Module completed in {round(toc - tic, 2)} seconds')
 
 if __name__ == '__main__':
     run()

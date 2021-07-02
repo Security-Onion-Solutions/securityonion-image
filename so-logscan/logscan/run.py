@@ -69,7 +69,7 @@ def __loop():
         thread.join()
         threads.remove([thread, _])
     toc = time.perf_counter()
-    LOGGER.info(f'Full scan completed in {round(toc - tic, 2)} seconds')
+    LOGGER.debug(f'Full scan completed in {round(toc - tic, 2)} seconds')
     LOGGER.debug('Waiting for next job...')
 
 

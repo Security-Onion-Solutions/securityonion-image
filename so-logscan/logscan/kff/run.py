@@ -56,7 +56,6 @@ def run(event: threading.Event):
                 if any([json.loads(line) == metadata for line in f.readlines()]):
                     continue
                 f.write(f'{json.dumps(metadata)}\n')
-            LOGGER.debug('Running event against model')
             alert = predict.alert_on_anomaly(data, metadata, model)
             if alert is not None:
                 LOGGER.debug(alert)
@@ -74,7 +73,7 @@ def run(event: threading.Event):
         LOGGER.debug(f'Finished writing {len(alert_list)} lines')
 
     toc = time.perf_counter()
-    LOGGER.info(f'Module completed in {round(toc - tic, 2)} seconds')
+    LOGGER.debug(f'Module completed in {round(toc - tic, 2)} seconds')
 
 if __name__ == '__main__':
     run()
