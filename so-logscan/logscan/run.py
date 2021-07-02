@@ -114,7 +114,6 @@ def main():
     LOGGER.debug('Importing keras...')
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable tensorflow stdout
     from tensorflow import keras
-    LOGGER.debug('Waiting for first job...')
 
     try:
         schedule.run_all()
