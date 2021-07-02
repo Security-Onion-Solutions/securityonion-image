@@ -28,7 +28,6 @@ def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     ], \
     {
         'model': 'kl',
-        'source_ip': time_group[0][2],
         'start_time': format_datetime(dt.datetime.fromtimestamp(time_group[0][0])),
         'end_time': format_datetime(dt.datetime.fromtimestamp(time_group[-1][0])),
         'num_attempts': int(len(arr)),

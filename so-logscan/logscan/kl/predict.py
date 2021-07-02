@@ -25,7 +25,6 @@ def alert_on_anomaly(data: List, metadata: Dict, model) -> Dict:
         return {
             'timestamp': format_datetime(dt.datetime.utcnow()),
             'model': metadata.get('model'),
-            'source_ip': metadata.get('source_ip'),
             'start_time': metadata.get('start_time'),
             'end_time': metadata.get('end_time'),
             'num_attempts': metadata.get('num_attempts'),
