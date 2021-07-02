@@ -116,6 +116,13 @@ def main():
     from tensorflow import keras
     LOGGER.debug('Waiting for first job...')
 
+    try:
+        schedule.run_all()
+    except Exception as e:
+        LOGGER.error(e)
+        print('Unexpected error occurred, exiting...', file=sys.stderr)
+        exit(1)
+
     while True:
         try:
             schedule.run_pending()
