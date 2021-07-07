@@ -23,12 +23,12 @@ def __exit_handler(signal_int, *_):
     print('Trying to exit, wait a moment...', end='\r')
     sys.stdout.write("\033[K")
     for thread, event in threads:
-        LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Waiting 5s to join')
-        thread.join(5)
+        LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Waiting 1s to join')
+        thread.join(1)
         if thread.is_alive():
             LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Thread still alive, setting close event')
             event.set()
-        thread.join(5)
+        thread.join(1)
         if thread.is_alive():
             LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Thread still alive, continuing')
     if len(threads) > 0:
@@ -69,7 +69,7 @@ def __loop():
         thread.join()
         threads.remove([thread, _])
     toc = time.perf_counter()
-    LOGGER.debug(f'Full scan completed in {round(toc - tic, 2)} seconds')
+    LOGGER.debug(f'[PERFORMANCE] Full scan completed in {round(toc - tic, 2)} seconds')
     LOGGER.debug('Waiting for next job...')
 
 
