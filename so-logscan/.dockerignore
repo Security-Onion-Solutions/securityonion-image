@@ -168,3 +168,6 @@ $RECYCLE.BIN/
 
 # Virtual Enviorment
 venv/
+
+# Config
+logscan.conf
