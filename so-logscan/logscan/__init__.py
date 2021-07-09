@@ -24,9 +24,9 @@ BASE_DIR = '/logscan' if __is_docker() else pathlib.Path(logscan.__file__).paren
 
 __OUTPUT_DIR = '/output' if __is_docker() and pathlib.Path('/output').is_dir else f'{BASE_DIR}/output'
 __DATA_DIR = '/data' if __is_docker() and pathlib.Path('/data').is_dir else f'{BASE_DIR}/data'
-ALERT_LOG = f'{__OUTPUT_DIR}/logscan.alerts.log'
-APP_LOG = f'{__OUTPUT_DIR}/logscan.app.log'
-HISTORY_LOG = f'{__DATA_DIR}/metadata_history.log'
+ALERT_LOG = f'{__OUTPUT_DIR}/alerts.log'
+APP_LOG = f'{__OUTPUT_DIR}/app.log'
+HISTORY_LOG = f'{__DATA_DIR}/history.log'
 
 LOG_BASE_DIR = '/logs' if __is_docker() and pathlib.Path('/logs').is_dir else f'{BASE_DIR}/logs' 
 

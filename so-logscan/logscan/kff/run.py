@@ -72,7 +72,7 @@ def run(event: threading.Event):
         LOGGER.debug(f'Finished writing {len(alert_list)} lines')
 
     toc = time.perf_counter()
-    LOGGER.debug(f'Module completed in {round(toc - tic, 2)} seconds')
+    LOGGER.debug(f'[PERFORMANCE] Module completed in {round(toc - tic, 2)} seconds')
 
 if __name__ == '__main__':
     run()
