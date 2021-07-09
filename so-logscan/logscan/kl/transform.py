@@ -32,5 +32,5 @@ def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
         'end_time': format_datetime(dt.datetime.fromtimestamp(time_group[-1][0])),
         'num_attempts': int(len(arr)),
         'num_failed': int(len(arr) - sum(arr)),
-        'avg_failure_interval': float(f'{np.mean(interval_arr):0.3f}')
+        'avg_failure_interval': f'{np.mean(interval_arr):0.0f}s'
     }
