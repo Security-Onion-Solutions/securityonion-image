@@ -38,6 +38,4 @@ CONFIG = __read_config(__CONFIG_FILE)
 LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timeparse(CONFIG.get('global', 'scan_interval'))
-
-#TODO: this needs to be increased
-MAX_THREAD_TIME = 30  #seconds
+    

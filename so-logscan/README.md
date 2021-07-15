@@ -7,16 +7,24 @@
 
 1. Create venv and activate it:
 ```sh
+# For example
 python3 -m venv ./venv
 source ./venv/bin/activate
 ```
+
 2. Install required packages:
 ```sh
 pip install -r requirements.txt
 ```
-3.  Run the project one of two ways:
+
+3. Copy `logscan.conf.example` to `logscan.conf` and edit as necessary
 ```sh
-pip3 install so-logscan # or pip3 install . if inside repo
+cp logscan.conf.example logscan.conf
+```
+
+4. Run the project one of two ways:
+```sh
+pip3 install . # from within this directory (so-logscan)
 so-logscan '<model_module>'
 # or
 python3 logscan/run.py '<model_module>'
