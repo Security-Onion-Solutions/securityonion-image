@@ -60,7 +60,7 @@ def __run_model(model, event):
 @repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
 def __loop():
     tic = time.perf_counter()
-    for model in ['kff', 'kl']:
+    for model in ['kff', 'kl', 'kq']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event,))
         threads.append([thread, event])
