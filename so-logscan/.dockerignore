@@ -170,4 +170,4 @@ $RECYCLE.BIN/
 venv/
 
 # Config
-logscan.conf
+logscan.conf*
