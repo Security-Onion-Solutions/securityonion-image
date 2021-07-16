@@ -12,7 +12,7 @@ from tensorflow import keras
 from . import MODEL_FILENAME, transform
 from . import predict
 from ..common import kratos_helper, check_file
-from .. import ALERT_LOG, HISTORY_LOG, CONFIG, LOG_BASE_DIR
+from .. import ALERT_LOG, HISTORY_LOG, CONFIG, FILTERED_LOG
 from . import TIME_SPLIT_SEC, LOGGER
 
 
@@ -26,15 +26,14 @@ def run(event: threading.Event):
     here = pathlib.Path(__file__).parent
     model = keras.models.load_model(f'{here}/{MODEL_FILENAME}')
 
-    kratos_log = f'{LOG_BASE_DIR}/{CONFIG.get("kratos", "log_path")}'
     try:
-        check_file(kratos_log)
+        check_file(FILTERED_LOG)
     except FileNotFoundError as e:
         LOGGER.error(e)
         sys.exit(1)
-
-    LOGGER.debug(f'Reading and filtering kratos log')
-    filtered_log = kratos_helper.filter_kratos_log(kratos_log)
+    
+    with open(FILTERED_LOG, 'r') as f:
+        filtered_log = [json.loads(line) for line in f.readlines()]
 
     LOGGER.debug(f'Transforming filtered log to attempts/{TIME_SPLIT_SEC}s')
     sparse_data = kratos_helper.sparse_data(filtered_log)

@@ -10,8 +10,8 @@ import signal
 from schedule import every, repeat
 import time
 
-from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR
-from logscan.common import check_file
+from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, FILTERED_LOG, KRATOS_LOG
+from logscan.common import check_file, filter_file
 
 global threads
 threads = []  # module-level thread list for signal handlers
@@ -60,6 +60,12 @@ def __run_model(model, event):
 @repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
 def __loop():
     tic = time.perf_counter()
+    try:
+        filter_file(FILTERED_LOG, KRATOS_LOG)
+    except FileNotFoundError as e:
+        LOGGER.error(e)
+        sys.exit(1)
+    
     for model in ['kff', 'kl', 'kq']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event,))
