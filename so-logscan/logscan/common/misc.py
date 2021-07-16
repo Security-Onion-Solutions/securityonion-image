@@ -1,8 +1,6 @@
 import datetime as dt
 import pathlib
 
-# import cached file path as filtered_log
-# import kratos log path as kratos_log
 import json
 
 from logscan import CONFIG
