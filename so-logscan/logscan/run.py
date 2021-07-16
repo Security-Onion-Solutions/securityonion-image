@@ -9,13 +9,13 @@ import schedule
 import signal
 from schedule import every, repeat
 import time
+import tempfile
 
 from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, FILTERED_LOG, KRATOS_LOG
 from logscan.common import check_file, filter_file
 
 global threads
 threads = []  # module-level thread list for signal handlers
-
 
 def __exit_handler(signal_int, *_):
     LOGGER.info(f'Received {signal.Signals(signal_int).name}, starting shutdown...')
@@ -61,15 +61,16 @@ def __run_model(model, event):
 def __loop():
     tic = time.perf_counter()
     LOGGER.debug('Checking kratos log...')
-    try:
-        filter_file(FILTERED_LOG, KRATOS_LOG)
-    except FileNotFoundError as e:
-        LOGGER.error(e)
-        sys.exit(1)
+
+    # read new log
+    # if cached log exists and len(new log) < len(cached log):
+    #     append new log to cached log (log_cache)
+    # cache only new log
+
     
     for model in ['kff', 'kl', 'kq']:
         event = threading.Event()
-        thread = threading.Thread(target=__run_model, args=(model, event,))
+        thread = threading.Thread(target=__run_model, args=(model, event, log, ))
         threads.append([thread, event])
         thread.start()
     for thread, _ in threads:
@@ -108,6 +109,9 @@ def main():
         print(e, file=sys.stderr)
         print('Exiting...')
         exit(1)
+    
+    global log_cache
+    log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=__DATA_DIR)
 
     if not pathlib.Path(__OUTPUT_DIR).is_dir():
         os.mkdir(__OUTPUT_DIR)

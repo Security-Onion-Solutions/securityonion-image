@@ -20,7 +20,7 @@ def __write_alert(py_dict, outfile):
     with open(outfile, 'a') as outfile:
         outfile.write(f'{json.dumps(py_dict)}\n')
 
-def run(event: threading.Event):
+def run(event: threading.Event, log: List):
     tic = time.perf_counter()
 
     here = pathlib.Path(__file__).parent
