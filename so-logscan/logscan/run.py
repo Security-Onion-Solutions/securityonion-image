@@ -10,9 +10,10 @@ import signal
 from schedule import every, repeat
 import time
 import tempfile
+import json
 
-from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, FILTERED_LOG, KRATOS_LOG
-from logscan.common import check_file, filter_file
+from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG
+from logscan.common import check_file
 
 global threads
 threads = []  # module-level thread list for signal handlers
@@ -33,12 +34,14 @@ def __exit_handler(signal_int, *_):
             LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Thread still alive, continuing')
     if len(threads) > 0:
         LOGGER.debug('Finished trying to join threads')
+    LOGGER.debug('Closing log cache...')
+    log_cache.close()
     LOGGER.info('Exiting logscan...')
     print('Exiting logscan...')
     os._exit(1)
 
 
-def __run_model(model, event):        
+def __run_model(model, event, log):        
     try:
         module = importlib.import_module(f'logscan.{model}.run')
     except ImportError as e:
@@ -48,7 +51,7 @@ def __run_model(model, event):
 
     if hasattr(module, 'run'):
         try:
-            module.run(event)
+            module.run(event, log)
         except Exception as e:
             LOGGER.error(e)
             LOGGER.error('Unexpected error occurred, quitting thread...')
@@ -60,14 +63,23 @@ def __run_model(model, event):
 @repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
 def __loop():
     tic = time.perf_counter()
-    LOGGER.debug('Checking kratos log...')
+    LOGGER.debug('Copying kratos log to cache...')
+    try:
+        check_file(KRATOS_LOG)
+        with open(KRATOS_LOG, 'r') as f:
+            log_lines = [json.loads(line) for line in f.readlines()]
+    except FileNotFoundError as e:
+        LOGGER.error(e)
+        sys.exit(1)
 
-    # read new log
-    # if cached log exists and len(new log) < len(cached log):
-    #     append new log to cached log (log_cache)
-    # cache only new log
+    log_cache.seek(0)
+    if len(log_lines) >= len(log_cache.readlines()):
+        log_cache.truncate(0)
+    for line in log_lines:
+        log_cache.write(f'{json.dumps(line)}\n')
 
-    
+    log_cache.seek(0)
+    log = log_cache.readlines()
     for model in ['kff', 'kl', 'kq']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event, log, ))
@@ -78,6 +90,7 @@ def __loop():
         threads.remove([thread, _])
     toc = time.perf_counter()
     LOGGER.debug(f'[PERFORMANCE] Full scan completed in {round(toc - tic, 2)} seconds')
+    LOGGER.info('Full scan complete')
     LOGGER.debug('Waiting for next job...')
 
 
@@ -111,7 +124,7 @@ def main():
         exit(1)
     
     global log_cache
-    log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=__DATA_DIR)
+    log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=__DATA_DIR, mode='a+')
 
     if not pathlib.Path(__OUTPUT_DIR).is_dir():
         os.mkdir(__OUTPUT_DIR)
