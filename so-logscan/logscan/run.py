@@ -60,6 +60,7 @@ def __run_model(model, event):
 @repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
 def __loop():
     tic = time.perf_counter()
+    LOGGER.debug('Checking kratos log...')
     try:
         filter_file(FILTERED_LOG, KRATOS_LOG)
     except FileNotFoundError as e:
