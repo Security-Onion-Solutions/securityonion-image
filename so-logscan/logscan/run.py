@@ -12,7 +12,7 @@ import time
 import tempfile
 import json
 
-from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG
+from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
 from logscan.common import check_file
 
 global threads
@@ -72,9 +72,11 @@ def __loop():
         LOGGER.error(e)
         sys.exit(1)
 
+    clear_history = True
     log_cache.seek(0)
     if len(log_lines) >= len(log_cache.readlines()):
         log_cache.truncate(0)
+        clear_history = False
     for line in log_lines:
         log_cache.write(f'{json.dumps(line)}\n')
 
@@ -88,6 +90,11 @@ def __loop():
     for thread, _ in threads:
         thread.join()
         threads.remove([thread, _])
+
+    if clear_history:
+        with open(HISTORY_LOG, 'a+') as f:
+            f.truncate(0)
+
     toc = time.perf_counter()
     LOGGER.debug(f'[PERFORMANCE] Full scan completed in {round(toc - tic, 2)} seconds')
     LOGGER.info('Full scan complete')
