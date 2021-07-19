@@ -11,7 +11,6 @@ from tensorflow import keras
 from . import PREDICTION_THRESHOLD
 from ..common import format_datetime
 
-
 def __predict(model, dataset_entry):
     X = np.vstack(dataset_entry)
     Y = model(X)

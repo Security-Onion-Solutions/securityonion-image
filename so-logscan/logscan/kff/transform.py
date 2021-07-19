@@ -7,7 +7,7 @@ from ..common import format_datetime
 def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     arr = np.asarray(time_group)[:, 1].astype(int)
     return [
-        float(f'{sum(arr) / len(arr):0.3f}'),  # ratio
+        float(f'{sum(arr) / len(arr):0.3f}'),  # percent success
         len(arr) - sum(arr)  # num fails
     ], \
     {

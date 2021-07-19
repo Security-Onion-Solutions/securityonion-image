@@ -15,10 +15,10 @@ from ..common import kratos_helper, check_file
 from .. import ALERT_LOG, HISTORY_LOG, CONFIG
 from . import TIME_SPLIT_SEC, LOGGER
 
-
 def __write_alert(py_dict, outfile):
     with open(outfile, 'a') as outfile:
         outfile.write(f'{json.dumps(py_dict)}\n')
+
 
 def run(event: threading.Event, log: List):
     tic = time.perf_counter()
@@ -66,6 +66,7 @@ def run(event: threading.Event, log: List):
 
     toc = time.perf_counter()
     LOGGER.debug(f'[PERFORMANCE] Module completed in {round(toc - tic, 2)} seconds')
+
 
 if __name__ == '__main__':
     run()

@@ -38,10 +38,10 @@ def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     interval_arr = np.absolute(time_arr[1:]-time_arr[:-1])
 
     return [
-        float(f'{sum(arr) / len(arr):0.3f}'),  # ratio
+        float(f'{sum(arr) / len(arr):0.3f}'),  # percent success
         len(arr) - sum(arr),  # num fails
-        float(f'{np.mean(interval_arr):0.3f}'), # average interval
-        float(f'{np.std(interval_arr):0.3f}') # standard deviation of average interval
+        float(f'{np.mean(interval_arr):0.3f}'),  # average interval
+        float(f'{np.std(interval_arr):0.3f}')  # standard deviation of average interval
     ], \
     {
         'model': 'kl',
