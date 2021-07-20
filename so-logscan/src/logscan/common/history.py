@@ -1,5 +1,4 @@
 import json
-from re import L
 from typing import Dict
 
 from .. import HISTORY_LOG
