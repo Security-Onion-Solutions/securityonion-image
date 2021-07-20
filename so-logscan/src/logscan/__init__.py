@@ -1,5 +1,5 @@
 import logging
-import logscan
+import src.logscan as logscan
 import configparser
 from configparser import ConfigParser
 from pytimeparse.timeparse import timeparse
@@ -19,7 +19,7 @@ def __is_docker():
     )
 
 
-BASE_DIR = '/logscan' if __is_docker() else pathlib.Path(logscan.__file__).parent.parent
+BASE_DIR = '/logscan' if __is_docker() else pathlib.Path(logscan.__file__).parent.parent.parent
 
 __OUTPUT_DIR = f'{BASE_DIR}/output'
 __DATA_DIR = f'{BASE_DIR}/data'

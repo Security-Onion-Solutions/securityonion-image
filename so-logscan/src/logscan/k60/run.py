@@ -47,8 +47,11 @@ def run(event: threading.Event, log: List):
                 if any([json.loads(line) == metadata for line in f.readlines()]):
                     continue
                 f.write(f'{json.dumps(metadata)}\n')
+                LOGGER.debug(data)
+                LOGGER.debug(json.dumps(metadata))
             alert = predict.alert_on_anomaly(data, metadata, model)
             if alert is not None:
+                LOGGER.debug('^^^^ ALERTED ^^^^')
                 alert_list.append(alert)
         else:
             LOGGER.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')

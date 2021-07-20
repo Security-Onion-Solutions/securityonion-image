@@ -5,7 +5,7 @@ import datetime as dt
 import time
 from itertools import groupby
 
-from logscan import KRATOS_SUCCESS_STR
+from src.logscan import KRATOS_SUCCESS_STR
 
 def filter_kratos_log(all_log_lines: List) -> List:
     log_lines = [json.loads(line) for line in all_log_lines if "self-service/login" in line]

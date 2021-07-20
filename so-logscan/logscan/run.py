@@ -12,11 +12,21 @@ import time
 import tempfile
 import json
 
-from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
-from logscan.common import check_file
+from src.logscan import APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
+from src.logscan.common import check_file
 
 global threads
 threads = []  # module-level thread list for signal handlers
+
+
+def __fatal(e: Exception, message: str = None, stdout = True):
+    if message: 
+        LOGGER.error(message)
+        if stdout: print(message, file=sys.stderr)
+    LOGGER.error(e.with_traceback())
+    if stdout: print(e.with_traceback, file=sys.stderr)
+    exit(1)
+
 
 def __exit_handler(signal_int, *_):
     LOGGER.info(f'Received {signal.Signals(signal_int).name}, starting shutdown...')
@@ -43,19 +53,15 @@ def __exit_handler(signal_int, *_):
 
 def __run_model(model, event, log):        
     try:
-        module = importlib.import_module(f'logscan.{model}.run')
+        module = importlib.import_module(f'src.logscan.{model}.run')
     except ImportError as e:
-        print(f'Error importing {model}:', file=sys.stderr, end=' ')
-        print(e, file=sys.stderr)
-        exit(1)
+        __fatal(e, f'Error importing {model}')
 
     if hasattr(module, 'run'):
         try:
             module.run(event, log)
         except Exception as e:
-            LOGGER.error(e)
-            LOGGER.error('Unexpected error occurred, quitting thread...')
-            exit(1)
+            __fatal(e, 'Unexpected error occurred, quitting thread...', stdout=False)
     else:
         raise NotImplementedError('Module does not contain necessary run function.')
 
@@ -127,10 +133,7 @@ def main():
     try:
         check_file(__CONFIG_FILE)
     except Exception as e:
-        LOGGER.error(f'Config file {__CONFIG_FILE} does not exist, exiting...')
-        print(e, file=sys.stderr)
-        print('Exiting...')
-        exit(1)
+        __fatal(e, f'Config file {__CONFIG_FILE} does not exist, exiting...')
     
     global log_cache
     log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=__DATA_DIR, mode='a+')
@@ -147,25 +150,14 @@ def main():
     LOGGER.debug('Importing keras...')
     from tensorflow import keras
 
-    # TODO: bring try: except: up a level
-
     try:
-        schedule.run_all()
-    except Exception as e:
-        # TODO: new fatal(message: str) function handling this code
-        LOGGER.error(e)
-        LOGGER.error(e.with_traceback())
-        print('Unexpected error occurred, exiting...', file=sys.stderr)
-        exit(1)
-
-    while True:
-        try:
+        schedule.run_all
+        while True:
             schedule.run_pending()
-        except Exception as e:
-            LOGGER.error(e)
-            print('Unexpected error occurred, exiting...', file=sys.stderr)
-            exit(1)
-        time.sleep(1)
+            time.sleep(1)
+    except Exception as e:
+        __fatal(e, 'Unexpected error occurred, exiting...')
+
 
 
 if __name__ == '__main__':

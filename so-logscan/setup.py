@@ -23,7 +23,7 @@ setup(
   install_requires=required,
   entry_points= {
     'console_scripts': [
-      'so-logscan=logscan.run:main'
+      'so-logscan=src.logscan.run:main'
     ]
   }
 )
