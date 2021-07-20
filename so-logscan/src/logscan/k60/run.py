@@ -20,7 +20,7 @@ def __write_alert(py_dict, outfile):
         outfile.write(f'{json.dumps(py_dict)}\n')
 
 
-def run(event: threading.Event, log: List):
+def run(event: threading.Event, log: List, clear_history: bool):
     tic = time.perf_counter()
 
     here = pathlib.Path(__file__).parent
@@ -39,6 +39,10 @@ def run(event: threading.Event, log: List):
     
     alert_list = []
 
+    with open(HISTORY_LOG, 'a+') as history_file:
+        history_file.seek(0)
+        num_initial_history_lines = len(history_file.readlines())
+
     LOGGER.debug('Generating alerts')
     for data, metadata in dataset:
         if not event.is_set():
@@ -51,11 +55,17 @@ def run(event: threading.Event, log: List):
                 LOGGER.debug(json.dumps(metadata))
             alert = predict.alert_on_anomaly(data, metadata, model)
             if alert is not None:
-                LOGGER.debug('^^^^ ALERTED ^^^^')
                 alert_list.append(alert)
         else:
             LOGGER.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')
             break
+
+    if clear_history:
+        with open(HISTORY_LOG, 'a+') as history_file:
+            history_lines = history_file.readlines()
+            history_file.truncate(0)
+            history_file.writelines("%s\n" % line for line in history_lines[num_initial_history_lines:])
+    
     alert_list.sort(key=lambda x: x.get('timestamp'))
     LOGGER.info(f'Generated {len(alert_list)} new alerts from k60 model')
 

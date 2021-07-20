@@ -53,7 +53,7 @@ def __exit_handler(signal_int, *_):
     os._exit(2)
 
 
-def __run_model(model, event, log):        
+def __run_model(model, event, log, clear_history):        
     try:
         module = importlib.import_module(f'src.logscan.{model}.run')
     except ImportError as e:
@@ -61,21 +61,21 @@ def __run_model(model, event, log):
 
     if hasattr(module, 'run'):
         try:
-            module.run(event, log)
+            module.run(event, log, clear_history)
         except Exception as e:
             __fatal(e, 'Unexpected error occurred, quitting thread...', stdout=False)
     else:
         raise NotImplementedError('Module does not contain necessary run function.')
 
 
-@repeat(every(SCAN_INTERVAL).seconds)  # Increase time later
+@repeat(every(SCAN_INTERVAL).seconds)
 def __loop():
     tic = time.perf_counter()
     LOGGER.debug('Copying kratos log to cache...')
     try:
         check_file(KRATOS_LOG)
-        with open(KRATOS_LOG, 'r') as f:
-            log_lines = [json.loads(line) for line in f.readlines()]
+        with open(KRATOS_LOG, 'r') as kratos_log:
+            log_lines = kratos_log.readlines()
     except FileNotFoundError as e:
         LOGGER.error(e)
         sys.exit(1)
@@ -84,26 +84,23 @@ def __loop():
 
     clear_history = True
     log_cache.seek(0)
-    if len(log_lines) >= len(log_cache.readlines()):
+    log_cache_lines = log_cache.readlines()
+    if len(log_cache_lines) == 0 or log_lines[0] == log_cache_lines[0]:
         log_cache.truncate(0)
         clear_history = False
     for line in log_lines:
-        log_cache.write(f'{json.dumps(line)}\n')
+        log_cache.write(line + '\n')
 
     log_cache.seek(0)
     log = log_cache.readlines()
     for model in ['k1', 'k5', 'k60']:
         event = threading.Event()
-        thread = threading.Thread(target=__run_model, args=(model, event, log, ))
+        thread = threading.Thread(target=__run_model, args=(model, event, log, clear_history, ))
         threads.append([thread, event])
         thread.start()
     for thread, _ in threads:
         thread.join()
         threads.remove([thread, _])
-
-    if clear_history:
-        with open(HISTORY_LOG, 'a+') as f:
-            f.truncate(0)
 
     toc = time.perf_counter()
     LOGGER.debug(f'[PERFORMANCE] Full scan completed in {round(toc - tic, 2)} seconds')
