@@ -1,16 +1,18 @@
 import json
 from typing import Dict
 
-from .. import HISTORY_LOG
+from src.logscan import HISTORY_LOG
 
 
 def get_history_line_count() -> int:
     with open(HISTORY_LOG, 'a+') as history_log:
+        history_log.seek(0)
         return len(history_log.readlines())
 
 
 def drop_old_history(start_line: int):
     with open(HISTORY_LOG, 'a+') as history_log:
+        history_log.seek(0)
         history = history_log.readlines()
         history_log.truncate(0)
         history_log.writelines(f'{line}\n' for line in history[start_line:])
