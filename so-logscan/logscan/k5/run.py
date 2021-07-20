@@ -56,7 +56,7 @@ def run(event: threading.Event, log: List):
             LOGGER.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')
             break
     alert_list.sort(key=lambda x: x.get('timestamp'))
-    LOGGER.info(f'Generated {len(alert_list)} new alerts from kq model')
+    LOGGER.info(f'Generated {len(alert_list)} new alerts from k5 model')
 
     if len(alert_list) > 0:
         LOGGER.debug(f'Writing to {ALERT_LOG}')

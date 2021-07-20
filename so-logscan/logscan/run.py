@@ -82,7 +82,7 @@ def __loop():
 
     log_cache.seek(0)
     log = log_cache.readlines()
-    for model in ['kff', 'kl', 'kq']:
+    for model in ['k1', 'k5', 'k60']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event, log, ))
         threads.append([thread, event])
