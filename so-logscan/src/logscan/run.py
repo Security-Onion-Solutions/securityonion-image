@@ -11,6 +11,7 @@ from schedule import every, repeat
 import time
 import tempfile
 import json
+import traceback
 
 from src.logscan import APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
 from src.logscan.common import check_file
@@ -19,13 +20,14 @@ global threads
 threads = []  # module-level thread list for signal handlers
 
 
-def __fatal(e: Exception, message: str = None, stdout = True):
-    if message: 
-        LOGGER.error(message)
-        if stdout: print(message, file=sys.stderr)
-    LOGGER.error(e.with_traceback())
-    if stdout: print(e.with_traceback, file=sys.stderr)
-    exit(1)
+def __fatal(e: Exception, message: str, stdout = True, exit_parent = False):
+    if stdout: print(message, file=sys.stderr)
+    LOGGER.exception(message)
+    if stdout: traceback.print_exc(file=sys.stderr)
+    if exit_parent:
+        os._exit(1)
+    else:
+        exit(1)
 
 
 def __exit_handler(signal_int, *_):
@@ -48,14 +50,14 @@ def __exit_handler(signal_int, *_):
     log_cache.close()
     LOGGER.info('Exiting logscan...')
     print('Exiting logscan...')
-    os._exit(1) # Change exit code
+    os._exit(2)
 
 
 def __run_model(model, event, log):        
     try:
         module = importlib.import_module(f'src.logscan.{model}.run')
     except ImportError as e:
-        __fatal(e, f'Error importing {model}')
+        __fatal(e, f'Error importing {model}', exit_parent=True)
 
     if hasattr(module, 'run'):
         try:
@@ -148,10 +150,11 @@ def main():
     print('Running logscan...')
 
     LOGGER.debug('Importing keras...')
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable tensorflow stdout
     from tensorflow import keras
 
     try:
-        schedule.run_all
+        schedule.run_all()
         while True:
             schedule.run_pending()
             time.sleep(1)
