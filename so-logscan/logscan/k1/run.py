@@ -43,18 +43,22 @@ def run(event: threading.Event, log: List):
 
     LOGGER.debug('Generating alerts')
     for data, metadata in dataset:
-        if not event.is_set():
-            with open(HISTORY_LOG, 'a+') as f:
-                f.seek(0)
-                if any([json.loads(line) == metadata for line in f.readlines()]):
+        if not event.is_set(): # rename variable for clarity
+            # TODO: move this to another package (history, common, whatever)
+            with open(HISTORY_LOG, 'a+') as history_file:
+                history_file.seek(0)
+                if any([json.loads(line) == metadata for line in history_file.readlines()]):
                     continue
-                f.write(f'{json.dumps(metadata)}\n')
+                history_file.write(f'{json.dumps(metadata)}\n')
             alert = predict.alert_on_anomaly(data, metadata, model)
             if alert is not None:
                 alert_list.append(alert)
         else:
             LOGGER.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')
             break
+
+    # TODO: prune_history() rolling queue, remove first x lines after line no. limit
+
     alert_list.sort(key=lambda x: x.get('timestamp'))
     LOGGER.info(f'Generated {len(alert_list)} new alerts from k1 model')
 

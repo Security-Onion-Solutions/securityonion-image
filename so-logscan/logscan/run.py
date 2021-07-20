@@ -12,7 +12,7 @@ import time
 import tempfile
 import json
 
-from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
+from logscan import APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
 from logscan.common import check_file
 
 global threads
@@ -25,11 +25,11 @@ def __exit_handler(signal_int, *_):
     sys.stdout.write("\033[K")
     for thread, event in threads:
         LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Waiting 1s to join')
-        thread.join(1)
+        thread.join(THREAD_EXPIRE_TIME)
         if thread.is_alive():
             LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Thread still alive, setting close event')
             event.set()
-        thread.join(1)
+        thread.join(THREAD_EXPIRE_TIME)
         if thread.is_alive():
             LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Thread still alive, continuing')
     if len(threads) > 0:
@@ -38,7 +38,7 @@ def __exit_handler(signal_int, *_):
     log_cache.close()
     LOGGER.info('Exiting logscan...')
     print('Exiting logscan...')
-    os._exit(1)
+    os._exit(1) # Change exit code
 
 
 def __run_model(model, event, log):        
@@ -71,6 +71,8 @@ def __loop():
     except FileNotFoundError as e:
         LOGGER.error(e)
         sys.exit(1)
+
+    # TODO: convert to rolling queue (delete old lines as cache fills up)
 
     clear_history = True
     log_cache.seek(0)
@@ -107,7 +109,7 @@ def main():
         format='[ %(asctime)s : %(levelname).1s : %(name)s ] %(message)s', 
         datefmt='%Y-%m-%d %H:%M:%S',
         encoding='utf-8', 
-        level=logging.DEBUG  # This will change to INFO later
+        level=logging.DEBUG  # FIXME: change to INFO
         )
 
     if os.name == 'nt':
@@ -143,13 +145,16 @@ def main():
     print('Running logscan...')
 
     LOGGER.debug('Importing keras...')
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable tensorflow stdout
     from tensorflow import keras
+
+    # TODO: bring try: except: up a level
 
     try:
         schedule.run_all()
     except Exception as e:
+        # TODO: new fatal(message: str) function handling this code
         LOGGER.error(e)
+        LOGGER.error(e.with_traceback())
         print('Unexpected error occurred, exiting...', file=sys.stderr)
         exit(1)
 
