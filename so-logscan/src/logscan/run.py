@@ -13,8 +13,10 @@ import tempfile
 import json
 import traceback
 
-from src.logscan import APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
+from src.logscan import ALERT_LOG, APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
 from src.logscan.common import check_file
+from src.logscan.common.alerts import gen_alert_list, write_alerts
+from src.logscan.common.history import drop_old_history, get_history_line_count
 
 global threads
 threads = []  # module-level thread list for signal handlers
@@ -53,19 +55,43 @@ def __exit_handler(signal_int, *_):
     os._exit(2)
 
 
-def __run_model(model, event, log, clear_history):        
+def __run_model(model, exit_event, log):  
+    tic = time.perf_counter()
     try:
-        module = importlib.import_module(f'src.logscan.{model}.run')
+        module = importlib.import_module(f'src.logscan.{model}')
     except ImportError as e:
         __fatal(e, f'Error importing {model}', exit_parent=True)
 
-    if hasattr(module, 'run'):
-        try:
-            module.run(event, log, clear_history)
-        except Exception as e:
-            __fatal(e, 'Unexpected error occurred, quitting thread...', stdout=False)
-    else:
-        raise NotImplementedError('Module does not contain necessary run function.')
+    try:
+        transform = importlib.import_module(f'src.logscan.{model}.transform')
+    except ImportError as e:
+        __fatal(e, f'Error importing {model}.transform', exit_parent=True)
+
+    if not hasattr(module, 'LOGGER'): raise NotImplementedError('Module does not contain required logger')
+    if not hasattr(module, 'PREDICTION_THRESHOLD'): raise NotImplementedError('Module does not contain required prediction threshold')
+       
+    module_logger = logging.getLogger(module.__name__)
+
+    try:
+        from tensorflow import keras # lazy load keras
+        model = keras.models.load_model(f'{pathlib.Path(module.__file__).parent}/{module.MODEL_FILENAME}')
+        
+        dataset = transform.build_dataset(log)
+        
+        module_logger.debug('Generating alerts')
+        alert_list, exit_early = gen_alert_list(dataset, model, module.PREDICTION_THRESHOLD, exit_event)
+        if exit_early: module_logger.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')
+        
+        if len(alert_list) > 0:
+            module_logger.debug(f'Writing to {ALERT_LOG}')
+            write_alerts(alert_list, ALERT_LOG)
+            module_logger.debug(f'Finished writing {len(alert_list)} lines')
+
+    except Exception as e:
+        __fatal(e, 'Unexpected error occurred, quitting thread...', stdout=False)
+
+    toc = time.perf_counter()
+    module_logger.debug(f'[ PERFORMANCE ] Module completed in {round(toc - tic, 2)} seconds')
 
 
 @repeat(every(SCAN_INTERVAL).seconds)
@@ -80,8 +106,6 @@ def __loop():
         LOGGER.error(e)
         sys.exit(1)
 
-    # TODO: convert to rolling queue (delete old lines as cache fills up)
-
     clear_history = True
     log_cache.seek(0)
     log_cache_lines = log_cache.readlines()
@@ -89,10 +113,13 @@ def __loop():
         log_cache.truncate(0)
         clear_history = False
     for line in log_lines:
-        log_cache.write(line + '\n')
+        log_cache.write(f'{line}\n')
 
     log_cache.seek(0)
     log = log_cache.readlines()
+
+    history_line_init = get_history_line_count()
+
     for model in ['k1', 'k5', 'k60']:
         event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, event, log, clear_history, ))
@@ -102,8 +129,10 @@ def __loop():
         thread.join()
         threads.remove([thread, _])
 
+    if clear_history: drop_old_history(start_line=history_line_init)
+
     toc = time.perf_counter()
-    LOGGER.debug(f'[PERFORMANCE] Full scan completed in {round(toc - tic, 2)} seconds')
+    LOGGER.debug(f'[ PERFORMANCE ] Full scan completed in {round(toc - tic, 2)} seconds')
     LOGGER.info('Full scan complete')
     LOGGER.debug('Waiting for next job...')
 
@@ -148,7 +177,7 @@ def main():
 
     LOGGER.debug('Importing keras...')
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Disable tensorflow stdout
-    from tensorflow import keras
+    from tensorflow import keras as _
 
     try:
         schedule.run_all()

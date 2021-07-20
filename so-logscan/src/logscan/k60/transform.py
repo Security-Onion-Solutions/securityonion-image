@@ -2,9 +2,27 @@ from typing import Dict, List, Tuple
 import numpy as np
 import datetime as dt
 
-from ..common import format_datetime
+from src.logscan.common import kratos_helper,format_datetime
 
-def check_split_attempts(split_data: List) -> List[List]:
+from src.logscan.k60 import LOGGER, TIME_SPLIT_SEC
+
+
+def build_dataset(log: List) -> List:
+    LOGGER.debug(f'Filtering kratos log')
+    filtered_log = kratos_helper.filter_kratos_log(log)
+
+    LOGGER.debug(f'Transforming filtered log to attempts/{TIME_SPLIT_SEC}s')
+    sparse_data = kratos_helper.sparse_data(filtered_log)
+    time_split_attempts = kratos_helper.split_attempts_seconds(sparse_data, TIME_SPLIT_SEC)
+    checked_data = __check_split_attempts(time_split_attempts)
+
+    LOGGER.debug(f'Building dataset from attempts/{TIME_SPLIT_SEC}s')
+    dataset = [__timesplit_to_d_md(time_group) for time_group in checked_data]
+
+    return dataset
+
+
+def __check_split_attempts(split_data: List) -> List[List]:
     checked_data = []
     for time_split_group in split_data:
         arr = np.asarray(time_split_group)[:, 1].astype(int)
@@ -14,7 +32,7 @@ def check_split_attempts(split_data: List) -> List[List]:
     return checked_data
 
 
-def get_ip_list(time_group: list) -> List:
+def __get_ip_list(time_group: list) -> List:
     all_ips = np.asarray(time_group)[:, 2].tolist()
     if len(set(all_ips)) == 1:
         ip_list = all_ips[0]
@@ -31,7 +49,7 @@ def get_ip_list(time_group: list) -> List:
     return ip_list
 
 
-def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
+def __timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     arr = np.asarray(time_group)[:, 1].astype(int)
     time_arr = np.asarray(time_group)
     time_arr = (time_arr[time_arr[:,1].astype(int) == 0])[:, 0].astype(float).astype(int)
@@ -45,7 +63,7 @@ def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     ], \
     {
         'model': 'kl',
-        'top_source_ips': get_ip_list(time_group),
+        'top_source_ips': __get_ip_list(time_group),
         'start_time': format_datetime(dt.datetime.fromtimestamp(time_group[0][0])),
         'end_time': format_datetime(dt.datetime.fromtimestamp(time_group[-1][0])),
         'num_attempts': int(len(arr)),
