@@ -2,8 +2,8 @@ from typing import Dict, List, Tuple
 import numpy as np
 import datetime as dt
 
-from src.logscan.common import kratos_helper, format_datetime
-from src.logscan.k1 import LOGGER, TIME_SPLIT_SEC
+from logscan.common import kratos_helper, format_datetime
+from logscan.k1 import LOGGER, TIME_SPLIT_SEC
 
 def build_dataset(log: List) -> List:
     LOGGER.debug(f'Filtering kratos log')

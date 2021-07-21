@@ -1,7 +1,7 @@
 import datetime as dt
 import pathlib
 
-from src.logscan import CONFIG
+from logscan import CONFIG
 
 def format_datetime(date_time: dt.datetime) -> str:
     ts_format = CONFIG.get('global', 'ts_format')

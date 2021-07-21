@@ -1,4 +1,3 @@
-from functools import partial
 import importlib
 import os
 import logging
@@ -10,16 +9,15 @@ import signal
 from schedule import every, repeat
 import time
 import tempfile
-import json
 import traceback
 
-from src.logscan import ALERT_LOG, APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, DATA_DIR, KRATOS_LOG
-from src.logscan.common import check_file
-from src.logscan.common.alerts import gen_alert_list, write_alerts
-from src.logscan.common.history import drop_old_history, get_history_line_count
+from logscan import ALERT_LOG, APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, DATA_DIR, KRATOS_LOG
+from logscan.common import check_file
+from logscan.common.alerts import gen_alert_list, write_alerts
+from logscan.common.history import drop_old_history, get_history_line_count
 
-global threads
 threads = []  # module-level thread list for signal handlers
+log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=DATA_DIR, mode='a+') # temp file to cache previous log read
 
 
 def __fatal(e: Exception, message: str, stdout = True, exit_parent = False):
@@ -29,7 +27,7 @@ def __fatal(e: Exception, message: str, stdout = True, exit_parent = False):
     if exit_parent:
         os._exit(1)
     else:
-        exit(1)
+        sys.exit(1)
 
 
 def __exit_handler(signal_int, *_):
@@ -43,7 +41,7 @@ def __exit_handler(signal_int, *_):
         if thread.is_alive():
             LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Thread still alive, setting close event')
             event.set()
-        thread.join(THREAD_EXPIRE_TIME)
+            thread.join(THREAD_EXPIRE_TIME)
         if thread.is_alive():
             LOGGER.debug(f'[THREAD_ID:{thread.native_id}] Thread still alive, continuing')
     if len(threads) > 0:
@@ -58,12 +56,12 @@ def __exit_handler(signal_int, *_):
 def __run_model(model, exit_event, log):  
     tic = time.perf_counter()
     try:
-        module = importlib.import_module(f'src.logscan.{model}')
+        module = importlib.import_module(f'logscan.{model}')
     except ImportError as e:
         __fatal(e, f'Error importing {model}', exit_parent=True)
 
     try:
-        transform = importlib.import_module(f'src.logscan.{model}.transform')
+        transform = importlib.import_module(f'logscan.{model}.transform')
     except ImportError as e:
         __fatal(e, f'Error importing {model}.transform', exit_parent=True)
 
@@ -123,11 +121,11 @@ def __loop():
     for model in ['k1', 'k5', 'k60']:
         exit_event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, exit_event, log, ))
-        threads.append([thread, exit_event])
+        threads.append((thread, exit_event))
         thread.start()
     for thread, _ in threads:
         thread.join()
-        threads.remove([thread, _])
+        threads.remove((thread, _))
 
     if clear_history: drop_old_history(start_line=history_line_init)
 
@@ -163,9 +161,6 @@ def main():
     except Exception as e:
         __fatal(e, f'Config file {__CONFIG_FILE} does not exist, exiting...')
     
-    global log_cache
-    log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=DATA_DIR, mode='a+')
-
     LOGGER.info('Starting logscan...')
     print('Running logscan...')
 

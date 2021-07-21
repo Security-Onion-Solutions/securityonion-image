@@ -2,7 +2,7 @@ import json
 import time
 from typing import Dict
 
-from src.logscan import HISTORY_LOG
+from logscan import HISTORY_LOG
 
 
 def get_history_line_count() -> int:

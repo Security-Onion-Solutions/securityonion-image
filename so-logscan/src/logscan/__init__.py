@@ -1,5 +1,5 @@
 import logging
-import src.logscan as logscan
+import logscan
 import configparser
 from configparser import ConfigParser
 from pytimeparse.timeparse import timeparse
@@ -44,7 +44,7 @@ LOG_BASE_DIR = f'{BASE_DIR}/logs'
 
 KRATOS_SUCCESS_STR = 'Identity authenticated successfully'
 
-__CONFIG_FILE = f'{ "/logscan" if __is_docker() else pathlib.Path(logscan.__file__).parent.parent.parent }/logscan.conf'
+__CONFIG_FILE = f'{BASE_DIR}/logscan.conf'
 CONFIG = __read_config(__CONFIG_FILE)
 
 LOGGER = logging.getLogger(__name__)

@@ -2,9 +2,9 @@ from typing import Dict, List, Tuple
 import numpy as np
 import datetime as dt
 
-from src.logscan.common import kratos_helper,format_datetime
+from logscan.common import kratos_helper,format_datetime
 
-from src.logscan.k60 import LOGGER, TIME_SPLIT_SEC
+from logscan.k60 import LOGGER, TIME_SPLIT_SEC
 
 
 def build_dataset(log: List) -> List:
@@ -34,19 +34,16 @@ def __check_split_attempts(split_data: List) -> List[List]:
 
 def __get_ip_list(time_group: list) -> List:
     all_ips = np.asarray(time_group)[:, 2].tolist()
-    if len(set(all_ips)) == 1:
-        ip_list = all_ips[0]
-    else:
-        ip_dict = {}
-        for ip in all_ips:
-            if ip not in ip_dict:
-                ip_dict[ip] = 1
-            else:
-                ip_dict[ip] += 1
-        sorted_ip_dict = {k: v for k, v in sorted(ip_dict.items(), key = lambda item: item[1])}
-        ip_list = list(sorted_ip_dict)[0:5]
-
-    return ip_list
+    ip_dict = {}
+    for ip in all_ips:
+        if ip not in ip_dict:
+            ip_dict[ip] = 1
+        else:
+            ip_dict[ip] += 1
+    sorted_ip_dict = {k: v for k, v in sorted(ip_dict.items(), key = lambda item: item[1])}
+    ip_list = list(sorted_ip_dict)
+    
+    return ip_list[:5]
 
 
 def __timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:

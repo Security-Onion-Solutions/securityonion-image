@@ -18,12 +18,13 @@ setup(
   long_description_content_type='text/markdown',
   author='Sagar Singhal, William Wernert',
   url='https://github.com/Security-Onion-Solutions/securityonion-image/tree/master/so-logscan',
-  packages=find_packages(),
+  packages=find_packages(where='src'),
+  package_dir={'':'src'},
   include_package_data=True,
   install_requires=required,
   entry_points= {
     'console_scripts': [
-      'so-logscan=src.logscan.run:main'
+      'so-logscan=logscan.run:main'
     ]
   }
 )

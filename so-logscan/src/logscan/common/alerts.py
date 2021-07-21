@@ -4,7 +4,7 @@ from typing import Dict, List
 import datetime as dt
 
 import numpy as np
-from src.logscan.common.history import check_write_history
+from logscan.common.history import check_write_history
 from tensorflow import keras
 
 from . import format_datetime
