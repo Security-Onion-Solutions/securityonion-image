@@ -171,3 +171,6 @@ venv/
 
 # Config
 logscan.conf*
+
+# Tests directory
+tests/
