@@ -4,11 +4,10 @@ from typing import Dict, List
 import datetime as dt
 
 import numpy as np
-from src.logscan import HISTORY_LOG
 from src.logscan.common.history import check_write_history
 from tensorflow import keras
 
-from . import LOGGER, format_datetime
+from . import format_datetime
 
 
 def __predict(model: keras.Model, dataset_entry: List):
@@ -24,13 +23,7 @@ def __gen_alert(data: List, metadata: Dict, model: keras.Model, prediction_thres
         alert = metadata
         alert['timestamp'] = format_datetime(dt.datetime.utcnow())
         alert['confidence'] = f'{y[0][0] * 100:0.3f}%'
-        return metadata
-
-
-def write_alerts(alert_list, alert_log):
-    for alert in alert_list:
-        with open(alert_log, 'a') as outfile:
-            outfile.write(f'{json.dumps(alert)}\n')
+        return alert
 
 
 def gen_alert_list(dataset: List, model: keras.Model, prediction_threshold: float, exit_event: threading.Event):
@@ -61,3 +54,7 @@ def gen_alert_list(dataset: List, model: keras.Model, prediction_threshold: floa
     return alert_list, exit_early
 
 
+def write_alerts(alert_list, alert_log):
+    for alert in alert_list:
+        with open(alert_log, 'a') as outfile:
+            outfile.write(f'{json.dumps(alert)}\n')

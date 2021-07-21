@@ -19,19 +19,32 @@ def __is_docker():
     )
 
 
-BASE_DIR = '/logscan' if __is_docker() else pathlib.Path(logscan.__file__).parent.parent.parent
+if __is_docker():
+    BASE_DIR = '/logscan'
+elif os.getenv('ENV') == 'testing':
+    BASE_DIR = (pathlib.Path(logscan.__file__).parent.parent.parent).joinpath('tests')
+else:
+    BASE_DIR = pathlib.Path(logscan.__file__).parent.parent.parent
 
-__OUTPUT_DIR = f'{BASE_DIR}/output'
-__DATA_DIR = f'{BASE_DIR}/data'
-ALERT_LOG = f'{__OUTPUT_DIR}/alerts.log'
-APP_LOG = f'{__OUTPUT_DIR}/app.log'
-HISTORY_LOG = f'{__DATA_DIR}/history.log'
+
+OUTPUT_DIR = f'{BASE_DIR}/output'
+DATA_DIR = f'{BASE_DIR}/data'
+
+if not pathlib.Path(OUTPUT_DIR).is_dir():
+    os.mkdir(OUTPUT_DIR)
+
+if not pathlib.Path(DATA_DIR).is_dir():
+    os.mkdir(DATA_DIR)
+
+ALERT_LOG = f'{OUTPUT_DIR}/alerts.log'
+APP_LOG = f'{OUTPUT_DIR}/app.log'
+HISTORY_LOG = f'{DATA_DIR}/history.log'
 
 LOG_BASE_DIR = f'{BASE_DIR}/logs'
 
 KRATOS_SUCCESS_STR = 'Identity authenticated successfully'
 
-__CONFIG_FILE = f'{BASE_DIR}/logscan.conf'
+__CONFIG_FILE = f'{ "/logscan" if __is_docker() else pathlib.Path(logscan.__file__).parent.parent.parent }/logscan.conf'
 CONFIG = __read_config(__CONFIG_FILE)
 
 LOGGER = logging.getLogger(__name__)

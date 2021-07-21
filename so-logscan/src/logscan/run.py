@@ -13,7 +13,7 @@ import tempfile
 import json
 import traceback
 
-from src.logscan import ALERT_LOG, APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, __OUTPUT_DIR, __DATA_DIR, KRATOS_LOG, HISTORY_LOG
+from src.logscan import ALERT_LOG, APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, DATA_DIR, KRATOS_LOG
 from src.logscan.common import check_file
 from src.logscan.common.alerts import gen_alert_list, write_alerts
 from src.logscan.common.history import drop_old_history, get_history_line_count
@@ -121,9 +121,9 @@ def __loop():
     history_line_init = get_history_line_count()
 
     for model in ['k1', 'k5', 'k60']:
-        event = threading.Event()
-        thread = threading.Thread(target=__run_model, args=(model, event, log, clear_history, ))
-        threads.append([thread, event])
+        exit_event = threading.Event()
+        thread = threading.Thread(target=__run_model, args=(model, exit_event, log, ))
+        threads.append([thread, exit_event])
         thread.start()
     for thread, _ in threads:
         thread.join()
@@ -164,13 +164,7 @@ def main():
         __fatal(e, f'Config file {__CONFIG_FILE} does not exist, exiting...')
     
     global log_cache
-    log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=__DATA_DIR, mode='a+')
-
-    if not pathlib.Path(__OUTPUT_DIR).is_dir():
-        os.mkdir(__OUTPUT_DIR)
-
-    if not pathlib.Path(__DATA_DIR).is_dir():
-        os.mkdir(__DATA_DIR)
+    log_cache = tempfile.SpooledTemporaryFile(max_size=8000000, dir=DATA_DIR, mode='a+')
 
     LOGGER.info('Starting logscan...')
     print('Running logscan...')
@@ -186,7 +180,6 @@ def main():
             time.sleep(1)
     except Exception as e:
         __fatal(e, 'Unexpected error occurred, exiting...')
-
 
 
 if __name__ == '__main__':

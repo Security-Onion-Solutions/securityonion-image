@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Dict
 
 from src.logscan import HISTORY_LOG
@@ -15,7 +16,7 @@ def drop_old_history(start_line: int):
         history_log.seek(0)
         history = history_log.readlines()
         history_log.truncate(0)
-        history_log.writelines(f'{line}\n' for line in history[start_line:])
+        history_log.writelines(f'{line}' for line in history[start_line:])
 
 
 def check_write_history(metadata: Dict) -> bool:
