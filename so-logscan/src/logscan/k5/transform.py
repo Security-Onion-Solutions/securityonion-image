@@ -29,7 +29,7 @@ def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
         len(arr) - sum(arr)  # num fails
     ], \
     {
-        'model': 'kff',
+        'model': 'k5',
         'source_ip': time_group[0][2],
         'start_time': format_datetime(dt.datetime.fromtimestamp(time_group[0][0])),
         'end_time': format_datetime(dt.datetime.fromtimestamp(time_group[-1][0])),

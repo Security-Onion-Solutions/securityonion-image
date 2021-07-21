@@ -62,7 +62,7 @@ def __timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
         float(f'{np.std(interval_arr):0.3f}')  # standard deviation of average interval
     ], \
     {
-        'model': 'kl',
+        'model': 'k60',
         'top_source_ips': __get_ip_list(time_group),
         'start_time': format_datetime(dt.datetime.fromtimestamp(time_group[0][0])),
         'end_time': format_datetime(dt.datetime.fromtimestamp(time_group[-1][0])),
