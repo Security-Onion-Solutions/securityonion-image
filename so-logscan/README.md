@@ -1,9 +1,8 @@
-# Security Onion ML Log Scanning
+# Security Onion ML Log Scanning - `logscan`
 
-### This repo contains code for using previously saved models to predict on kratos log files
+`logscan` is a tool to detect anomalies in log files using pre-trained models. Currently the available models are built to only scan kratos logs, however this will likely expand in future iterations.
 
----
-## Getting Started
+## Setting up Dev Environment
 
 1. Create venv and activate it:
 ```sh
@@ -12,20 +11,27 @@ python3 -m venv ./venv
 source ./venv/bin/activate
 ```
 
-2. Install required packages:
+2. Install app:
 ```sh
-pip install -r requirements.txt
+pip3 install -e .[dev] # will need to escape [dev] as \[dev\] in zsh
 ```
 
-3. Copy `logscan.conf.example` to `logscan.conf` and edit as necessary
+3. Run tests:
+```sh
+pytest # config pytest using pytest.ini
+```
+
+4. Copy `logscan.conf.example` to `logscan.conf` and edit as necessary
 ```sh
 cp logscan.conf.example logscan.conf
 ```
 
-4. Run the project one of two ways:
+5. Run the project one of two ways:
 ```sh
-pip3 install . # from within this directory (so-logscan)
-so-logscan '<model_module>'
+so-logscan
 # or
-python3 logscan/run.py '<model_module>'
+docker compose up --build "so-logscan"
 ```
+
+## Running in Production
+  This app is meant to be run in a Docker container using the image built from the included Dockerfile. Running the app using a local Python  environment is only suggested for development as the app uses the project directory to search for logs, data storage, and output.

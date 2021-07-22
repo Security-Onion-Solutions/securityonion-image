@@ -1,8 +1,5 @@
-tensorflow>=2.5.0
-keras>=2.4.3
-schedule>=1.1.0
-pathlib>=1.0.1
-pytimeparse>=1.1.8
-pytest>=6.2.4
-pytest-cov>=2.12.1
-pytest-env>=0.6.2
+tensorflow>=2.5.0,<2.6
+keras>=2.4.3,<2.5
+schedule>=1.1.0,<1.2
+pathlib>=1.0.1,<1.1
+pytimeparse>=1.1.8,<1.2

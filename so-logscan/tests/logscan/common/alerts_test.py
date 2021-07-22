@@ -1,8 +1,7 @@
 import os
-import pathlib
-import threading, tempfile, json, time
-from tests.conftests import MockKerasModel
-import pytest
+import tempfile
+import json
+from tests.conftests import MockKerasModel, MockThreadingEvent
 
 from logscan import HISTORY_LOG
 from logscan.common import alerts
@@ -86,26 +85,25 @@ def test_gen_alert_none():
     assert test_alert == None
 
 
-def gen_test_alerts(exit_event: threading.Event, sleep_time: int):
+def gen_test_alerts(exit_event: MockThreadingEvent):
     dataset = get_dataset()
     confidence_level = 0.85
 
-    time.sleep(sleep_time)
     test_alert_list, exit_early = alerts.gen_alert_list(dataset, MockKerasModel(confidence_level), prediction_threshold, exit_event)
 
     return test_alert_list, exit_early
 
 
-def gen_test_alerts_wrapper(exit_event: threading.Event, sleep_time: int = 0, no_new = False):
+def gen_test_alerts_wrapper(exit_event: MockThreadingEvent, no_new = False):
     dataset = get_dataset()
     alert_list = [ dataset[0][1], dataset[1][1] ]
 
-    test_alert_list, exit_early = gen_test_alerts(exit_event, sleep_time)
+    test_alert_list, exit_early = gen_test_alerts(exit_event)
 
     alert_list.sort(key=lambda x: x.get('start_time'))
     test_alert_list.sort(key=lambda x: x.get('start_time'))
 
-    if sleep_time != 0:
+    if exit_event.is_set() == True:
         assert exit_early == True
     elif no_new == False:
         assert len(test_alert_list) == len(alert_list)
@@ -116,37 +114,28 @@ def gen_test_alerts_wrapper(exit_event: threading.Event, sleep_time: int = 0, no
 
     
 def test_gen_alert_list():
-    exit_event = threading.Event()
-    thread = threading.Thread(target=gen_test_alerts_wrapper, args=(exit_event, ))
-    thread.start()
-    thread.join()
+    exit_event = MockThreadingEvent()
+    gen_test_alerts_wrapper(exit_event)
 
     if os.path.exists(HISTORY_LOG):
         os.remove(HISTORY_LOG)
 
 
 def test_gen_alert_history():
-    exit_event = threading.Event()
-    thread = threading.Thread(target=gen_test_alerts_wrapper, args=(exit_event, ))
-    thread.start()
-    thread.join()
+    exit_event = MockThreadingEvent()
+    gen_test_alerts_wrapper(exit_event)
 
     # Run function again, should not regenerate alerts
-    thread = threading.Thread(target=gen_test_alerts_wrapper, args=(exit_event, 0, True, ))
-    thread.start()
-    thread.join()
+    gen_test_alerts_wrapper(exit_event, True)
 
     if os.path.exists(HISTORY_LOG):
         os.remove(HISTORY_LOG)
 
 
 def test_gen_alert_list_exit():
-    exit_event = threading.Event()
-    sleep_time = 2
-    thread = threading.Thread(target=gen_test_alerts_wrapper, args=(exit_event, sleep_time, ))
-    thread.start()
-    exit_event.set()
-    thread.join()
+    exit_event = MockThreadingEvent(is_set=True)
+    gen_test_alerts_wrapper(exit_event)
+
     if os.path.exists(HISTORY_LOG):
         os.remove(HISTORY_LOG)
 
