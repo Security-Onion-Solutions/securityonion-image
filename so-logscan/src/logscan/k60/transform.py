@@ -14,25 +14,21 @@ def build_dataset(log: List) -> List:
     LOGGER.debug(f'Transforming filtered log to attempts/{TIME_SPLIT_SEC}s')
     sparse_data = kratos_helper.sparse_data(filtered_log)
     time_split_attempts = kratos_helper.split_attempts_seconds(sparse_data, TIME_SPLIT_SEC)
-    checked_data = __check_split_attempts(time_split_attempts)
+
+    std_dev_filtered_attempts = list(filter(__ts_group_gt_3f, time_split_attempts))
 
     LOGGER.debug(f'Building dataset from attempts/{TIME_SPLIT_SEC}s')
-    dataset = [__timesplit_to_d_md(time_group) for time_group in checked_data]
+    dataset = [__timesplit_to_d_md(time_group) for time_group in std_dev_filtered_attempts]
 
     return dataset
 
 
-def __check_split_attempts(split_data: List) -> List[List]:
-    checked_data = []
-    for time_split_group in split_data:
-        arr = np.asarray(time_split_group)[:, 1].astype(int)
-        if len(arr) - sum(arr) >= 3:
-            checked_data += [time_split_group]
-
-    return checked_data
+def __ts_group_gt_3f(ts_group: List):
+    arr = np.asarray(ts_group)[:, 1].astype(int)
+    return len(arr) - sum(arr) >= 3 # model looks at std dev, which needs minimum 3 failures
 
 
-def __get_ip_list(time_group: list) -> List:
+def __top_ip_list(time_group: list) -> List:
     all_ips = np.asarray(time_group)[:, 2].tolist()
     ip_dict = {}
     for ip in all_ips:
@@ -60,7 +56,7 @@ def __timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     ], \
     {
         'model': 'k60',
-        'top_source_ips': __get_ip_list(time_group),
+        'top_source_ips': __top_ip_list(time_group),
         'start_time': format_datetime(dt.datetime.fromtimestamp(time_group[0][0])),
         'end_time': format_datetime(dt.datetime.fromtimestamp(time_group[-1][0])),
         'num_attempts': int(len(arr)),

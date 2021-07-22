@@ -18,11 +18,11 @@ def build_dataset(log: List) -> List:
     LOGGER.debug(f'Building dataset from attempts/ip/{TIME_SPLIT_SEC}s')
     dataset = []
     for ip_group in time_split_attempts:
-        dataset += [timesplit_to_d_md(time_group) for time_group in ip_group]
+        dataset += [__timesplit_to_d_md(time_group) for time_group in ip_group]
 
     return dataset
 
-def timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
+def __timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     arr = np.asarray(time_group)[:, 1].astype(int)
     return [
         float(f'{sum(arr) / len(arr):0.3f}'),  # percent success
