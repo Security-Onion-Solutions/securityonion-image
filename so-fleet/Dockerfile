@@ -1,4 +1,4 @@
-# Copyright 2014-2020 Security Onion Solutions, LLC
+# Copyright 2014-2021 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/alpine:3.12.1
+FROM ghcr.io/security-onion-solutions/alpine
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Fleet running in Docker container for use with Security Onion"
 
