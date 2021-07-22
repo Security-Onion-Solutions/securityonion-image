@@ -18,6 +18,6 @@ class MockThread(object):
 
 
 class MockThreadingEvent(object):
-    def __init__(self):
+    def __init__(self, is_set=False):
         self.set = mock.Mock()
-        self.is_set = mock.Mock(return_value=False)
+        self.is_set = mock.Mock(return_value=is_set)
