@@ -118,6 +118,10 @@ def __loop():
 
     history_line_init = get_history_line_count()
 
+    if len(log) == 0:
+        LOGGER.info('No log lines to scan')
+        return
+
     for model in ['k1', 'k5', 'k60']:
         exit_event = threading.Event()
         thread = threading.Thread(target=__run_model, args=(model, exit_event, log, ))
