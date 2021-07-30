@@ -150,6 +150,12 @@ def main():
         level=logging.DEBUG  # FIXME: change to INFO
         )
 
+    # Only log critical errors to console
+    console = logging.StreamHandler(sys.stdout)
+    console.setLevel(logging.CRITICAL)
+    root_logger = logging.getLogger('')
+    root_logger.addHandler(console)
+
     if os.name == 'nt':
         LOGGER.debug('Registering signal handler for (SIGBREAK, SIGINT)')
         signal.signal(signal.SIGBREAK, __exit_handler)
