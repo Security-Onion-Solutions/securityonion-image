@@ -1,5 +1,4 @@
 import json
-import time
 from typing import Dict
 
 from logscan import HISTORY_LOG

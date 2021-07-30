@@ -107,7 +107,9 @@ def __loop():
     clear_history = True
     log_cache.seek(0)
     log_cache_lines = log_cache.readlines()
+
     if len(log_cache_lines) == 0 or log_lines[0] == log_cache_lines[0]:
+        log_cache.seek(0)
         log_cache.truncate(0)
         clear_history = False
     for line in log_lines:
