@@ -3,7 +3,6 @@ import numpy as np
 import datetime as dt
 
 from logscan.common import kratos_helper,format_datetime
-
 from logscan.k60 import LOGGER, TIME_SPLIT_SEC
 
 
@@ -12,7 +11,7 @@ def build_dataset(log: List) -> List:
     filtered_log = kratos_helper.filter_kratos_log(log)
 
     LOGGER.debug(f'Transforming filtered log to attempts/{TIME_SPLIT_SEC}s')
-    sparse_data = kratos_helper.sparse_data(filtered_log)
+    sparse_data = kratos_helper.sparse_data(filtered_log, ip_sort=False)
     time_split_attempts = kratos_helper.split_attempts_seconds(sparse_data, TIME_SPLIT_SEC)
 
     std_dev_filtered_attempts = list(filter(__ts_group_gt_3f, time_split_attempts))
