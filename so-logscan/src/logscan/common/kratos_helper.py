@@ -24,6 +24,7 @@ def __create_sparse_entry(log_line: Dict):
 
 def sparse_data(filtered_log: List, ip_sort: bool=True) -> List:
     sparse_data = list(map(lambda x: __create_sparse_entry(x), filtered_log))
+    sparse_data.sort()
     if ip_sort:
         sparse_data.sort(key=lambda x: x[2])
     return sparse_data
