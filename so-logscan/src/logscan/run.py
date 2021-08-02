@@ -4,6 +4,7 @@ import logging
 import pathlib
 import threading
 import sys
+from pytimeparse.timeparse import timeparse
 import schedule
 import signal
 from schedule import every, repeat
@@ -11,7 +12,7 @@ import time
 import tempfile
 import traceback
 
-from logscan import ALERT_LOG, APP_LOG, LOGGER, SCAN_INTERVAL, THREAD_EXPIRE_TIME, __CONFIG_FILE, DATA_DIR, KRATOS_LOG
+from logscan import ALERT_LOG, APP_LOG, CONFIG, LOGGER, LOG_BASE_DIR, THREAD_EXPIRE_TIME, __CONFIG_FILE, DATA_DIR
 from logscan.common import check_file
 from logscan.common.alerts import gen_alert_list, write_alerts
 from logscan.common.history import drop_old_history, get_history_line_count
@@ -28,6 +29,15 @@ def __fatal(e: Exception, message: str, stdout = True, exit_parent = False):
         os._exit(1)
     else:
         sys.exit(1)
+
+
+# Get config options
+try:    
+    check_file(__CONFIG_FILE)
+except Exception as e:
+    __fatal(e, f'Config file {__CONFIG_FILE} does not exist, exiting...')
+SCAN_INTERVAL = timeparse(CONFIG.get('global', 'scan_interval'))
+KRATOS_LOG = f'{LOG_BASE_DIR}/{CONFIG.get("kratos", "log_path")}'
 
 
 def __exit_handler(signal_int, *_):
@@ -142,12 +152,16 @@ def __loop():
 
 
 def main():
+    log_level = CONFIG.get('global', 'log_level').upper()
+    if log_level not in ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG' ]:
+        log_level = 'INFO'
+
     logging.basicConfig(
         filename=f'{APP_LOG}', 
         format='[ %(asctime)s : %(levelname).1s : %(name)s ] %(message)s', 
         datefmt='%Y-%m-%d %H:%M:%S',
         encoding='utf-8', 
-        level=logging.DEBUG  # FIXME: change to INFO
+        level=log_level
         )
 
     # Only log critical errors to console
@@ -168,10 +182,7 @@ def main():
     logging.getLogger('tensorflow').setLevel(logging.INFO)
     logging.getLogger('h5py._conv').setLevel(logging.WARNING)
     
-    try:
-        check_file(__CONFIG_FILE)
-    except Exception as e:
-        __fatal(e, f'Config file {__CONFIG_FILE} does not exist, exiting...')
+
     
     LOGGER.info('Starting logscan...')
     print('Running logscan...')

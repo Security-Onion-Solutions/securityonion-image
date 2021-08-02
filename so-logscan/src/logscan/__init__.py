@@ -2,8 +2,9 @@ import logging
 import logscan
 import configparser
 from configparser import ConfigParser
-from pytimeparse.timeparse import timeparse
-import pathlib, os
+import pathlib
+import os
+
 
 def __read_config(file) -> ConfigParser:
     config = configparser.ConfigParser()
@@ -45,13 +46,11 @@ LOG_BASE_DIR = f'{BASE_DIR}/logs'
 KRATOS_SUCCESS_STR = 'Identity authenticated successfully'
 
 __CONFIG_FILE = f'{BASE_DIR}/logscan.conf'
+
+
 CONFIG = __read_config(__CONFIG_FILE)
 
 LOGGER = logging.getLogger(__name__)
-
-SCAN_INTERVAL = timeparse(CONFIG.get('global', 'scan_interval'))
-
-KRATOS_LOG = f'{LOG_BASE_DIR}/{CONFIG.get("kratos", "log_path")}'
 
 THREAD_EXPIRE_TIME = 1
     
