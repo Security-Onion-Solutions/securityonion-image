@@ -1,0 +1,5 @@
+tensorflow>=2.5.0,<2.6
+keras>=2.4.3,<2.5
+schedule>=1.1.0,<1.2
+pathlib>=1.0.1,<1.1
+pytimeparse>=1.1.8,<1.2

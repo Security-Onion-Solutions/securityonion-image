@@ -1,0 +1,2 @@
+[run]
+omit = src/logscan/**/__init__.py
