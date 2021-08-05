@@ -1,6 +1,7 @@
-from typing import Dict, List, Tuple
 import numpy as np
 import datetime as dt
+
+from typing import Dict, List, Tuple
 
 from logscan.common import kratos_helper,format_datetime
 from logscan.k60 import LOGGER, TIME_SPLIT_SEC

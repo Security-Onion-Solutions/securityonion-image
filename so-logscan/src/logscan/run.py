@@ -1,15 +1,15 @@
-import importlib
 import os
-import logging
-import pathlib
-import threading
 import sys
-from pytimeparse.timeparse import timeparse
-import schedule
-import signal
-from schedule import every, repeat
+import pathlib
+import importlib
+import logging
 import time
+import schedule
+from schedule import every, repeat
+from pytimeparse.timeparse import timeparse
+import signal
 import tempfile
+import threading
 import traceback
 
 from logscan import ALERT_LOG, APP_LOG, CONFIG, LOGGER, LOG_BASE_DIR, THREAD_EXPIRE_TIME, __CONFIG_FILE, DATA_DIR

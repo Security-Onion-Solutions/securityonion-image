@@ -1,9 +1,11 @@
-from typing import Dict, List, Tuple
 import numpy as np
 import datetime as dt
 
+from typing import Dict, List, Tuple
+
 from logscan.common import kratos_helper, format_datetime
 from logscan.k1 import LOGGER, TIME_SPLIT_SEC
+
 
 def build_dataset(log: List) -> List:
     LOGGER.debug(f'Filtering kratos log')
@@ -20,6 +22,7 @@ def build_dataset(log: List) -> List:
         dataset += [__timesplit_to_d_md(time_group) for time_group in ip_group]
 
     return dataset
+
 
 def __timesplit_to_d_md(time_group: list) -> Tuple[List, Dict]:
     arr = np.asarray(time_group)[:, 1].astype(int)
