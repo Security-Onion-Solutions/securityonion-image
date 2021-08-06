@@ -10,6 +10,8 @@ from logscan.k5 import LOGGER, TIME_SPLIT_SEC
 def build_dataset(log: List) -> List:
     LOGGER.debug(f'Filtering kratos log')
     filtered_log = kratos_helper.filter_kratos_log(log)
+    if len(filtered_log) == 0:
+        return []
 
     LOGGER.debug(f'Transforming filtered log to attempts/ip/{TIME_SPLIT_SEC}s')
     sparse_data = kratos_helper.sparse_data(filtered_log)
