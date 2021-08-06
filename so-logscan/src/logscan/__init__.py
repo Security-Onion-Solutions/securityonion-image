@@ -1,9 +1,10 @@
+import os
+import pathlib
 import logging
-import logscan
 import configparser
 from configparser import ConfigParser
-import pathlib
-import os
+
+import logscan
 
 
 def __read_config(file) -> ConfigParser:
@@ -46,8 +47,6 @@ LOG_BASE_DIR = f'{BASE_DIR}/logs'
 KRATOS_SUCCESS_STR = 'Identity authenticated successfully'
 
 __CONFIG_FILE = f'{BASE_DIR}/logscan.conf'
-
-
 CONFIG = __read_config(__CONFIG_FILE)
 
 LOGGER = logging.getLogger(__name__)

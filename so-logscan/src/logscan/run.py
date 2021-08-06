@@ -1,15 +1,15 @@
-import importlib
 import os
-import logging
-import pathlib
-import threading
 import sys
-from pytimeparse.timeparse import timeparse
-import schedule
-import signal
-from schedule import every, repeat
+import pathlib
+import importlib
+import logging
 import time
+import schedule
+from schedule import every, repeat
+from pytimeparse.timeparse import timeparse
+import signal
 import tempfile
+import threading
 import traceback
 
 from logscan import ALERT_LOG, APP_LOG, CONFIG, LOGGER, LOG_BASE_DIR, THREAD_EXPIRE_TIME, __CONFIG_FILE, DATA_DIR
@@ -85,15 +85,15 @@ def __run_model(model, exit_event, log):
         model = keras.models.load_model(f'{pathlib.Path(module.__file__).parent}/{module.MODEL_FILENAME}')
         
         dataset = transform.build_dataset(log)
-        
-        module_logger.debug('Generating alerts')
-        alert_list, exit_early = gen_alert_list(dataset, model, module.PREDICTION_THRESHOLD, exit_event)
-        if exit_early: module_logger.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')
-        
-        if len(alert_list) > 0:
-            module_logger.debug(f'Writing to {ALERT_LOG}')
-            write_alerts(alert_list, ALERT_LOG)
-            module_logger.debug(f'Finished writing {len(alert_list)} lines')
+        if len(dataset) > 0:
+            module_logger.debug('Generating alerts')
+            alert_list, exit_early = gen_alert_list(dataset, model, module.PREDICTION_THRESHOLD, exit_event)
+            if exit_early: module_logger.debug(f'[THREAD_ID:{threading.get_native_id()}] Quit generating alerts early')
+            
+            if len(alert_list) > 0:
+                module_logger.debug(f'Writing to {ALERT_LOG}')
+                write_alerts(alert_list, ALERT_LOG)
+                module_logger.debug(f'Finished writing {len(alert_list)} lines')
 
     except Exception as e:
         __fatal(e, 'Unexpected error occurred, quitting thread...', stdout=False)

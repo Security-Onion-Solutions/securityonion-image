@@ -1,6 +1,7 @@
-from typing import Dict, List, Tuple
 import numpy as np
 import datetime as dt
+
+from typing import Dict, List, Tuple
 
 from logscan.common import kratos_helper,format_datetime
 from logscan.k60 import LOGGER, TIME_SPLIT_SEC
@@ -9,6 +10,8 @@ from logscan.k60 import LOGGER, TIME_SPLIT_SEC
 def build_dataset(log: List) -> List:
     LOGGER.debug(f'Filtering kratos log')
     filtered_log = kratos_helper.filter_kratos_log(log)
+    if len(filtered_log) == 0:
+        return []
 
     LOGGER.debug(f'Transforming filtered log to attempts/{TIME_SPLIT_SEC}s')
     sparse_data = kratos_helper.sparse_data(filtered_log, ip_sort=False)

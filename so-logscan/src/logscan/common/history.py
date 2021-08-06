@@ -1,4 +1,5 @@
 import json
+
 from typing import Dict
 
 from logscan import HISTORY_LOG
@@ -25,4 +26,3 @@ def check_write_history(metadata: Dict) -> bool:
             return True
         history_log.write(f'{json.dumps(metadata)}\n')
     return False
-        

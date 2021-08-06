@@ -1,9 +1,10 @@
-import json
-from typing import Dict, List
-import numpy as np
 import datetime as dt
+import numpy as np
+import json
 import time
 from itertools import groupby
+
+from typing import Dict, List
 
 from logscan import KRATOS_SUCCESS_STR
 

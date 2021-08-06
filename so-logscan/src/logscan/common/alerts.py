@@ -1,12 +1,13 @@
+import datetime as dt
+import numpy as np
 import json
 import threading
-from typing import Dict, List
-import datetime as dt
 
-import numpy as np
-from logscan.common.history import check_write_history
 from tensorflow import keras
 
+from typing import Dict, List
+
+from logscan.common.history import check_write_history
 from . import format_datetime
 
 
