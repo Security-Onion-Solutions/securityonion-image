@@ -10,12 +10,12 @@ WORKDIR /logscan
 
 # Install dependencies early to speed up subsequent build times
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
 # Add --use-feature=in-tree-build flag until it becomes default in pip 21.3
-RUN pip install --use-feature=in-tree-build .
+RUN pip install --no-cache-dir --use-feature=in-tree-build .
 
 VOLUME [ "/logscan/output", "/logscan/logs", "/logscan/data" ]
 
