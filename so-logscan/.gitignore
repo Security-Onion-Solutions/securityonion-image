@@ -1,0 +1,12 @@
+# Logs
+*.log
+*.alerts
+
+# Virtual Enviorment
+venv/
+
+# Config
+logscan.conf
+
+!tests/logs/*
+!tests/logscan.conf

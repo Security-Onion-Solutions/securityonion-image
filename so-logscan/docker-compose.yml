@@ -1,0 +1,13 @@
+version: "3.9"
+services: 
+  so-logscan:
+    build: .
+    volumes:
+      - ./data:/logscan/data
+      - ./logs:/logscan/logs
+      - ./output:/logscan/output
+      - ./logscan.conf:/logscan/logscan.conf
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
