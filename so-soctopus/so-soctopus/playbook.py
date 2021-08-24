@@ -138,12 +138,10 @@ def get_plays():
 # Imports rules when Sigma Options -> Import Rules is selected in Redmine
 # If a rule (matched by rule id) exists, the rule is updated with the imported rule, if not a new rule is created
 # Template is moved to /custom/sigma/ as well
-def play_import(issue_id):
-    plays = []
-    ruleset_path = "/SOCtopus/custom/import/"
+def play_import(enable_play):
+    import_count = 0
+    ruleset_path = "/SOCtopus/sigma-import/"
     filen = ""
-
-    plays = get_plays()
 
     for filename in Path(ruleset_path).glob('*.yml'):
         filen = str(filename)
@@ -151,35 +149,13 @@ def play_import(issue_id):
             raw = fpi2.read()
         repo_sigma = yaml.load(raw)
         
-        #if folder == 'process_creation':
-            #folder = 'proc' 
-        for play in plays:
-            if repo_sigma['id'] == play['sigma_id']:
-                formatted_sigma = f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{raw}\n</code></pre>\n}}}}'
-                update_payload = {"issue": {"subject": repo_sigma['title'], "project_id": 1, "status": "Disabled", "tracker": "Play", "custom_fields": [ 
-                    {"id": 9, "name": "Sigma", "value": formatted_sigma.strip()}, \
-                    {"id": 30, "name": "Auto Update Sigma", "value": "0"}, \
-                    {"id": 13, "name": "Playbook", "value": "imported"}, \
-                    {"id": 27, "name": "Sigma File", "value": filen.strip()}]}} #changed adding filename to sigma after importing
-                url = f"{playbook_url}/issues/{play['issue_id']}.json"
-                r = requests.put(url, data=json.dumps(
-                    update_payload), headers=playbook_headers, verify=False)
-                break
-        else:
-            creation_status = play_create(raw, repo_sigma,"imported", "import", "import", "DRL-1.0", filen, "NA") #changed filename added to play_create
+        creation_status = play_create(raw, repo_sigma,"imported", "import", "import", "DRL-1.0", filen, "NA", enable_play) #changed filename added to play_create
+        if creation_status['play_creation'] == 201:
+            import_count = import_count + 1
         
-        fileloc = filen.rfind('/')
-        file = filen[filen.rfind('/') + 1:]
-        dst = "/SOCtopus/custom/sigma/" + file
-        shutil.copyfile(filen, dst)
+    import_status = f"{import_count} Play/s Imported Successfully."
         
-
-    update_payload = {"issue": {"subject": "Sigma Options", "project_id": 3, "tracker": "Sigma Options", "custom_fields": [ 
-        {"id": 38, "name": "Import Custom Sigmas", "value": 0}]}} #changed adding filename to sigma after importing
-    url = f"{playbook_url}/issues/{issue_id}.json"
-    r = requests.put(url, data=json.dumps(update_payload), headers=playbook_headers, verify=False)
-
-    return 
+    return import_status
 
 # Imports rules when Sigma Options -> Backup is selected - backs up up all non community rules or community rules with auto update disabled 
 # Backed up to /custom/backup
@@ -586,7 +562,7 @@ def sigma_metadata(sigma_raw, sigma, play_id):
     }
 
 
-def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group="", license="", filename="", sigma_url=""):
+def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group="", license="", filename="", sigma_url="", enable=False):
     # Expects Sigma in dict format
 
     # Generate a unique ID for the Play
@@ -640,6 +616,9 @@ def play_create(sigma_raw, sigma_dict, playbook="imported", ruleset="", group=""
         # Notate success & Play URL
         play_creation = 201
         play_url = f"{playbook_external_url}/issues/{new_issue_id['issue']['id']}"
+        if enable:
+            enable_payload = {"issue": {"status_id": "3"}}
+            enable_play = requests.put(url, data=json.dumps(enable_payload), headers=playbook_headers, verify=playbook_verifycert)
     # If Play creation was not successful, return the status code
     else:
         print("Play Creation Error - " + r.text, file=sys.stderr)
