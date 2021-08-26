@@ -45,6 +45,6 @@ RUN yum -y install epel-release bash libpcap iproute && \
 # Copy over the entry script.
 ADD files/so-suricata.sh /usr/local/sbin/so-suricata.sh
 
-RUN chmod +x /usr/local/sbin/so-suricata.sh && chown 940:940 /var/run/suricata
+RUN chmod +x /usr/local/sbin/so-suricata.sh
 
 ENTRYPOINT ["/usr/local/sbin/so-suricata.sh"]
