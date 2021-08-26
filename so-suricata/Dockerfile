@@ -32,7 +32,7 @@ FROM ghcr.io/security-onion-solutions/centos:7
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
 
-COPY --from=builder /suricata/suriinstall/ /suri/
+COPY --from=builder /suricata/suriinstall/ /
 
 RUN yum -y install epel-release bash libpcap iproute && \
     yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
