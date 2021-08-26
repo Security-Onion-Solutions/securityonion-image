@@ -25,13 +25,13 @@ WORKDIR /suricata
 
 RUN wget https://www.openinfosecfoundation.org/download/suricata-$SURIVERSION.tar.gz && tar zxvf suricata-$SURIVERSION.tar.gz && \
     cd suricata-$SURIVERSION && ./configure --enable-rust --enable-luajit --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var && make
-RUN mkdir suriinstall && cd suricata-$SURIVERSION && make install DESTDIR=/suricata/suriinstall && make install-conf DESTDIR=/suricata/suriinstall
+RUN mkdir suriinstall && cd suricata-$SURIVERSION && make install DESTDIR=/suricata/suriinstall && make install-conf DESTDIR=/suricata/suriinstall && rm -rf /suricata/suriinstall/var/run
 
 FROM ghcr.io/security-onion-solutions/centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
-RUN mkdir /suri
+
 COPY --from=builder /suricata/suriinstall/ /suri/
 
 RUN yum -y install epel-release bash libpcap iproute && \
