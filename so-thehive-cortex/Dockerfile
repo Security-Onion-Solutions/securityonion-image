@@ -36,6 +36,7 @@ RUN apt-get --no-install-recommends --no-install-suggests -y install \
     exiftool \
     locales \
     libmagic1 \
+    netbase \
     whois
 
 RUN locale-gen en_US.UTF-8
