@@ -16,14 +16,14 @@ RUN wget http://f00l.de/pcapfix/pcapfix-${PCAPFIX_VERSION}.tar.gz && \
 
 FROM ghcr.io/security-onion-solutions/python:3-slim
 
-ADD calculate_timestamp.sh /calculate_timestamp.sh
-RUN chmod +x /calculate_timestamp.sh
+ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
+RUN chmod +x /evtx_calc_timestamps.sh
 
 # libwiretap11 is required for capinfo libaries
 # jq is required for evtx timestamp script
 RUN apt-get update && apt-get install -y --no-install-recommends --force-yes libwiretap11 git jq && rm -rf /var/lib/apt/lists/*
-RUN pip3 install evtx elasticsearch tqdm orjson
-RUN git clone --depth 1 --branch v1.4.6 https://github.com/sumeshi/evtx2es.git
+RUN pip3 install evtx elasticsearch tqdm orjson importlib_metadata
+RUN pip3 install evtx2es --no-dependencies
 
 COPY --from=builder /usr/bin/pcapfix /usr/bin/
 COPY --from=builder /usr/bin/capinfos /usr/bin/
