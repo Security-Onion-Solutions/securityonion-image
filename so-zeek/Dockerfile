@@ -25,7 +25,7 @@ RUN yum update -y && \
     yum -y install devtoolset-7-gcc-c++ cmake3 wget && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
-ENV ZEEKVER=4.0.3
+ENV ZEEKVER=4.0.4
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
