@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/curator
+FROM alpine:3
 
 LABEL maintainer "Security Onion Solutions, LLC"
 
@@ -24,6 +24,10 @@ ARG USERNAME=curator
 ENV LC_ALL=en_US.UTF-8
 
 USER root
+
+RUN apk --no-cache add python3 py-setuptools py-pip gcc libffi py-cffi python3-dev libffi-dev py-openssl musl-dev linux-headers openssl-dev && \
+    pip install elasticsearch-curator && \
+    apk del gcc python3-dev libffi-dev musl-dev linux-headers openssl-dev
 
 RUN addgroup -g ${GID} ${USERNAME} && \
     adduser -u ${UID} -G ${USERNAME} -D -H ${USERNAME}

@@ -13,16 +13,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+FROM ghcr.io/security-onion-solutions/centos:7 as builder
+
+RUN yum -y install epel-release
+RUN yum -y install jansson-devel libpcap-devel python3 libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
+
+ENV SURIVERSION=6.0.3
+RUN mkdir /suricata
+
+WORKDIR /suricata
+
+RUN wget https://www.openinfosecfoundation.org/download/suricata-$SURIVERSION.tar.gz && tar zxvf suricata-$SURIVERSION.tar.gz && \
+    cd suricata-$SURIVERSION && ./configure --enable-rust --enable-luajit --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var && make
+RUN mkdir suriinstall && cd suricata-$SURIVERSION && make install DESTDIR=/suricata/suriinstall && make install-conf DESTDIR=/suricata/suriinstall && rm -rf /suricata/suriinstall/var/run
+
 FROM ghcr.io/security-onion-solutions/centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="Suricata 6.0.3 running in a docker for use with Security Onion."
+LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
 
-# Common CentOS layer
+COPY --from=builder /suricata/suriinstall/ /
+
 RUN yum -y install epel-release bash libpcap iproute && \
     yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
-    rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/securityonion-suricata-6.0.3.0/securityonion-suricata-6.0.3.0.rpm && \
     groupadd --gid 940 suricata && \
     adduser --uid 940 --gid 940 --home-dir /etc/suricata --no-create-home suricata && \
     chown -R 940:940 /etc/suricata && \
@@ -31,6 +45,6 @@ RUN yum -y install epel-release bash libpcap iproute && \
 # Copy over the entry script.
 ADD files/so-suricata.sh /usr/local/sbin/so-suricata.sh
 
-RUN chmod +x /usr/local/sbin/so-suricata.sh && chown 940:940 /var/run/suricata
+RUN chmod +x /usr/local/sbin/so-suricata.sh
 
 ENTRYPOINT ["/usr/local/sbin/so-suricata.sh"]
