@@ -14,12 +14,12 @@ from elasticsearch.client import IndicesClient
 from elasticsearch.exceptions import NotFoundError
 from envparse import Env
 
-from .auth import Auth
+from elastalert.auth import Auth
 
 env = Env(ES_USE_SSL=bool)
 
-def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None, index_settings=None):
 
+def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None, index_settings=None):
     if index_settings is not None:
         settings = {'settings': {'index': {}}}
         if index_settings["shards"] is not None:
@@ -29,8 +29,13 @@ def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None
     else:
         settings = None
 
-    esversion = es_client.info()["version"]["number"]
-    print("Elastic Version: " + esversion)
+    esinfo = es_client.info()['version']
+    if esinfo.get('distribution') == "opensearch":
+        # OpenSearch is based on Elasticsearch 7.10.2, currently only v1.0.0 exists
+        # https://opensearch.org/
+        esversion = "7.10.2"
+    else:
+        esversion = esinfo['number']
 
     es_index_mappings = read_es_index_mappings() if is_atleastsix(esversion) else read_es_index_mappings(5)
 
@@ -161,6 +166,8 @@ def main():
     parser.add_argument('--port', default=os.environ.get('ES_PORT', None), type=int, help='Elasticsearch port')
     parser.add_argument('--username', default=os.environ.get('ES_USERNAME', None), help='Elasticsearch username')
     parser.add_argument('--password', default=os.environ.get('ES_PASSWORD', None), help='Elasticsearch password')
+    parser.add_argument('--bearer', default=os.environ.get('ES_BEARER', None), help='Elasticsearch bearer token')
+    parser.add_argument('--api-key', default=os.environ.get('ES_API_KEY', None), help='Elasticsearch api-key token')
     parser.add_argument('--url-prefix', help='Elasticsearch URL prefix')
     parser.add_argument('--no-auth', action='store_const', const=True, help='Suppress prompt for basic auth')
     parser.add_argument('--ssl', action='store_true', default=env('ES_USE_SSL', None), help='Use TLS')
@@ -169,7 +176,6 @@ def main():
     parser.add_argument('--no-verify-certs', dest='verify_certs', action='store_false',
                         help='Do not verify TLS certificates')
     parser.add_argument('--index', help='Index name to create')
-    parser.add_argument('--alias', help='Alias name to create')
     parser.add_argument('--old-index', help='Old index name to copy')
     parser.add_argument('--send_get_body_as', default='GET',
                         help='Method for querying Elasticsearch - POST, GET or source')
@@ -207,6 +213,8 @@ def main():
         index_settings = data.get('index_settings')
         username = args.username if args.username else data.get('es_username')
         password = args.password if args.password else data.get('es_password')
+        bearer = args.bearer if args.bearer else data.get('es_bearer')
+        api_key = args.api_key if args.api_key else data.get('es_api_key')
         url_prefix = args.url_prefix if args.url_prefix is not None else data.get('es_url_prefix', '')
         use_ssl = args.ssl if args.ssl is not None else data.get('use_ssl')
         verify_certs = args.verify_certs if args.verify_certs is not None else data.get('verify_certs') is not False
@@ -216,12 +224,13 @@ def main():
         client_cert = data.get('client_cert')
         client_key = data.get('client_key')
         index = args.index if args.index is not None else data.get('writeback_index')
-        alias = args.alias if args.alias is not None else data.get('writeback_alias')
         old_index = args.old_index if args.old_index is not None else None
     else:
         username = args.username if args.username else None
         password = args.password if args.password else None
         index_settings = None
+        bearer = args.bearer if args.bearer else None
+        api_key = args.api_key if args.api_key else None
         aws_region = args.aws_region
         host = args.host if args.host else input('Enter Elasticsearch host: ')
         port = args.port if args.port else int(input('Enter Elasticsearch port: '))
@@ -244,9 +253,6 @@ def main():
         index = args.index if args.index is not None else input('New index name? (Default elastalert_status) ')
         if not index:
             index = 'elastalert_status'
-        alias = args.alias if args.alias is not None else input('New alias name? (Default elastalert_alerts) ')
-        if not alias:
-            alias = 'elastalert_alias'
         old_index = (args.old_index if args.old_index is not None
                      else input('Name of existing index to copy? (Default None) '))
 
@@ -258,6 +264,13 @@ def main():
                      password=password,
                      aws_region=aws_region,
                      profile_name=args.profile)
+
+    headers = {}
+    if bearer is not None:
+        headers.update({'Authorization': f'Bearer {bearer}'})
+    if api_key is not None:
+        headers.update({'Authorization': f'ApiKey {api_key}'})
+
     es = Elasticsearch(
         host=host,
         port=port,
@@ -266,6 +279,7 @@ def main():
         verify_certs=verify_certs,
         connection_class=RequestsHttpConnection,
         http_auth=http_auth,
+        headers=headers,
         url_prefix=url_prefix,
         send_get_body_as=send_get_body_as,
         client_cert=client_cert,

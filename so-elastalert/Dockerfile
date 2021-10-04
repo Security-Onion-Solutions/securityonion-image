@@ -1,13 +1,15 @@
-FROM ghcr.io/security-onion-solutions/elastalert-docker:latest-alt
+FROM ghcr.io/jertel/elastalert2/elastalert2:2.2.2
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=933
 ARG UID=933
-ARG USERNAME=elastalert
+ARG USERNAME=so-elastalert
 
-RUN addgroup -g ${GID} ${USERNAME} && \
-    adduser -D --uid ${UID} --ingroup ${USERNAME} \
-      --home /opt/elastalert --no-create-home ${USERNAME}
+USER root
+
+RUN groupadd -g ${GID} ${USERNAME} && \
+    useradd -u ${UID} -g ${GID} -M -b /opt/elastalert -s /sbin/nologin \
+        -c "ElastAlert 2 User" ${USERNAME}
 
 COPY ./files /custom
 
