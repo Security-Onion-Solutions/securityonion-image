@@ -37,6 +37,7 @@ RUN apt-get --no-install-recommends --no-install-suggests -y install \
     locales \
     libmagic1 \
     netbase \
+    openjdk-8-jre \
     whois
 
 RUN locale-gen en_US.UTF-8

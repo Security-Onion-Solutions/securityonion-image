@@ -34,6 +34,7 @@ RUN echo 'deb https://deb.thehive-project.org release main' | tee -a /etc/apt/so
     curl -s https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | apt-key add - > /dev/null 2>&1
 
 RUN apt-get update \
+  && apt-get -y install openjdk-8-jre \
   && apt-get -y install thehive
 
 RUN groupmod -g 939 thehive \
