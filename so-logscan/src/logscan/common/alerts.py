@@ -41,7 +41,7 @@ def gen_alert_list(dataset: List, model: keras.Model, prediction_threshold: floa
 
     for data, metadata in dataset:
         if not exit_event.is_set():
-            if check_write_history(metadata): 
+            if check_write_history(metadata):
                 continue
             alert = __gen_alert(data, metadata, model, prediction_threshold)
             if alert is not None:
@@ -49,7 +49,7 @@ def gen_alert_list(dataset: List, model: keras.Model, prediction_threshold: floa
         else:
             exit_early = True
             break
-    
+
     alert_list.sort(key=lambda x: x.get('timestamp'))
 
     return alert_list, exit_early

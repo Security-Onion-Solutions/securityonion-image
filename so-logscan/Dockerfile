@@ -1,4 +1,4 @@
-FROM python:3-slim
+FROM ghcr.io/security-onion-solutions/python:3-slim
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Log scanning machine learning models running in Docker container for use with Security Onion"
