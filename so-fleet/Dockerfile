@@ -18,14 +18,15 @@ LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Fleet running in Docker container for use with Security Onion"
 
 RUN apk --update add ca-certificates unzip curl bash
+
+COPY startfleet.sh /startfleet.sh
+RUN chmod +x /startfleet.sh
+
 RUN mkdir -p /tmp/fleet && cd /tmp/fleet \
 && curl -OL  https://github.com/fleetdm/fleet/releases/download/3.9.0/fleet.zip \
 && unzip fleet.zip 'linux/*' \
 && cp linux/fleet /usr/bin/fleet \
 && cp linux/fleetctl /usr/bin/fleetctl \
 && cd /tmp && rm -rf /tmp/fleet
-
-COPY startfleet.sh /startfleet.sh
-RUN chmod +x /startfleet.sh
 
 ENTRYPOINT ["/startfleet.sh"]
