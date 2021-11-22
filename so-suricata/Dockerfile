@@ -18,7 +18,7 @@ FROM ghcr.io/security-onion-solutions/centos:7 as builder
 RUN yum -y install epel-release
 RUN yum -y install jansson-devel libpcap-devel python3 libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
 
-ENV SURIVERSION=6.0.3
+ENV SURIVERSION=6.0.4
 RUN mkdir /suricata
 
 WORKDIR /suricata
