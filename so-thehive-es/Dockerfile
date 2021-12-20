@@ -25,7 +25,7 @@ ENV PATH /usr/share/elasticsearch/bin:$PATH
 
 WORKDIR /usr/share/elasticsearch
 
-RUN groupadd -g 939 socore && adduser -u 939 -g 939 -d /usr/share/elasticsearch socore
+RUN groupadd -g 939 socore && adduser --uid 939 --gid 939 --home /usr/share/elasticsearch socore
 RUN set -ex && for esdirs in config data logs; do \
         mkdir -p "$esdirs"; \
     done; \
