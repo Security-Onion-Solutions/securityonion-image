@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.16.2
 
 LABEL maintainer "Security Onion Solutions, LLC"
 
@@ -25,7 +25,7 @@ ENV PATH /usr/share/elasticsearch/bin:$PATH
 
 WORKDIR /usr/share/elasticsearch
 
-RUN groupadd -g 939 socore && adduser -u 939 -g 939 -d /usr/share/elasticsearch socore
+RUN groupadd -g 939 socore && adduser --uid 939 --gid 939 --home /usr/share/elasticsearch socore
 RUN set -ex && for esdirs in config data logs; do \
         mkdir -p "$esdirs"; \
     done; \

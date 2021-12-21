@@ -38,6 +38,8 @@ RUN set -ex && for esdirs in config data logs; do \
 COPY *.yml log4j2.properties config/
 COPY bin bin
 
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
 RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
     chmod 0750 bin/es-docker
 
