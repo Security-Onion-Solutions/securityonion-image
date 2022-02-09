@@ -1,4 +1,4 @@
-# Copyright 2014-2021 Security Onion Solutions, LLC
+# Copyright 2014-2022 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@ COPY startfleet.sh /startfleet.sh
 RUN chmod +x /startfleet.sh
 
 RUN mkdir -p /tmp/fleet && cd /tmp/fleet \
-&& curl -OL  https://github.com/fleetdm/fleet/releases/download/fleet-v4.5.0/fleet_v4.5.0_linux.tar.gz \
-&& curl -OL https://github.com/fleetdm/fleet/releases/download/fleet-v4.5.0/fleetctl_v4.5.0_linux.tar.gz \
+&& curl -OL  https://github.com/fleetdm/fleet/releases/download/fleet-v4.8.0/fleet_v4.8.0_linux.tar.gz \
+&& curl -OL https://github.com/fleetdm/fleet/releases/download/fleet-v4.8.0/fleetctl_v4.8.0_linux.tar.gz \
 && for file in *.tar.gz; do tar -zxf "$file"; done \
 && cp fleet_*_linux/fleet /usr/bin/fleet \
 && cp fleetctl_*_linux/fleetctl /usr/bin/fleetctl \

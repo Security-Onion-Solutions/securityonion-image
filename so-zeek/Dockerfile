@@ -1,4 +1,4 @@
-# Copyright 2014-2020 Security Onion Solutions, LLC
+# Copyright 2014-2022 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ RUN yum update -y && \
     yum -y install devtoolset-7-gcc-c++ cmake3 wget && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
-ENV ZEEKVER=4.0.4
+ENV ZEEKVER=4.0.5
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
