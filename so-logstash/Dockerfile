@@ -54,6 +54,10 @@ RUN chmod 0755 /usr/local/bin/docker-entrypoint
 
 USER logstash
 
+# 2022-02-16 | jertel - Temporary fix while Logstash teams works on fixing an unpinned Ruby Gem. 
+# See https://github.com/elastic/logstash/issues/13777 for more information.
+RUN sed --in-place "s/gem.add_runtime_dependency \"sinatra\", '~> 2'/gem.add_runtime_dependency \"sinatra\", '~> 2.1.0'/g" /usr/share/logstash/logstash-core/logstash-core.gemspec 
+
 RUN cd /usr/share/logstash && LOGSTASH_PACK_URL=https://artifacts.elastic.co/downloads/logstash-plugins && \
   logstash-plugin install logstash-filter-translate \
                           logstash-filter-tld \
