@@ -1,4 +1,3 @@
-from grr_api_client import api
 import json
 import requests
 from requests.auth import HTTPBasicAuth

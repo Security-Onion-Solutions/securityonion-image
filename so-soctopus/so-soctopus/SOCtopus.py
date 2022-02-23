@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
-from destinations import createHiveAlert, createHiveCase, createMISPEvent, createSlackAlert, createFIREvent, createGRRFlow, \
+from destinations import createHiveAlert, createHiveCase, createMISPEvent, createSlackAlert, createFIREvent, \
     createRTIRIncident, showESResult, playbookWebhook, eventModifyFields, eventUpdateFields, \
     sendHiveAlert, sendHiveCase, processHiveReq, playbookSigmac, playbookCreatePlay
 import ruamel.yaml
