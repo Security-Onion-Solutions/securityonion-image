@@ -63,6 +63,7 @@ VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/e
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
 RUN chmod +x /usr/local/sbin/zeek.sh
+RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el7.x86_64.rpm
 
 HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
