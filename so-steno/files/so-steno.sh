@@ -5,4 +5,4 @@
 
 chown -R 941:939 /etc/stenographer/certs
 
-runuser -l stenographer -c '/usr/bin/stenographer --syslog=false >> /var/log/stenographer/stenographer.log 2>&1' 
+exec runuser -l stenographer -c 'exec >> /var/log/stenographer/stenographer.log 2>&1 /usr/bin/stenographer --syslog=false' 
