@@ -4,8 +4,6 @@ from helpers import get_hits, get_conn, do_update
 from thehive4py.api import TheHiveApi
 from thehive4py.models import Alert, AlertArtifact
 from pymisp import PyMISP
-from grr_api_client import api
-from grr import listProcessFlow, checkFlowStatus, downloadFlowResults
 from requests.auth import HTTPBasicAuth
 from flask import redirect, render_template, jsonify
 from forms import DefaultForm

@@ -22,7 +22,7 @@ RUN chmod +x /evtx_calc_timestamps.sh
 # libwiretap11 is required for capinfo libaries
 # jq is required for evtx timestamp script
 RUN apt-get update && apt-get install -y --no-install-recommends --force-yes libwiretap11 git jq && rm -rf /var/lib/apt/lists/*
-RUN pip3 install evtx elasticsearch tqdm orjson importlib_metadata
+RUN pip3 install evtx elasticsearch==7.17.1 tqdm orjson importlib_metadata
 RUN pip3 install evtx2es --no-dependencies
 
 COPY --from=builder /usr/bin/pcapfix /usr/bin/

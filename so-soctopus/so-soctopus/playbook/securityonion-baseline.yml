@@ -11,6 +11,10 @@ logsources:
   windows:
     product: windows
     index: "*:so-*"
+  idh-opencanary:
+    product: opencanary
+    conditions:
+      event.module: 'opencanary'
   suricata-alerts:
     product: suricata
     service: alert
@@ -100,6 +104,7 @@ fieldmappings:
     Initiated: winlog.event_data.Initiated
     LogonProcessName: winlog.event_data.LogonProcessName
     LogonType: winlog.event_data.LogonType
+    logtype: event.code
     NewProcessName: winlog.event_data.NewProcessName
     ObjectClass: winlog.event_data.ObjectClass
     ObjectName: winlog.event_data.ObjectName

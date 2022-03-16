@@ -1,4 +1,4 @@
-# Copyright 2014-2021 Security Onion Solutions, LLC
+# Copyright 2014-2022 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ FROM ghcr.io/security-onion-solutions/centos:7 as builder
 RUN yum -y install epel-release
 RUN yum -y install jansson-devel libpcap-devel python3 libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
 
-ENV SURIVERSION=6.0.3
+ENV SURIVERSION=6.0.4
 RUN mkdir /suricata
 
 WORKDIR /suricata
@@ -46,5 +46,6 @@ RUN yum -y install epel-release bash libpcap iproute && \
 ADD files/so-suricata.sh /usr/local/sbin/so-suricata.sh
 
 RUN chmod +x /usr/local/sbin/so-suricata.sh
+RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el7.x86_64.rpm
 
 ENTRYPOINT ["/usr/local/sbin/so-suricata.sh"]

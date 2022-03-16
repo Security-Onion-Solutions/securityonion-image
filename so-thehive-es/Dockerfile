@@ -1,7 +1,7 @@
 # This Dockerfile was based on the official Elasticsearch Docker image:
 # https://github.com/elastic/elasticsearch-docker
 
-# Copyright 2014,2015,2016,2017,2019,2020 Security Onion Solutions, LLC
+# Copyright 2014-2022 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.1
 
 LABEL maintainer "Security Onion Solutions, LLC"
 
@@ -25,7 +25,7 @@ ENV PATH /usr/share/elasticsearch/bin:$PATH
 
 WORKDIR /usr/share/elasticsearch
 
-RUN groupadd -g 939 socore && adduser -u 939 -g 939 -d /usr/share/elasticsearch socore
+RUN groupadd -g 939 socore && adduser --uid 939 --gid 939 --home /usr/share/elasticsearch socore
 RUN set -ex && for esdirs in config data logs; do \
         mkdir -p "$esdirs"; \
     done; \

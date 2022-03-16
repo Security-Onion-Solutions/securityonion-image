@@ -1,4 +1,4 @@
-# Copyright 2014-2021 Security Onion Solutions, LLC
+# Copyright 2014-2022 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,14 +18,16 @@ LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Fleet running in Docker container for use with Security Onion"
 
 RUN apk --update add ca-certificates unzip curl bash
-RUN mkdir -p /tmp/fleet && cd /tmp/fleet \
-&& curl -OL  https://github.com/fleetdm/fleet/releases/download/3.9.0/fleet.zip \
-&& unzip fleet.zip 'linux/*' \
-&& cp linux/fleet /usr/bin/fleet \
-&& cp linux/fleetctl /usr/bin/fleetctl \
-&& cd /tmp && rm -rf /tmp/fleet
 
 COPY startfleet.sh /startfleet.sh
 RUN chmod +x /startfleet.sh
+
+RUN mkdir -p /tmp/fleet && cd /tmp/fleet \
+&& curl -OL  https://github.com/fleetdm/fleet/releases/download/fleet-v4.10.0/fleet_v4.10.0_linux.tar.gz \
+&& curl -OL https://github.com/fleetdm/fleet/releases/download/fleet-v4.10.0/fleetctl_v4.10.0_linux.tar.gz \
+&& for file in *.tar.gz; do tar -zxf "$file"; done \
+&& cp fleet_*_linux/fleet /usr/bin/fleet \
+&& cp fleetctl_*_linux/fleetctl /usr/bin/fleetctl \
+&& cd /tmp && rm -rf /tmp/fleet
 
 ENTRYPOINT ["/startfleet.sh"]

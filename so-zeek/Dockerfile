@@ -1,4 +1,4 @@
-# Copyright 2014-2020 Security Onion Solutions, LLC
+# Copyright 2014-2022 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ RUN yum update -y && \
     yum -y install devtoolset-7-gcc-c++ cmake3 wget && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
 
-ENV ZEEKVER=4.0.4
+ENV ZEEKVER=4.0.5
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -63,6 +63,7 @@ VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/e
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
 RUN chmod +x /usr/local/sbin/zeek.sh
+RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el7.x86_64.rpm
 
 HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
