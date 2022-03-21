@@ -42,7 +42,7 @@ COPY bin bin
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
-    chmod 0750 bin/es-docker && elasticsearch-plugin install -b repository-s3
+    chmod 0750 bin/es-docker
 
 # Enable the following lines if custom plugins are to be included in this image.
 # COPY plugins-src /plugins-src
