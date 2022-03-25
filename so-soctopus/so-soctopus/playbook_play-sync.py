@@ -10,7 +10,6 @@ import playbook
 urllib3.disable_warnings()
 
 active_elastalert_counter = 0
-active_hive_counter = 0
 inactive_elastalert_counter = 0
 active_plays = []
 inactive_plays = []
@@ -41,15 +40,12 @@ while offset < response['total_count']:
 print(f"\n-= Parsed Playbook Plays: {len(active_plays)} -=\n")
 
 for play in active_plays:
-    play_hiveid = None
 
     for item in play['custom_fields']:
         if item['name'] == "PlayID":
             play_id = item['value']
-        elif item['name'] == "HiveID":
-            play_hiveid = item['value']
 
-    print(f"\n\n{play_id} -- {play_hiveid}")
+    print(f"\n\n{play_id}")
 
     play_file = f"/etc/playbook-rules/{play_id}.yaml"
     if os.path.exists(play_file):
@@ -59,13 +55,6 @@ for play in active_plays:
         active_elastalert_counter += 1
         playbook.elastalert_update(play['id'])
         time.sleep(.5)
-
-    if (play_hiveid == "") or (play_id is None):
-        print('Warning - HiveID doesnt exist')
-        active_hive_counter += 1
-        playbook.thehive_casetemplate_update(play['id'])
-    else:
-        print('All Good - HiveID Exists')
 
 
 # Get inactive plays from Playbook - id = 4
@@ -103,7 +92,6 @@ print(f"\n\n-= Maintenance Summary =-\n\n"
       f"Active Plays: {response['total_count']}"
       f"\n-----------------\n"
       f"Missing ElastAlert Configs: {active_elastalert_counter}\n"
-      f"Missing HiveIDs: {active_hive_counter}\n\n"
       f"Inactive Plays: {inactive_response['total_count']}\n"
       f"-----------------\n"
       f"Out of Sync ElastAlert Configs: {inactive_elastalert_counter}"
