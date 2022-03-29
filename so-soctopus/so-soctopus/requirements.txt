@@ -2,7 +2,7 @@ urllib3>=1.26.5
 certifi>=2019.11
 flask-bootstrap>=3.3.7.0
 Flask==2.0.3
-Flask-WTF>=0.14,<0.15
+Flask-WTF>==1.0.0
 jsonpickle>=1.2
 pymisp>=2.4,<2.5
 requests>=2.25,<2.26
@@ -10,3 +10,4 @@ rt>=2.0,<2.1
 ruamel.yaml>=0.16,<0.17
 sigmatools==0.18.1
 thehive4py>=1.6,<1.7
+Werkzeug~=2.0.0
