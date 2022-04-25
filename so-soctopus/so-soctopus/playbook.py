@@ -29,8 +29,6 @@ playbook_external_url = parser.get("playbook", "playbook_ext_url")
 playbook_unit_test_index = parser.get("playbook", "playbook_unit_test_index")
 playbook_verifycert = parser.getboolean('playbook', 'playbook_verifycert', fallback=False)
 
-hive_headers = {'Authorization': f"Bearer {parser.get('hive', 'hive_key')}", 'Accept': 'application/json, text/plain',
-                'Content-Type': 'application/json;charset=utf-8'}
 
 es_url = parser.get("es", "es_url")
 es_ip = parser.get("es", "es_ip")
@@ -251,69 +249,6 @@ def navigator_update():
         json.dump(curr_json, nav_layer_w)
 
 
-def thehive_casetemplate_update(issue_id):
-    # Get play metadata - specifically the raw Sigma
-    play_meta = play_metadata(issue_id)
-
-    # Generate Sigma metadata
-    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
-
-    # Check to see if there are any tasks - if so, get them formatted
-    tasks = []
-    if sigma_meta.get('tasks'):
-        task_order = 0
-        for task_title, task_desc in sigma_meta.get('tasks').items():
-            task_order += 1
-            tasks.append({"order": task_order, "title": task_title, "description": task_desc})
-    else:
-        tasks = []
-
-    for analyzer in play_meta['case_analyzers']:
-        minimal_name = re.sub(r' - \S*$', '', analyzer)
-        tasks.insert(0, {"order": 0, "title": f"Analyzer - {minimal_name}", "description": minimal_name})
-
-    # Build the case template
-    case_template = \
-        {
-            "name": play_meta['playid'], 
-            "severity": 2, 
-            "tlp": 3, 
-            "metrics": {}, 
-            "customFields": {
-                "playObjective": {
-                    "string": sigma_meta['description']
-                },
-                "playbookLink": {
-                    "string": f"{playbook_url}/issues/{issue_id}"
-                }
-            },
-            "description": sigma_meta['description'],
-            "tasks": tasks
-        }
-
-    # Is there a Case Template already created?
-    if play_meta['hiveid']:
-        # Case Template exists - let's update it
-        url = f"{parser.get('hive', 'hive_url')}api/case/template/{play_meta['hiveid']}"
-        requests.patch(url, data=json.dumps(case_template), headers=hive_headers,
-                       verify=parser.getboolean('hive', 'hive_verifycert', fallback=False)).json()
-    else:
-        # Case Template does not exist - let's create it
-        url = f"{parser.get('hive', 'hive_url')}api/case/template"
-        r = requests.post(url, data=json.dumps(case_template), headers=hive_headers,
-                          verify=parser.getboolean('hive', 'hive_verifycert', fallback=False))
-
-        if r.status_code != 201:    
-            print(f"TheHive Template Creation Failed: {r.__dict__}", file=sys.stderr)
-        else:
-            # Update Play (on Redmine) with Case Template ID
-            r = r.json()
-            url = f"{playbook_url}/issues/{issue_id}.json"
-            data = '{"issue":{"custom_fields":[{"id":7,"value":"' + r['id'] + '"}]}}'
-            requests.put(url, data=data, headers=playbook_headers, verify=playbook_verifycert)
-
-    return 200, "success"
-
 
 def elastalert_update(issue_id):
     # Get play metadata - specifically the raw Sigma
@@ -356,24 +291,6 @@ def elastalert_update(issue_id):
             content = f.read()
             f.seek(0)
             f.truncate()
-            # If Severity is High (3) or Critical (4), substitute Play metadata in TheHive alerter
-            if event_severity >= 3:
-                # Sub Severity 
-                content = re.sub(r' severity:.*', f" severity: {event_severity}", content.rstrip())
-                # Sub Play Name & Play ID for Elastalert Rule Name
-                content = re.sub(r' title:.*', f" title: '{{rule[name]}} - {play_meta['playbook']}'", content.rstrip())          
-                # Sub Play Name and Playbook Name for TheHive Alert Title
-                content = re.sub(r'\btitle: .*', f"title: \"{sigma_meta['title']} - {play_meta['playbook']}\"", content.rstrip())          
-                # Sub Play Tags
-                content = re.sub(r'tags:.*', f"tags: ['playbook','playid-{play_meta['playid']}','{play_meta['playbook']}']",
-                            content.rstrip())
-                # Sub Redmine IssueID
-                content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
-                # Sub Case Template
-                content = re.sub(r'caseTemplate:.*', f"caseTemplate: '{play_meta['playid']}'", content.rstrip())
-            else:
-                # This is a low Severity alert - Remove TheHive alerter 
-                content = re.sub(r"- \"hivealerter\"[\s\S]*5000'", "", content.rstrip()) 
             # Sub details in the ES_Alerter - play URL, etc
             content = re.sub(r'rule\.category:.*', f"rule.category: \"{rule_category}\"", content.rstrip())
             content = re.sub(r'\/6000', f"/{issue_id}", content.rstrip())
@@ -450,8 +367,6 @@ def play_metadata(issue_id):
     for item in r['issue']['custom_fields']:
         if item['name'] == "Sigma":
             sigma_raw = item['value']
-        elif item['name'] == "HiveID":
-            play['hiveid'] = item['value']
         elif item['name'] == "PlayID":
             play['playid'] = item['value']
         elif item['name'] == "Playbook":
@@ -486,7 +401,6 @@ def play_metadata(issue_id):
     return {
         'issue_id': issue_id,
         'playid': play.get('playid'),
-        'hiveid': play.get('hiveid'),
         'sigma_dict': sigma_dict,
         'sigma_raw': sigma_raw,
         'sigma_formatted': f'{{{{collapse(View Sigma)\n<pre><code class="yaml">\n\n{sigma_raw}\n</code></pre>\n}}}}',

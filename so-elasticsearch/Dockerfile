@@ -25,6 +25,7 @@ ARG UID=930
 ARG USERNAME=elasticsearch
 ARG FLAVOR
 
+USER root 
 RUN groupmod -g ${GID} ${USERNAME} && \
     usermod -u ${UID} -g ${GID} ${USERNAME}
 

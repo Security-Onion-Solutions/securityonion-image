@@ -1,1 +1,1 @@
-Suricata 6.0.2
+Suricata Docker Container

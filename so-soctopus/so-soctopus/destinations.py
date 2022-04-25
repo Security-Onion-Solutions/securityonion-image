@@ -542,7 +542,6 @@ def playbookWebhook(webhook_content):
                 if issue_status_name == "Active" and not detection_updated:
                     detection_updated = True
                     playbook.elastalert_update(issue_id)
-                    playbook.thehive_casetemplate_update(issue_id)
                 elif issue_status_name == "Inactive" and not detection_updated:
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
@@ -553,7 +552,6 @@ def playbookWebhook(webhook_content):
                     # Status = Active --> Enable EA & TheHive
                     detection_updated = True
                     playbook.elastalert_update(issue_id)
-                    playbook.thehive_casetemplate_update(issue_id)
                 elif item['value'] == '4':
                     # Status = Inactive --> Disable EA
                     detection_updated = True
