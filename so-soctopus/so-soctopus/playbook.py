@@ -211,7 +211,6 @@ def navigator_update():
     try:
         with open('/etc/playbook/nav_layer_playbook.json') as nav_layer_r:
             curr_json = json.load(nav_layer_r)
-        curr_json['version'] = "3.0"
         curr_json['description'] = f'Current Coverage of Playbook - Updated {strftime("%Y-%m-%d %H:%M", gmtime())}'
         curr_json['techniques'] = technique_payload
 
@@ -219,7 +218,6 @@ def navigator_update():
         curr_json = \
             {
                 "name": "Playbook",
-                "version": "3.0",
                 "domain": "mitre-enterprise",
                 "description": f'Current Coverage of Playbook - Updated {strftime("%Y-%m-%d %H:%M", gmtime())}',
                 "filters": {

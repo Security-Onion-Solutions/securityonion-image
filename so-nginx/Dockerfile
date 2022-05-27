@@ -14,9 +14,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM ghcr.io/security-onion-solutions/node:14-alpine as navigator-builder
+FROM ghcr.io/security-onion-solutions/node:16-alpine as navigator-builder
 
-ARG NAVIGATOR_VERSION=3.1
+ARG NAVIGATOR_VERSION=4.6.4
 
 RUN apk add git && \
     git config --global advice.detachedHead false && \
