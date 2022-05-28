@@ -373,7 +373,7 @@ def play_metadata(issue_id):
             play['case_analyzers'] = item['value']
         elif item['name'] == "Rule ID":
             play['sigma_id'] = item['value']
-        elif item['name'] == "Target Log":
+        elif item['name'] == "Custom Filter":
             play['target_log'] = item['value']
         elif item['name'] == "Ruleset":
             play['ruleset'] = item['value']
