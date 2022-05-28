@@ -537,7 +537,7 @@ def playbookWebhook(webhook_content):
                 # Sigma field updated (Sigma field ID is 9) --> Call function - Update Play metadata
                 playbook.play_update(issue_id)
                 # Run Play Unit Test (If Target Log exists)
-                playbook.play_unit_test(issue_id,"Sigma Updated")
+                #playbook.play_unit_test(issue_id,"Sigma Updated")
                 # Create/Update ElastAlert config
                 if issue_status_name == "Active" and not detection_updated:
                     detection_updated = True
@@ -556,13 +556,9 @@ def playbookWebhook(webhook_content):
                     # Status = Inactive --> Disable EA
                     detection_updated = True
                     playbook.elastalert_disable(issue_id)
-            # Check to see if the Play Target Log (Field ID 21) has been updated - if so, run a Unit Test
-            elif item['prop_key'] == '21' and item['old_value'] == "":
-                # First time Target Log has been updated - Normalize log only
-                playbook.play_unit_test(issue_id,"Target Log Updated",True)
-            elif item['prop_key'] == '21' and item['old_value'] != "":
-                # Normalize log (if needed) & run Play unit test
-                playbook.play_unit_test(issue_id,"Target Log Updated")
+            # Check to see if the Play Custom Filter (Field ID 21) has been updated - if so, update elastalert rule
+            elif item['prop_key'] == '21':
+                playbook.play_update(issue_id)
             if item['prop_key'] == '30':  
                 playbook.play_template_backup(issue_id)
             if item['prop_key'] == '27':  

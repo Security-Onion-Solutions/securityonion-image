@@ -253,7 +253,7 @@ def elastalert_update(issue_id):
     play_meta = play_metadata(issue_id)
 
     # Generate Sigma metadata
-    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'], play_meta['target_log'])
 
     play_file = f"/etc/playbook-rules/{play_meta['playid']}.yaml"
 
@@ -334,7 +334,7 @@ def play_update(issue_id):
     play_meta = play_metadata(issue_id)
 
     # Generate Sigma metadata
-    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'])
+    sigma_meta = sigma_metadata(play_meta['sigma_raw'], play_meta['sigma_dict'], play_meta['playid'], play_meta['target_log'])
 
     payload = {"issue": {"subject": sigma_meta['title'], "project_id": 1, "tracker": "Play", "custom_fields": [ \
         {"id": 1, "name": "Title", "value": sigma_meta['title']}, \
@@ -431,9 +431,18 @@ def sigmac_generate(sigma):
     return es_query
 
 
-def sigma_metadata(sigma_raw, sigma, play_id):
+def sigma_metadata(sigma_raw, sigma, play_id, custom_condition=""):
     play = dict()
 
+    # If there is a custom filter, rewrite the Sigma rule
+    if custom_condition != "":
+        sigma_dict = dict()
+        sigma_dict = yaml.load(sigma_raw)
+        old_condition = sigma_dict['detection']['condition']
+        sigma_dict['detection']['condition'] = f'({old_condition}) and not 1 of sofilter*'
+        sigma_dict['detection'] = sigma_dict['detection'] | yaml.load(custom_condition)
+        sigma_raw = sigma_dict
+    
     # Call sigmac tool to generate ElastAlert config
     temp_file = tempfile.NamedTemporaryFile(mode='w+t')
     print(sigma_raw, file=temp_file)
