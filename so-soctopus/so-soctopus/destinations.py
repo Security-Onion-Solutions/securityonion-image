@@ -559,6 +559,7 @@ def playbookWebhook(webhook_content):
             # Check to see if the Play Custom Filter (Field ID 21) has been updated - if so, update elastalert rule
             elif item['prop_key'] == '21':
                 playbook.play_update(issue_id)
+                if issue_status_name == "Active": playbook.elastalert_update(issue_id)
             if item['prop_key'] == '30':  
                 playbook.play_template_backup(issue_id)
             if item['prop_key'] == '27':  
