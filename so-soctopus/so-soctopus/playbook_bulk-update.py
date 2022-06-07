@@ -172,7 +172,7 @@ if os.path.exists(sigma_repo):
         ["git", "pull"], stdout=subprocess.PIPE, encoding='ascii',cwd='/SOCtopus/sigma')
 else:
     git_status = subprocess.run(
-        ["git", "clone", "https://github.com/Security-Onion-Solutions/sigma.git"], stdout=subprocess.PIPE, encoding='ascii')
+        ["git", "clone", "https://github.com/SigmaHQ/sigma.git"], stdout=subprocess.PIPE, encoding='ascii')
 
 
 '''

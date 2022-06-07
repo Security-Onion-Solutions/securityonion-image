@@ -4,6 +4,7 @@
 
 # Virtual Enviorment
 venv/
+.venv/
 
 # Config
 logscan.conf

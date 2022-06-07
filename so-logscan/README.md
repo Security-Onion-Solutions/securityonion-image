@@ -26,7 +26,9 @@ pytest # config pytest using pytest.ini
 cp logscan.conf.example logscan.conf
 ```
 
-5. Run the project one of two ways:
+5. Place a kratos.log file in the ./logs/ subdir (create dir if needed)
+
+6. Run the project one of two ways:
 ```sh
 so-logscan
 # or
