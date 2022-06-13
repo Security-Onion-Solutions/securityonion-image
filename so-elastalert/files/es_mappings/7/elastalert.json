@@ -1,0 +1,26 @@
+{
+  "properties": {
+    "rule_name": {
+      "type": "keyword"
+    },
+    "@timestamp": {
+      "type": "date",
+      "format": "date_optional_time"
+    },
+    "alert_time": {
+      "type": "date",
+      "format": "date_optional_time"
+    },
+    "match_time": {
+      "type": "date",
+      "format": "date_optional_time"
+    },
+    "match_body": {
+      "type": "object",
+      "enabled": "true"
+    },
+    "aggregate_id": {
+      "type": "keyword"
+    }
+  }
+}
