@@ -179,7 +179,6 @@ def main():
             data = yaml.load(config_file, Loader=yaml.FullLoader)
         host = args.host if args.host else data.get('es_host')
         port = args.port if args.port else data.get('es_port')
-        index_settings = data.get('index_settings')
         username = args.username if args.username else data.get('es_username')
         password = args.password if args.password else data.get('es_password')
         bearer = args.bearer if args.bearer else data.get('es_bearer')
@@ -194,10 +193,10 @@ def main():
         client_key = data.get('client_key')
         index = args.index if args.index is not None else data.get('writeback_index')
         old_index = args.old_index if args.old_index is not None else None
+        index_settings = data.get('index_settings')
     else:
         username = args.username if args.username else None
         password = args.password if args.password else None
-        index_settings = None
         bearer = args.bearer if args.bearer else None
         api_key = args.api_key if args.api_key else None
         aws_region = args.aws_region
@@ -220,6 +219,7 @@ def main():
         client_cert = None
         client_key = None
         index = args.index if args.index is not None else input('New index name? (Default elastalert_status) ')
+        index_settings = None
         if not index:
             index = 'elastalert_status'
         old_index = (args.old_index if args.old_index is not None

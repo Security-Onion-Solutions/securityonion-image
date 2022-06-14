@@ -32,6 +32,8 @@ RUN apk --no-cache add python3 py-setuptools py-pip gcc libffi py-cffi python3-d
 RUN addgroup -g ${GID} ${USERNAME} && \
     adduser -u ${UID} -G ${USERNAME} -D -H ${USERNAME}
 
+COPY ../files/actions.py /usr/lib/python3.9/site-packages/curator/actions.py
+COPY ../files/settings.py /usr/lib/python3.9/site-packages/curator/defaults/settings.py 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
