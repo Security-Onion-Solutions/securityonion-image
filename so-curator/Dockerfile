@@ -15,7 +15,7 @@
 
 FROM alpine:3
 
-LABEL maintainer "Security Onion Solutions, LLC"
+LABEL maintainer "Security Onion Solutions, LLC" 
 
 ARG GID=934
 ARG UID=934
