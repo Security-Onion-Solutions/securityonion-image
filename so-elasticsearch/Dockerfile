@@ -39,9 +39,9 @@ RUN set -ex && for esdirs in config data logs; do \
 COPY *.yml log4j2.properties config/
 COPY bin bin
 
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/* && wget -O /usr/share/elasticsearch/modules/ingest-geoip/GeoLite2-City.mmdb http://centosbm7/GeoLite2-City.mmdb
 
-RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker && \
+RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker /usr/share/elasticsearch/modules/ingest-geoip/GeoLite2-City.mmdb && \
     chmod 0750 bin/es-docker
 
 # Enable the following lines if custom plugins are to be included in this image.
