@@ -36,7 +36,7 @@ FROM nginx:1.20.2-alpine
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=9.37.3
+ARG CYBERCHEF_VERSION=9.46.0
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist /opt/socore/html/navigator
