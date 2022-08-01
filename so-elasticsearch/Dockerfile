@@ -40,7 +40,7 @@ COPY *.yml log4j2.properties config/
 COPY bin bin
 
 
-RUN apt-get update && install -y wget && wget -O /usr/share/elasticsearch/modules/ingest-geoip/GeoLite2-City.mmdb http://centosbm7/GeoLite2-City.mmdb && apt-get remove -y wget 
+RUN apt-get update && install -y wget && wget -O /tmp/GeoLite2-City.mmdb http://centosbm7/GeoLite2-City.mmdb && apt-get remove -y wget 
 
 RUN apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
