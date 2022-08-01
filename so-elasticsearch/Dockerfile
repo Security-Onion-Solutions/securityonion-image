@@ -40,7 +40,10 @@ COPY *.yml log4j2.properties config/
 COPY bin bin
 
 
-RUN apt-get update && apt install -y wget && wget -O /tmp/GeoLite2-City.mmdb http://centosbm7/GeoLite2-City.mmdb && apt-get remove -y wget 
+RUN apt-get update && apt install -y unzip wget && \
+    wget -O /tmp/GeoLite2-City.zip https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/geolite2-city/GeoLite2-City.zip &&\
+    unzip -o /tmp/GeoLite2-City.zip -d /usr/share/elasticsearch/modules/ingest-geoip &&\
+    apt-get remove -y unzip wget 
 
 RUN apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
