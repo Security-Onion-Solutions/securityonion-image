@@ -40,13 +40,12 @@ COPY *.yml log4j2.properties config/
 COPY bin bin
 
 
-RUN apt-get update && apt-get install -y unzip wget && \
-    wget -O /tmp/GeoLite2.zip https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/geolite2-db/GeoLite2.zip &&\
+RUN apt-get update && apt-get install -y ca-certificates unzip wget && \
+    wget -O /tmp/GeoLite2.zip https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/geolite2-db/GeoLite2.zip && \
     mkdir -p /usr/share/elasticsearch/config/ingest-geoip && \
-    unzip -o /tmp/GeoLite2.zip -d /usr/share/elasticsearch/config/ingest-geoip &&\
-    apt-get remove -y unzip wget 
-
-RUN apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+    unzip -o /tmp/GeoLite2.zip -d /usr/share/elasticsearch/config/ingest-geoip && \
+    apt-get remove -y unzip wget && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker /usr/share/elasticsearch/config/ingest-geoip && \
     chmod 0750 bin/es-docker
