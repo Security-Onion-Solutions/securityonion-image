@@ -40,7 +40,7 @@ COPY *.yml log4j2.properties config/
 COPY bin bin
 
 
-RUN apt-get update && apt install -y unzip wget && \
+RUN apt-get update && apt-get install -y unzip wget && \
     wget -O /tmp/GeoLite2.zip https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/geolite2-db/GeoLite2.zip &&\
     mkdir -p /usr/share/elasticsearch/config/ingest-geoip && \
     unzip -o /tmp/GeoLite2.zip -d /usr/share/elasticsearch/config/ingest-geoip &&\
