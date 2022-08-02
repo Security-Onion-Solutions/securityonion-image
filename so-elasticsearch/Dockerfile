@@ -48,7 +48,7 @@ RUN apt-get update && apt install -y unzip wget && \
 
 RUN apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker /usr/share/elasticsearch/modules/ingest-geoip/GeoLite2-City.mmdb && \
+RUN chown elasticsearch:elasticsearch config/elasticsearch.yml config/log4j2.properties bin/es-docker /usr/share/elasticsearch/config/ingest-geoip && \
     chmod 0750 bin/es-docker
 
 # Enable the following lines if custom plugins are to be included in this image.
