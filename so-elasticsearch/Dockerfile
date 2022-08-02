@@ -41,9 +41,9 @@ COPY bin bin
 
 
 RUN apt-get update && apt install -y unzip wget && \
-    wget -O /tmp/GeoLite2-City.zip https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/geolite2-city/GeoLite2-City.zip &&\
+    wget -O /tmp/GeoLite2.zip https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/geolite2-db/GeoLite2.zip &&\
     mkdir -p /usr/share/elasticsearch/config/ingest-geoip && \
-    unzip -o /tmp/GeoLite2-City.zip -d /usr/share/elasticsearch/config/ingest-geoip &&\
+    unzip -o /tmp/GeoLite2.zip -d /usr/share/elasticsearch/config/ingest-geoip &&\
     apt-get remove -y unzip wget 
 
 RUN apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
