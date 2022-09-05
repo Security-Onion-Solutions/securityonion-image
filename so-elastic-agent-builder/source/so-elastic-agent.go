@@ -26,12 +26,11 @@ import (
 var caCRT []byte
 
 var fleetHost = ""
-var fleetHostServer = "https://" + fleetHost + ":8220"
-var fleetHostLogstash = "https://" + fleetHost + ":5055"
+var fleetHostFlag string
 var hostFile string
-var installSysmon string
-var enrollmentToken string
-var enrollmentTokenFlag string
+
+// var installSysmon string
+var enrollmentToken, enrollmentTokenFlag string
 
 func check(err error, context string) {
 	if err != nil {
@@ -54,6 +53,7 @@ func editHosts(fleetIP string, fleetHostname string) {
 func main() {
 	// Allow runtime configuration
 	flag.StringVar(&enrollmentTokenFlag, "token", "", "Override default Enrollment Token")
+	flag.StringVar(&fleetHostFlag, "fleet", "", "Override default Fleet Host")
 	flag.StringVar(&hostFile, "hostfile", "", "IP:Hostname - Add Fleet Hostname & IP to local etc/hosts file")
 	//flag.StringVar(&showConfig, "config", "", "Show default config")
 	flag.Parse()
@@ -61,6 +61,13 @@ func main() {
 	if enrollmentTokenFlag != "" {
 		enrollmentToken = enrollmentTokenFlag
 	}
+
+	if fleetHostFlag != "" {
+		fleetHost = fleetHostFlag
+	}
+
+	var fleetHostServer = "https://" + fleetHost + ":8220"
+	var fleetHostLogstash = "https://" + fleetHost + ":5055"
 
 	// If hostFile != "", add Fleet hostname & IP mapping to local hosts file
 	if hostFile != "" {
@@ -92,7 +99,7 @@ func main() {
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("\n \xE2\x9C\x94 Elastic Fleet is accessible at: " + fleetHostServer + "  -==\n\n")
+		fmt.Printf("\n \xE2\x9C\x94 Elastic Fleet (Managment API) is accessible at: " + fleetHostServer + "  -==\n\n")
 	} else {
 		fmt.Printf("\n \u00D7 Elastic Fleet is not accessible at: " + fleetHostServer + "... Exiting installer. -==\n\n")
 		return
@@ -100,31 +107,22 @@ func main() {
 
 	// TODO
 	// Check to make sure that data plane is accessible
-	/*
 
-		client = &http.Client{Transport: tr, Timeout: 3 * time.Second}
-		req, err = http.NewRequest("GET", fleetHostLogstash, nil)
-		resp, err = client.Do(req)
+	client = &http.Client{Transport: tr, Timeout: 3 * time.Second}
+	req, err = http.NewRequest("GET", fleetHostLogstash, nil)
+	resp, err = client.Do(req)
 
-		if err != nil {
-			if os.IsTimeout(err) {
-				// A timeout error occurred
-				check(err, "\n\u00D7 Logstash is not accessible at: "+fleetHostLogstash+" \n  - Confirm that Elastic Fleet is up & network access is permitted.\n\nRaw Error Logs:\n")
-			}
-			// TODO: Add check here for hostname resolution
-			// This was an error, but not a timeout
-			check(err, "\n\u00D7 Logstash is not accessible at: "+fleetHostLogstash+" \n\nRaw Error Logs:\n")
+	if err != nil {
+		if os.IsTimeout(err) {
+			// A timeout error occurred
+			check(err, "\n\u00D7 Logstash is not accessible at: "+fleetHostLogstash+" \n  - Confirm that Elastic Fleet is up & network access is permitted.\n\nRaw Error Logs:\n")
 		}
+		// TODO: Add check here for hostname resolution
+		// This was an error, but not a timeout
+		//check(err, "\n\u00D7 Logstash is not accessible at: "+fleetHostLogstash+" \n\nRaw Error Logs:\n")
+	}
 
-		if resp.StatusCode == http.StatusNotFound {
-			fmt.Printf("\n \xE2\x9C\x94 Elastic Fleet is accessible at: " + fleetHostLogstash + "  -==\n\n")
-		} else {
-			fmt.Printf("\n \u00D7 Elastic Fleet is not accessible at: " + fleetHostLogstash + "... Exiting installer. -==\n\n")
-			return
-		}
-	*/
-
-	fmt.Printf(" \n \xE2\x9C\x94 Logstash Output is accessible at: " + fleetHostLogstash + "  -==\n\n")
+	fmt.Printf("\n \xE2\x9C\x94 Elastic Fleet (Data Connection) is accessible at: " + fleetHostLogstash + "  -==\n\n")
 
 	fmt.Printf("\n-== Installation Precheck Complete -==\n\n")
 
