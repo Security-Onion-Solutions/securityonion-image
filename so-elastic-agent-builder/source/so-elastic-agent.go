@@ -55,7 +55,6 @@ func main() {
 	// Allow runtime configuration
 	flag.StringVar(&enrollmentTokenFlag, "token", "", "Override default Enrollment Token")
 	flag.StringVar(&hostFile, "hostfile", "", "IP:Hostname - Add Fleet Hostname & IP to local etc/hosts file")
-	flag.StringVar(&installSysmon, "sysmon", "False", "True|False - Install sysmon w/SwiftOnSecurity Config")
 	//flag.StringVar(&showConfig, "config", "", "Show default config")
 	flag.Parse()
 
