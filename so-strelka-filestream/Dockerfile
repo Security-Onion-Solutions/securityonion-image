@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/golang AS build
+FROM ghcr.io/security-onion-solutions/golang:alpine AS build
 LABEL maintainer "Security Onion Solutions, LLC"
 
 RUN CGO_ENABLED=0 go get github.com/target/strelka/src/go/cmd/strelka-filestream
