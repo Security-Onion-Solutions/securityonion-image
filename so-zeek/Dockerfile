@@ -22,7 +22,7 @@ RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertoo
     pip3 install GitPython semantic-version && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=4.0.9
+ENV ZEEKVER=5.0.2
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -32,12 +32,12 @@ WORKDIR /zeekbuild
 RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
-    make -j8 && make install 
+    make -j4 && make install 
 RUN yum install -y glibc-common
-RUN yes | /opt/zeek/bin/zkg install ja3
-RUN yes | /opt/zeek/bin/zkg install hassh
-RUN yes | /opt/zeek/bin/zkg install https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master
-RUN yes | /opt/zeek/bin/zkg install zeek-community-id
+RUN /opt/zeek/bin/zkg install --force ja3
+RUN /opt/zeek/bin/zkg install --force hassh
+RUN /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master
+RUN /opt/zeek/bin/zkg install --force zeek-community-id
 
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
