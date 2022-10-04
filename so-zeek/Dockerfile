@@ -49,8 +49,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force zeek-plugin-s7comm && \
     /opt/zeek/bin/zkg install --force zeek-plugin-profinet && \
     /opt/zeek/bin/zkg install --force zeek-plugin-tds && \
-    /opt/zeek/bin/zkg install --forcezeek-spicy-wireguard && \
-    /opt/zeek/bin/zkg install --forcezeek-spicy-stun
+    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \
+    /opt/zeek/bin/zkg install --force zeek-spicy-stun
 
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
