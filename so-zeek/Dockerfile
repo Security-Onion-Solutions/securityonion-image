@@ -46,16 +46,13 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
     /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force icsnpp-modbus && \
-    /opt/zeek/bin/zkg install --force zeek-plugin-s7comm && \
-    /opt/zeek/bin/zkg install --force zeek-plugin-profinet && \
-    /opt/zeek/bin/zkg install --force zeek-plugin-tds && \
-    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \
+    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force zeek-spicy-stun
 
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
 LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="Zeek running in a docker with AF_Packet 1.4 for use with Security Onion."
+LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
 
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
