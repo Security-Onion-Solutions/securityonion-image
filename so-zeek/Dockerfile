@@ -34,10 +34,23 @@ RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
     make -j4 && make install 
 RUN yum install -y glibc-common
-RUN /opt/zeek/bin/zkg install --force ja3
-RUN /opt/zeek/bin/zkg install --force hassh
-RUN /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master
-RUN /opt/zeek/bin/zkg install --force zeek-community-id
+RUN /opt/zeek/bin/zkg install --force ja3 && \
+    /opt/zeek/bin/zkg install --force hassh && \
+    /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
+    /opt/zeek/bin/zkg install --force zeek-community-id && \
+    /opt/zeek/bin/zkg install --force bzar && \
+    /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
+    /opt/zeek/bin/zkg install --force icsnpp-bsap && \
+    /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
+    /opt/zeek/bin/zkg install --force icsnpp-enip && \
+    /opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
+    /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
+    /opt/zeek/bin/zkg install --force icsnpp-modbus && \
+    /opt/zeek/bin/zkg install --force zeek-plugin-s7comm && \
+    /opt/zeek/bin/zkg install --force zeek-plugin-profinet && \
+    /opt/zeek/bin/zkg install --force zeek-plugin-tds && \
+    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \
+    /opt/zeek/bin/zkg install --force zeek-spicy-stun
 
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
