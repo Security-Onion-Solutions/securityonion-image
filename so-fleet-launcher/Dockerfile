@@ -20,7 +20,8 @@ RUN apt-get install -y --no-install-recommends \
     rpm \
     git
 
-RUN gem install --no-ri --no-rdoc fpm && \
+RUN gem install public_suffix -v 4.0.7 && \
+    gem install --no-ri --no-rdoc fpm && \
     apt-get -f -y --auto-remove remove build-essential autoconf libtool && \    
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

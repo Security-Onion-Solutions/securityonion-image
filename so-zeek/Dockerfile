@@ -13,19 +13,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/centos:7 as builder
-
-RUN yum update -y && \
-    yum -y install epel-release bash libpcap iproute && \
-    yum -y install jemalloc numactl libnl3 libdnet gdb GeoIP python-ipaddress python3 && \
-    yum -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
-    yum group install -y "Development Tools" && \
+FROM ghcr.io/security-onion-solutions/rockylinux:8 as builder 
+RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertools && dnf update -y && \
+    dnf -y install epel-release bash libpcap iproute wget cmake swig && \
+    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
+    dnf group install -y "Development Tools" && \
     pip3 install GitPython semantic-version && \
-    yum -y install centos-release-scl && \
-    yum -y install devtoolset-7-gcc-c++ cmake3 wget && \
-    yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum
+    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=4.0.7
+ENV ZEEKVER=5.0.2
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -33,30 +30,47 @@ RUN mkdir /zeekbuild
 WORKDIR /zeekbuild
 
 RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
-RUN source scl_source enable devtoolset-7 && cd zeek-$ZEEKVER && \
+RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
-    make -j8 && make install 
-RUN yes | /opt/zeek/bin/zkg install ja3
-RUN yes | /opt/zeek/bin/zkg install hassh
-RUN source scl_source enable devtoolset-7 && yes | /opt/zeek/bin/zkg install https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master
-RUN source scl_source enable devtoolset-7 && yes | /opt/zeek/bin/zkg install zeek-community-id
-
-FROM ghcr.io/security-onion-solutions/centos:7
-
-LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="Zeek running in a docker with AF_Packet 1.4 for use with Security Onion."
-
-COPY --from=builder /nsm/zeek /nsm/zeek
-COPY --from=builder /opt/zeek /opt/zeek
-# Common CentOS layer
-RUN yum update -y && \
-    yum -y install epel-release bash libpcap iproute && \
-    yum -y install jemalloc numactl libnl3 libdnet gdb GeoIP python-ipaddress python3 && \
-    yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
-    groupadd --gid 937 zeek  && \
+    make -j4 && make install 
+RUN yum install -y glibc-common
+RUN /opt/zeek/bin/zkg install --force ja3 && \
+    /opt/zeek/bin/zkg install --force hassh && \
+    /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
+    /opt/zeek/bin/zkg install --force zeek-community-id && \
+    /opt/zeek/bin/zkg install --force bzar && \
+    /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
+    /opt/zeek/bin/zkg install --force icsnpp-bsap && \
+    /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
+    /opt/zeek/bin/zkg install --force icsnpp-enip && \
+    /opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
+    /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
+    /opt/zeek/bin/zkg install --force icsnpp-modbus && \
+    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
+    /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
+    rm -rf /opt/zeek/var/lib/zkg/testing && \
+    rm -rf /opt/zeek/var/lib/zkg/clones && \
+    rm -rf /opt/zeek/var/lib/zkg/scratch
+RUN groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
     chown -R 937:937 /opt/zeek && \
     chown -R 937:937 /nsm/zeek
+    
+FROM ghcr.io/security-onion-solutions/rockylinux:8 
+
+LABEL maintainer "Security Onion Solutions, LLC"
+LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
+
+# Common CentOS layer
+RUN dnf update -y && \
+    dnf -y install epel-release bash libpcap iproute && \
+    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP python3 && \
+    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
+    groupadd --gid 937 zeek  && \
+    adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
+    
+COPY --from=builder /nsm/zeek /nsm/zeek
+COPY --from=builder /opt/zeek /opt/zeek
 
 VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/etc/"]
 
