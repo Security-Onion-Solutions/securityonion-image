@@ -49,6 +49,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force zeek-spicy-stun
 
+RUN rm -rf /opt/zeek/var/lib/zkg/testing
+    
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
 LABEL maintainer "Security Onion Solutions, LLC"
