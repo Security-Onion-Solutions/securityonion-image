@@ -48,7 +48,9 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force icsnpp-modbus && \
     /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
-    rm -rf /opt/zeek/var/lib/zkg/testing
+    rm -rf /opt/zeek/var/lib/zkg/testing && \
+    rm -rf /opt/zeek/var/lib/zkg/clones && \
+    rm -rf /opt/zeek/var/lib/zkg/scratch
     
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
