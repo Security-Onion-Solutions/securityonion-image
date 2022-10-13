@@ -67,7 +67,7 @@ RUN dnf update -y && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP python3 && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
-    adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
+    adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
     
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
