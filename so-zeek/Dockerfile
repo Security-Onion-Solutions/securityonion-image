@@ -51,14 +51,16 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/clones && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
+RUN groupadd --gid 937 zeek  && \
+    adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
+    chown -R 937:937 /opt/zeek && \
+    chown -R 937:937 /nsm/zeek
     
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
 
-COPY --from=builder /nsm/zeek /nsm/zeek
-COPY --from=builder /opt/zeek /opt/zeek
 # Common CentOS layer
 RUN dnf update -y && \
     dnf -y install epel-release bash libpcap iproute && \
@@ -66,8 +68,9 @@ RUN dnf update -y && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
-    chown -R 937:937 /opt/zeek && \
-    chown -R 937:937 /nsm/zeek
+    
+COPY --from=builder /nsm/zeek /nsm/zeek
+COPY --from=builder /opt/zeek /opt/zeek
 
 VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/etc/"]
 
