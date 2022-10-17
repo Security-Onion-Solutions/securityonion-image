@@ -22,7 +22,7 @@ RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertoo
     pip3 install GitPython semantic-version && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=4.0.9
+ENV ZEEKVER=5.0.2
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -32,29 +32,45 @@ WORKDIR /zeekbuild
 RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
-    make -j8 && make install 
+    make -j4 && make install 
 RUN yum install -y glibc-common
-RUN yes | /opt/zeek/bin/zkg install ja3
-RUN yes | /opt/zeek/bin/zkg install hassh
-RUN yes | /opt/zeek/bin/zkg install https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master
-RUN yes | /opt/zeek/bin/zkg install zeek-community-id
-
+RUN /opt/zeek/bin/zkg install --force ja3 && \
+    /opt/zeek/bin/zkg install --force hassh && \
+    /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
+    /opt/zeek/bin/zkg install --force zeek-community-id && \
+    /opt/zeek/bin/zkg install --force bzar && \
+    /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
+    /opt/zeek/bin/zkg install --force icsnpp-bsap && \
+    /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
+    /opt/zeek/bin/zkg install --force icsnpp-enip && \
+    #/opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
+    /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
+    /opt/zeek/bin/zkg install --force icsnpp-modbus && \
+    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
+    /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
+    rm -rf /opt/zeek/var/lib/zkg/testing && \
+    rm -rf /opt/zeek/var/lib/zkg/clones && \
+    rm -rf /opt/zeek/var/lib/zkg/scratch
+RUN groupadd --gid 937 zeek  && \
+    adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
+    chown -R 937:937 /opt/zeek && \
+    chown -R 937:937 /nsm/zeek
+    
 FROM ghcr.io/security-onion-solutions/rockylinux:8 
 
 LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="Zeek running in a docker with AF_Packet 1.4 for use with Security Onion."
+LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
 
-COPY --from=builder /nsm/zeek /nsm/zeek
-COPY --from=builder /opt/zeek /opt/zeek
 # Common CentOS layer
 RUN dnf update -y && \
     dnf -y install epel-release bash libpcap iproute && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP python3 && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
-    adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
-    chown -R 937:937 /opt/zeek && \
-    chown -R 937:937 /nsm/zeek
+    adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
+    
+COPY --from=builder /nsm/zeek /nsm/zeek
+COPY --from=builder /opt/zeek /opt/zeek
 
 VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/etc/"]
 
