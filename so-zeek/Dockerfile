@@ -48,7 +48,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force icsnpp-modbus && \
     /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
-    /opt/zeek/bin/zkg install --force https://github.com/iamckn/oui-logging
+    /opt/zeek/bin/zkg install --force https://github.com/iamckn/oui-logging && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/clones && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
