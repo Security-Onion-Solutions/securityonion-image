@@ -43,13 +43,12 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force icsnpp-bsap && \
     /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
     /opt/zeek/bin/zkg install --force icsnpp-enip && \
-    #/opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
+    /opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
     /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force icsnpp-modbus && \
     /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
-    rm -rf /opt/zeek/var/lib/zkg/clones && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
 RUN groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
