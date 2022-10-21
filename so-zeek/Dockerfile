@@ -62,7 +62,7 @@ LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Se
 
 # Common CentOS layer
 RUN dnf update -y && \
-    dnf -y install epel-release bash libpcap iproute && \
+    dnf -y install epel-release bash find libpcap iproute && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP python3 && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
