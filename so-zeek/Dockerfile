@@ -38,7 +38,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
     /opt/zeek/bin/zkg install --force zeek-community-id && \
-    /opt/zeek/bin/zkg install --force bzar && \
+    #/opt/zeek/bin/zkg install --force bzar && \
+    /opt/zeek/bin/zkg install --force https://github.com/mmguero-dev/bzar --version=master && \
     /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
     /opt/zeek/bin/zkg install --force icsnpp-bsap && \
     /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
