@@ -40,7 +40,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force zeek-community-id && \
     #/opt/zeek/bin/zkg install --force bzar && \
     /opt/zeek/bin/zkg install --force https://github.com/mmguero-dev/bzar --version=master && \
-    /opt/zeek/bin/zkg install --force https://github.com/lock-wire/icsnpp-bacnet --version=patch-1 && \
+    /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
     /opt/zeek/bin/zkg install --force icsnpp-bsap && \
     /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
     /opt/zeek/bin/zkg install --force icsnpp-enip && \
