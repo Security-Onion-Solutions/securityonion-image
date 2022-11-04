@@ -38,16 +38,18 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
     /opt/zeek/bin/zkg install --force zeek-community-id && \
-    /opt/zeek/bin/zkg install --force bzar && \
+    #/opt/zeek/bin/zkg install --force bzar && \
+    /opt/zeek/bin/zkg install --force https://github.com/mmguero-dev/bzar --version=master && \
     /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
     /opt/zeek/bin/zkg install --force icsnpp-bsap && \
     /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
     /opt/zeek/bin/zkg install --force icsnpp-enip && \
-    /opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
+    #/opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
     /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force icsnpp-modbus && \
     /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
-    /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
+    #/opt/zeek/bin/zkg install --force zeek-spicy-stun && \
+    /opt/zeek/bin/zkg install --force https://github.com/iamckn/oui-logging && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
 RUN groupadd --gid 937 zeek  && \
