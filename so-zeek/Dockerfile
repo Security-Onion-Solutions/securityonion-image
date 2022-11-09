@@ -49,7 +49,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force icsnpp-modbus && \
 #    /opt/zeek/bin/zkg install --force icsnpp-genisys && \
     /opt/zeek/bin/zkg install --force icsnpp-s7comm && \
-    /opt/zeek/bin/zkg install --force zeek-plugin-profinet && \
+#    /opt/zeek/bin/zkg install --force zeek-plugin-profinet && \
     /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force https://github.com/iamckn/oui-logging && \
