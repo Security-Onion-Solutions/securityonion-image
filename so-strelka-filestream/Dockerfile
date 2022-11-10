@@ -10,4 +10,3 @@ RUN addgroup -g 939 strelka && \
     -h /etc/strelka --no-create-home strelka
 RUN apk add --no-cache jq
 USER strelka
-
