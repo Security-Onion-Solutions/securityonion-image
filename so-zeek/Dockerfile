@@ -16,7 +16,7 @@
 FROM ghcr.io/security-onion-solutions/rockylinux:8 as builder 
 RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertools && dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP && \
+    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP git && \
     dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
     dnf group install -y "Development Tools" && \
     pip3 install GitPython semantic-version && \
@@ -48,7 +48,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force icsnpp-modbus && \
 #    /opt/zeek/bin/zkg install --force icsnpp-genisys && \
-    /opt/zeek/bin/zkg install --force icsnpp-s7comm && \
+#    /opt/zeek/bin/zkg install --force icsnpp-s7comm && \
+    git clone https://github.com/amzn/zeek-plugin-profinet && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-profinet && \
     /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
