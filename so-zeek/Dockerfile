@@ -45,6 +45,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-ethercat && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-enip && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary && \
+    sed -i 's|-|_|g' /opt/zeek/share/zeek/site/icsnpp-opcua-binary/main.zeek && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
     git https://github.com/cisagov/icsnpp-genisys && \
