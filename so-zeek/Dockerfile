@@ -48,12 +48,14 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     sed -i 's|-|_|g' /opt/zeek/share/zeek/site/icsnpp-opcua-binary/main.zeek && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
-    git https://github.com/cisagov/icsnpp-s7comm && \
+    git clone https://github.com/cisagov/icsnpp-s7comm && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-s7comm && \
     git clone https://github.com/amzn/zeek-plugin-profinet && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-profinet && \
-    git https://github.com/amzn/zeek-plugin-tds && \
+    git clone https://github.com/amzn/zeek-plugin-tds && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-tds && \
+    git clone https://github.com/cisagov/icsnpp-genisys && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-genisys && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
