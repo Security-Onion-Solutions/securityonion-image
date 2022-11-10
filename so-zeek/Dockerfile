@@ -39,21 +39,25 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
     /opt/zeek/bin/zkg install --force zeek-community-id && \
     #/opt/zeek/bin/zkg install --force bzar && \
-    /opt/zeek/bin/zkg install --force https://github.com/mmguero-dev/bzar --version=master && \
-    /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
-    /opt/zeek/bin/zkg install --force icsnpp-bsap && \
-    /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
-    /opt/zeek/bin/zkg install --force icsnpp-enip && \
-    /opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
-    /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
-    /opt/zeek/bin/zkg install --force icsnpp-modbus && \
-#    /opt/zeek/bin/zkg install --force icsnpp-genisys && \
-#    /opt/zeek/bin/zkg install --force icsnpp-s7comm && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/bzar --version=master && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-bacnet && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-bsap && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-ethercat && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-enip && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-dnp3 && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
+    git https://github.com/cisagov/icsnpp-genisys && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-genisys && \
+    git https://github.com/cisagov/icsnpp-s7comm && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-s7comm && \
     git clone https://github.com/amzn/zeek-plugin-profinet && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-profinet && \
-    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
-    /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
-    /opt/zeek/bin/zkg install --force https://github.com/iamckn/oui-logging && \
+    git https://github.com/amzn/zeek-plugin-tds && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-tds && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \ 
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
 RUN groupadd --gid 937 zeek  && \
