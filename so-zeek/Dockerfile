@@ -54,8 +54,6 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-profinet && \
     git clone https://github.com/amzn/zeek-plugin-tds && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-tds && \
-    git clone https://github.com/cisagov/icsnpp-genisys && \
-    /opt/zeek/bin/zkg install --force --skiptests icsnpp-genisys && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
