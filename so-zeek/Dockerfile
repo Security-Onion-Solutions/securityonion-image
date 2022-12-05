@@ -16,13 +16,13 @@
 FROM ghcr.io/security-onion-solutions/rockylinux:8 as builder 
 RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertools && dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP && \
+    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP git && \
     dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
     dnf group install -y "Development Tools" && \
     pip3 install GitPython semantic-version && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=5.0.3
+ENV ZEEKVER=5.0.4
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -38,16 +38,25 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
     /opt/zeek/bin/zkg install --force zeek-community-id && \
-    /opt/zeek/bin/zkg install --force bzar && \
-    /opt/zeek/bin/zkg install --force icsnpp-bacnet && \
-    /opt/zeek/bin/zkg install --force icsnpp-bsap && \
-    /opt/zeek/bin/zkg install --force icsnpp-ethercat && \
-    /opt/zeek/bin/zkg install --force icsnpp-enip && \
-    /opt/zeek/bin/zkg install --force icsnpp-opcua-binary && \
-    /opt/zeek/bin/zkg install --force icsnpp-dnp3 && \
-    /opt/zeek/bin/zkg install --force icsnpp-modbus && \
-    /opt/zeek/bin/zkg install --force zeek-spicy-wireguard && \ 
-    /opt/zeek/bin/zkg install --force zeek-spicy-stun && \
+    #/opt/zeek/bin/zkg install --force bzar && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/bzar --version=master && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-bacnet && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-bsap && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-ethercat && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-enip && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary && \
+    sed -i 's|-|_|g' /opt/zeek/share/zeek/site/icsnpp-opcua-binary/main.zeek && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-dnp3 && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
+    git clone https://github.com/cisagov/icsnpp-s7comm && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-s7comm && \
+    git clone https://github.com/amzn/zeek-plugin-profinet && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-profinet && \
+    git clone https://github.com/amzn/zeek-plugin-tds && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-tds && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \ 
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
 RUN groupadd --gid 937 zeek  && \
