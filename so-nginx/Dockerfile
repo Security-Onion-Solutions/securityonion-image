@@ -32,7 +32,7 @@ RUN sed -i '/<base href="\/">/d' ./dist/index.html
 ###################################
 
 FROM nginx:1.20.2-alpine
-
+HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Security Onion Core Functions Docker"
 
