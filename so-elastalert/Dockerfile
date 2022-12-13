@@ -1,4 +1,4 @@
-FROM ghcr.io/jertel/elastalert2/elastalert2:2.5.0
+FROM ghcr.io/jertel/elastalert2/elastalert2:2.9.0
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=933
