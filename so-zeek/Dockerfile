@@ -13,11 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/rockylinux:8 as builder 
-RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertools && dnf update -y && \
+FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder 
+RUN dnf -y install dnf-plugins-core && \
+    dnf config-manager --set-enabled crb && \
+    dnf update -y && \ 
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
+    dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers && \
     dnf group install -y "Development Tools" && \
     pip3 install GitPython semantic-version && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
@@ -64,7 +66,7 @@ RUN groupadd --gid 937 zeek  && \
     chown -R 937:937 /opt/zeek && \
     chown -R 937:937 /nsm/zeek
     
-FROM ghcr.io/security-onion-solutions/rockylinux:8 
+FROM ghcr.io/security-onion-solutions/rockylinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
@@ -90,3 +92,4 @@ RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-
 HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
+
