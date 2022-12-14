@@ -17,4 +17,6 @@ ARG VERSION
 
 FROM docker.elastic.co/package-registry/distribution:$VERSION
 
-RUN for dir in /packages/production/*; do ls -d $dir/* | head -n -3 | xargs rm -r; done
+#Commented out 12/22 - Needs to be reworked to bring image size down
+#RUN for dir in /packages/production/*; do ls -d $dir/* | head -n -3 | xargs rm -r; done
+
