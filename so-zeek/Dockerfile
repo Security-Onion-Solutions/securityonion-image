@@ -66,7 +66,7 @@ RUN groupadd --gid 937 zeek  && \
     chown -R 937:937 /opt/zeek && \
     chown -R 937:937 /nsm/zeek
     
-FROM ghcr.io/security-onion-solutions/rockylinux:8 
+FROM ghcr.io/security-onion-solutions/rockylinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
