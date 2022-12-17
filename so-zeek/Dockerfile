@@ -13,7 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder 
+FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder
+RUN curl -v https://mirrors.rockylinux.org/mirrorlist?arch=x86_64&repo=BaseOS-9 2>&1
 RUN dnf -y install dnf-plugins-core && \
     dnf config-manager --set-enabled crb && \
     dnf update -y && \ 
