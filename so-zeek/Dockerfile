@@ -14,11 +14,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder
+
+RUN curl -v https://securityonion.net
 RUN curl -v https://mirrors.rockylinux.org
-RUN dnf -y install python3-devel kernel-devel kernel-headers && \
-    dnf group install -y "Development Tools" && \
-    pip3 install GitPython semantic-version && \
-    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
 ENV ZEEKVER=5.0.4
 ARG BUILD_TYPE=Release
