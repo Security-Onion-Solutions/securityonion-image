@@ -14,13 +14,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder
-RUN curl -v https://mirrors.rockylinux.org/mirrorlist?arch=x86_64&repo=BaseOS-9 2>&1
-RUN dnf -y install dnf-plugins-core && \
-    dnf config-manager --set-enabled crb && \
-    dnf update -y && \ 
-    dnf -y install epel-release bash libpcap iproute wget cmake swig && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers && \
+RUN curl -v https://mirrors.rockylinux.org
+RUN dnf -y install python3-devel kernel-devel kernel-headers && \
     dnf group install -y "Development Tools" && \
     pip3 install GitPython semantic-version && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
