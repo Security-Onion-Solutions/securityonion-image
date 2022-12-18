@@ -13,7 +13,5 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM rockylinux:9 as builder
-
-RUN curl -v https://securityonion.net
-RUN curl -v https://mirrors.rockylinux.org
+FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder 
+RUN ping -c 3 8.8.8.8
