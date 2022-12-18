@@ -14,5 +14,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder 
-RUN ping 8.8.8.8
-
+RUN curl -v google.com
