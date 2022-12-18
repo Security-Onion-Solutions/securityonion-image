@@ -14,5 +14,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder 
-RUN echo "199.232.198.132 mirrors.rockylinux.org" >> /etc/hosts
-RUN curl -v mirrors.rockylinux.org
+RUN ping 8.8.8.8
+
