@@ -1,7 +1,7 @@
 FROM ghcr.io/security-onion-solutions/alpine
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="InfluxDB running in Docker container for use with Security Onion"
-
+HEALTHCHECK --interval=5m --timeout=3s CMD nc -z localhost 8086 || exit 1
 RUN echo 'hosts: files dns' >> /etc/nsswitch.conf
 RUN apk add --no-cache tzdata bash ca-certificates && \
     update-ca-certificates
