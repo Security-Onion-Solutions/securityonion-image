@@ -19,7 +19,7 @@ RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertoo
     dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP git && \
     dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
     dnf group install -y "Development Tools" && \
-    pip3 install GitPython semantic-version && \
+    pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
 ENV ZEEKVER=5.0.4
