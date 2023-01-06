@@ -22,7 +22,7 @@ RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertoo
     pip3 install GitPython semantic-version && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=5.0.3
+ENV ZEEKVER=5.0.4
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
