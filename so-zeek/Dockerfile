@@ -57,6 +57,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
+    rm /opt/zeek/share/zeek/site/oui-logging/oui.dat
     python3 /opt/zeek/share/zeek/site/oui-logging/oui.py oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
