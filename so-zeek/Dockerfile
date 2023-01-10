@@ -19,7 +19,7 @@ RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertoo
     dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP git && \
     dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
     dnf group install -y "Development Tools" && \
-    pip3 install GitPython semantic-version && \
+    pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
 ENV ZEEKVER=5.0.4
@@ -57,6 +57,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \ 
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
+    rm /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
+    /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch
 RUN groupadd --gid 937 zeek  && \
