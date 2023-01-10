@@ -65,6 +65,11 @@ logsources:
     service: driver-framework
     conditions:
       source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-msexchange-management:
+    product: windows
+    service: msexchange-management
+    conditions:
+      log_name: 'MSExchange Management'
 defaultindex: "*:so-*"
 fieldmappings:
     EventID: event.code
