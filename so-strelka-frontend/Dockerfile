@@ -1,11 +1,7 @@
 FROM ghcr.io/security-onion-solutions/golang AS build
 LABEL maintainer "Security Onion Solutions, LLC"
 
-RUN mkdir -p src/github.com/target/strelka && \
-    git clone https://github.com/target/strelka src/github.com/target/strelka && \
-    cd src/github.com/target/strelka && \
-    go mod init strelka && \
-    CGO_ENABLED=0 go build -o /go/bin/strelka-frontend src/go/cmd/strelka-frontend/main.go
+RUN CGO_ENABLED=0 go install github.com/target/strelka/src/go/cmd/strelka-frontend@latest
 
 FROM ghcr.io/security-onion-solutions/alpine
 COPY --from=build /go/bin/strelka-frontend /usr/local/bin/
