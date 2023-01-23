@@ -21,16 +21,17 @@ ARG GID=939
 ARG UID=939
 ARG USERNAME=socore
 
-ARG MYSQL_SERVER_PACKAGE=mysql-community-server-minimal-5.7.24
-ARG MYSQL_SHELL_PACKAGE=mysql-shell-8.0.13
+# Latest versions found here: https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/
+ARG MYSQL_CE_VERSION=5.7.41-1
+ARG MYSQL_SHELL_VERSION=8.0.32-1
 
 # Install server
-RUN yum install -y https://repo.mysql.com/mysql-community-minimal-release-el7.rpm \
-  && yum-config-manager --enable mysql57-server-minimal \
-  && yum install -y \
-      $MYSQL_SERVER_PACKAGE \
-      $MYSQL_SHELL_PACKAGE \
-      libpwquality \
+RUN yum install -y libpwquality \
+  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-common-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
+  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-libs-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
+  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-client-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
+  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-server-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
+  https://repo.mysql.com/yum/mysql-tools-community/el/7/x86_64/mysql-shell-${MYSQL_SHELL_VERSION}.el7.x86_64.rpm \
   && yum clean all \
   && mkdir /docker-entrypoint-initdb.d
 
