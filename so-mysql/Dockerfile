@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-FROM ghcr.io/security-onion-solutions/oraclelinux:7-slim
+FROM ghcr.io/security-onion-solutions/rockylinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="MySQL Server running in Docker container for use with Security Onion"
@@ -21,17 +21,14 @@ ARG GID=939
 ARG UID=939
 ARG USERNAME=socore
 
-# Latest versions found here: https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/
-ARG MYSQL_CE_VERSION=5.7.41-1
-ARG MYSQL_SHELL_VERSION=8.0.32-1
+ARG MYSQL_VERSION=8.0.32
 
 # Install server
-RUN yum install -y libpwquality \
-  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-common-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
-  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-libs-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
-  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-client-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
-  https://repo.mysql.com/yum/mysql-5.7-community/el/7/x86_64/mysql-community-server-${MYSQL_CE_VERSION}.el7.x86_64.rpm \
-  https://repo.mysql.com/yum/mysql-tools-community/el/7/x86_64/mysql-shell-${MYSQL_SHELL_VERSION}.el7.x86_64.rpm \
+RUN yum install -y https://repo.mysql.com/mysql80-community-release-el9.rpm \
+  && yum update -y \
+  && yum install -y \
+      mysql-community-server-${MYSQL_VERSION} \
+      mysql-shell-${MYSQL_VERSION} \
   && yum clean all \
   && mkdir /docker-entrypoint-initdb.d
 
