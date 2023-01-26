@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ARG VERSION
 
-FROM docker.elastic.co/beats/elastic-agent:8.6.1
+FROM docker.elastic.co/beats/elastic-agent:$VERSION
 
 ARG GID=947
 ARG UID=947
