@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ARG VERSION
 
-FROM docker.elastic.co/beats/elastic-agent:$VERSION
+FROM docker.elastic.co/beats/elastic-agent:8.6.1
 
 ARG GID=947
 ARG UID=947
@@ -27,4 +27,4 @@ USER root
 RUN groupmod -g ${GID} ${USERNAME} && \
     usermod -u ${UID} -g ${GID} ${USERNAME}
 
-RUN chown ${USERNAME}:${USERNAME} /usr/share/elastic-agent/data/elastic-agent-*/install/filebeat* /usr/share/elastic-agent/data/elastic-agent-*/install/metricbeat*
+RUN chown ${USERNAME}:${USERNAME} /usr/share/elastic-agent/data/elastic-agent-*/components/filebeat* /usr/share/elastic-agent/data/elastic-agent-*/components/metricbeat*
