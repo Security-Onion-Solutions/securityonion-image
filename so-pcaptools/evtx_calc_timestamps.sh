@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 # Convert EVTX to JSON
 evtx2json -q "/tmp/data.evtx" --output-file /tmp/evtx/import.json
