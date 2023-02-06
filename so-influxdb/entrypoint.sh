@@ -9,4 +9,4 @@ if [ "$1" = 'influxd' ]; then
 	/init-influxdb.sh "${@:2}"
 fi
 
-exec "$@" &>/log/influxdb.log
+exec "$@" &>/var/log/influxdb.log
