@@ -137,6 +137,7 @@ fieldmappings:
     SubjectUserName: user.name
     TargetFilename: file.target
     TargetImage: winlog.event_data.TargetImage
+    TargetUserName: winlog.event_data.TargetUserName
     TargetObject: winlog.event_data.TargetObject
     TicketEncryptionType: winlog.event_data.TicketEncryptionType
     TicketOptions: winlog.event_data.TicketOptions
