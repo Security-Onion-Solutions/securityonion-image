@@ -10,5 +10,9 @@ VOLUME /var/lib/influxdb2
 
 RUN mkdir -p /log
 RUN mkdir -p /conf
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["influxd"]
+
+COPY entrypoint.sh /redirect_to_file.sh
+RUN groupmod -g 939 influxdb
+
+ENTRYPOINT ["/redirect_to_file.sh"]
+CMD ["/entrypoint.sh", "influxd"]
