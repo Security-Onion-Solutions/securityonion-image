@@ -12,7 +12,7 @@ RUN mkdir -p /log
 RUN mkdir -p /conf
 
 COPY entrypoint.sh /redirect_to_file.sh
-RUN groupmod -g 939 influxdb
+RUN chmod a+x /redirect_to_file.sh && groupmod -g 939 influxdb
 
 ENTRYPOINT ["/redirect_to_file.sh"]
 CMD ["/entrypoint.sh", "influxd"]
