@@ -4,6 +4,7 @@ LABEL maintainer "Security Onion Solutions, LLC"
 ARG DEBIAN_FRONTEND=noninteractive
 ARG YARA_VERSION=3.11.0
 ARG YARA_PYTHON_VERSION=3.11.0
+ARG STRELKA_RELEASE_VERSION=0.23.01.07
 
 # Copy Strelka files
 
@@ -41,7 +42,7 @@ RUN apt-get install --no-install-recommends -qq \
 
 # Download strelka
 RUN mkdir /tmp/strelka && \
-    git clone https://github.com/target/strelka /tmp/strelka
+    git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka /tmp/strelka
 
 # Prepare backend for python build
 RUN mkdir /strelka && \
