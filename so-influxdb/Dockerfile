@@ -4,10 +4,11 @@ LABEL description="InfluxDB running in Docker container for use with Security On
 
 HEALTHCHECK --interval=5m --timeout=3s CMD nc -z localhost 8086 || exit 1
 EXPOSE 8086
+VOLUME /conf
+VOLUME /log
 VOLUME /var/lib/influxdb2
 
-RUN mkdir -p /var/log
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN mkdir -p /log
+RUN mkdir -p /conf
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["influxd"]
