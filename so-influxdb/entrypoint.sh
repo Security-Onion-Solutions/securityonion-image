@@ -1,2 +1,2 @@
 #!/bin/bash
-exec "$@" &> /log/influxdb.log
+exec "$@" &>> /log/influxdb.log
