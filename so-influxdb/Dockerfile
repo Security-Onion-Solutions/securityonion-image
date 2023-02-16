@@ -1,42 +1,41 @@
-FROM ghcr.io/security-onion-solutions/alpine
+ARG INFLUX_VERSION=2.6.1
+
+FROM ghcr.io/security-onion-solutions/ubuntu:22.04 as builder
+
+ARG INFLUX_VERSION
+ARG NODE_VERSION=v18.14.0
+ARG NODE_ARCH=linux-x64
+
+RUN apt update -y && apt install -y git wget xz-utils 
+RUN git clone https://github.com/influxdata/ui -b OSS-v$INFLUX_VERSION
+RUN wget https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_ARCH.tar.xz -O /node.xz
+RUN tar -xJf /node.xz
+
+RUN export PATH=$PATH:/node-$NODE_VERSION-$NODE_ARCH/bin && npm i -g yarn
+
+ENV BASE_PATH=/influxdb/
+ENV API_BASE_PATH=/influxdb/
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
+RUN export PATH=$PATH:/node-$NODE_VERSION-$NODE_ARCH/bin && cd ui && yarn build
+
+FROM ghcr.io/security-onion-solutions/influxdb:$INFLUX_VERSION
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="InfluxDB running in Docker container for use with Security Onion"
+
 HEALTHCHECK --interval=5m --timeout=3s CMD nc -z localhost 8086 || exit 1
-RUN echo 'hosts: files dns' >> /etc/nsswitch.conf
-RUN apk add --no-cache tzdata bash ca-certificates && \
-    update-ca-certificates
-
-ENV INFLUXDB_VERSION 1.8.4
-RUN set -ex && \
-    apk add --no-cache --virtual .build-deps wget gnupg tar && \
-    for key in \
-        05CE15085FC09D18E99EFB22684A14CF2582E0C5 ; \
-    do \
-        gpg --keyserver keyserver.ubuntu.com --recv-keys "$key" || \
-        gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" || \
-        gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
-        gpg --keyserver keyserver.pgp.com --recv-keys "$key" ; \
-    done && \
-    wget --no-verbose https://dl.influxdata.com/influxdb/releases/influxdb-${INFLUXDB_VERSION}-static_linux_amd64.tar.gz.asc && \
-    wget --no-verbose https://dl.influxdata.com/influxdb/releases/influxdb-${INFLUXDB_VERSION}-static_linux_amd64.tar.gz && \
-    gpg --batch --verify influxdb-${INFLUXDB_VERSION}-static_linux_amd64.tar.gz.asc influxdb-${INFLUXDB_VERSION}-static_linux_amd64.tar.gz && \
-    mkdir -p /usr/src && \
-    tar -C /usr/src -xzf influxdb-${INFLUXDB_VERSION}-static_linux_amd64.tar.gz && \
-    rm -f /usr/src/influxdb-*/influxdb.conf && \
-    chmod +x /usr/src/influxdb-*/* && \
-    cp -a /usr/src/influxdb-*/* /usr/bin/ && \
-    rm -rf *.tar.gz* /usr/src /root/.gnupg && \
-    apk del .build-deps
-COPY influxdb.conf /etc/influxdb/influxdb.conf
-
 EXPOSE 8086
-
-VOLUME /var/lib/influxdb
+VOLUME /conf
+VOLUME /log
+VOLUME /var/lib/influxdb2
 
 RUN mkdir -p /log
+RUN mkdir -p /conf
 
-COPY entrypoint.sh /entrypoint.sh
-COPY init-influxdb.sh /init-influxdb.sh
-RUN chmod +x /entrypoint.sh && chmod +x /init-influxdb.sh
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["influxd"]
+COPY entrypoint.sh /redirect_to_file.sh
+RUN chmod a+x /redirect_to_file.sh && groupmod -g 939 influxdb
+
+COPY --from=builder /ui/build /ui
+
+ENTRYPOINT ["/redirect_to_file.sh"]
+CMD ["/entrypoint.sh", "influxd"]
