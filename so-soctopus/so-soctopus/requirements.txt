@@ -10,4 +10,4 @@ rt>=2.0,<2.1
 ruamel.yaml>=0.16,<0.17
 sigmatools==0.18.1
 thehive4py>=1.6,<1.7
-Werkzeug>=2.3.3
+Werkzeug>=2.2.3
