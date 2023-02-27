@@ -10,7 +10,7 @@ ENV INFLUXDB_VERSION 1.8.4
 RUN set -ex && \
     apk add --no-cache --virtual .build-deps wget gnupg tar && \
     for key in \
-        05CE15085FC09D18E99EFB22684A14CF2582E0C5 ; \
+        9D539D90D3328DC7D6C8D3B9D8FF8E1F7DF8B07E ; \
     do \
         gpg --keyserver keyserver.ubuntu.com --recv-keys "$key" || \
         gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key" || \
