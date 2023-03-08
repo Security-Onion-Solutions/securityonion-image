@@ -23,7 +23,7 @@ FROM ghcr.io/security-onion-solutions/influxdb:$INFLUX_VERSION
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="InfluxDB running in Docker container for use with Security Onion"
 
-HEALTHCHECK --interval=5m --timeout=3s CMD nc -z localhost 8086 || exit 1
+HEALTHCHECK --interval=1m --timeout=10s CMD nc -z localhost 8086 || exit 1
 EXPOSE 8086
 VOLUME /conf
 VOLUME /log
@@ -36,6 +36,8 @@ COPY entrypoint.sh /redirect_to_file.sh
 RUN chmod a+x /redirect_to_file.sh && groupmod -g 939 influxdb
 
 COPY --from=builder /ui/build /ui
+
+RUN apt update -y && apt install netcat -y && apt clean -y
 
 ENTRYPOINT ["/redirect_to_file.sh"]
 CMD ["/entrypoint.sh", "influxd"]
