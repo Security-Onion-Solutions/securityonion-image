@@ -37,7 +37,7 @@ RUN chmod a+x /redirect_to_file.sh && groupmod -g 939 influxdb
 
 COPY --from=builder /ui/build /ui
 
-RUN apt update -y && apt install nc -y && apt clean -y
+RUN apt update -y && apt install netcat -y && apt clean -y
 
 ENTRYPOINT ["/redirect_to_file.sh"]
 CMD ["/entrypoint.sh", "influxd"]
