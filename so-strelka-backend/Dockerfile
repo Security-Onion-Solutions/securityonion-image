@@ -42,7 +42,7 @@ RUN apt-get install --no-install-recommends -qq \
 
 # Download strelka
 RUN mkdir /tmp/strelka && \
-    git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka /tmp/strelka
+    git clone -b patch-2 https://github.com/jertel/strelka /tmp/strelka
 
 # Prepare backend for python build
 RUN mkdir /strelka && \
