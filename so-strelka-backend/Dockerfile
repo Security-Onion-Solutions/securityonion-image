@@ -43,7 +43,9 @@ RUN apt-get install --no-install-recommends -qq \
 # Download strelka
 RUN mkdir /tmp/strelka && \
     git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka /tmp/strelka && \
-    sed -i 's/mime_db", ""/mime_db", None/' /tmp/strelka/src/python/strelka/strelka.py
+    sed -i "s/mime_db', ''/mime_db', None/" /tmp/strelka/src/python/strelka/strelka.py && \
+    grep "mime_db" /tmp/strelka/src/python/strelka/strelka.py && \
+    echo "done"
 
 # Prepare backend for python build
 RUN mkdir /strelka && \
