@@ -24,7 +24,7 @@ RUN dnf -y install dnf-plugins-core && \
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=5.0.6
+ENV ZEEKVER=5.0.7
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
