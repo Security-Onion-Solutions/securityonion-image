@@ -25,9 +25,6 @@ LABEL description="InfluxDB running in Docker container for use with Security On
 
 HEALTHCHECK --interval=1m --timeout=10s CMD nc -z localhost 8086 || exit 1
 EXPOSE 8086
-VOLUME /conf
-VOLUME /log
-VOLUME /var/lib/influxdb2
 
 RUN mkdir -p /log
 RUN mkdir -p /conf
