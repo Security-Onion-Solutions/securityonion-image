@@ -181,7 +181,7 @@ RUN cd /strelka/ && \
 USER $USERNAME
 
 # Run build checks
- RUN echo '[+] Run build checks' && \
+RUN echo '[+] Run build checks' && \
     cd /strelka/strelka/ && \
     python3 -m pytest -p no:cacheprovider -s tests/ --ignore-glob='*pcap*.py' && \
     if $CONFIG_TESTS; then python3 -m pytest -s tests_configuration/; fi && \
