@@ -20,8 +20,12 @@ ARG EXIFTOOL_VERSION=12.52
 
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
 ARG STRELKA_RELEASE_VERSION=0.23.03.14
-RUN mkdir /strelka && mkdir /etc/strelka && mkdir /tmp/strelka && mkdir /var/log/strelka && \
-    apt -y update && apt install git -y && \
+RUN mkdir /strelka && \
+    mkdir /etc/strelka && \
+    mkdir /tmp/strelka && \
+    mkdir /var/log/strelka && \
+    apt -y update && \ 
+    apt install git -y && \
     git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka /tmp/strelka && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
@@ -51,13 +55,6 @@ RUN apt-get -q update && \
     python-is-python3 \
     pkg-config
 
-# Add zeek repo
-RUN echo 'deb http://download.opensuse.org/repositories/security:/zeek/xUbuntu_22.04/ /' | tee /etc/apt/sources.list.d/security:zeek.list && \
-    curl -fsSL https://download.opensuse.org/repositories/security:zeek/xUbuntu_22.04/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/security_zeek.gpg > /dev/null
-
-# Add zeek to path
-ENV PATH=$PATH:/opt/zeek/bin
-
 # Install runtime packages
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
@@ -79,8 +76,7 @@ RUN apt-get -q update && \
     unrar \
     unzip \
     upx \
-    jq \
-    zeek-lts && \
+    jq && \
 # Download and compile Archive library, needed for exiftool to work best
     cd /tmp/ && \
     curl -OL https://cpan.metacpan.org/authors/id/P/PH/PHRED/Archive-Zip-1.68.tar.gz && \
@@ -128,9 +124,6 @@ RUN apt-get -q update && \
     cd yara-python-$YARA_PYTHON_VERSION/ && \
     python3 setup.py build --dynamic-linking && \
     python3 setup.py install
-
-# Mark zeek as manual (keeps getting autoremoved?)
-RUN apt-mark manual zeek-lts
 
 # Install JTR
 RUN apt-get -q update \
@@ -182,15 +175,15 @@ RUN cd /strelka/ && \
     python3-pip \
     python3-wheel && \
     apt-get clean -qq && \
-    rm -rf /var/lib/apt/lists/* /tmp/yara* 
+    rm -rf /var/lib/apt/lists/* /tmp/yara*
 
 # Run tests as non-root user
 USER $USERNAME
 
 # Run build checks
-RUN echo '[+] Run build checks' && \
+ RUN echo '[+] Run build checks' && \
     cd /strelka/strelka/ && \
-    python3 -m pytest -p no:cacheprovider -s tests/ && \
+    python3 -m pytest -p no:cacheprovider -s tests/ --ignore-glob='*pcap*.py' && \
     if $CONFIG_TESTS; then python3 -m pytest -s tests_configuration/; fi && \
     echo '[+] Done'
 
