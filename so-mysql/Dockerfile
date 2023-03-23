@@ -40,8 +40,6 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
     useradd --uid ${UID} --gid ${GID} \
     --home-dir /opt/so --no-create-home ${USERNAME}
 
-VOLUME /var/lib/mysql
-
 COPY docker-entrypoint.sh /entrypoint.sh
 COPY healthcheck.sh /healthcheck.sh
 RUN chmod +x /entrypoint.sh && chmod +x /healthcheck.sh
