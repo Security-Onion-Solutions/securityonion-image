@@ -31,8 +31,6 @@ COPY influxdb.conf /etc/influxdb/influxdb.conf
 
 EXPOSE 8086
 
-VOLUME /var/lib/influxdb
-
 RUN mkdir -p /log
 
 COPY entrypoint.sh /entrypoint.sh
