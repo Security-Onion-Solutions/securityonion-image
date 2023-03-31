@@ -1,4 +1,4 @@
-# Copyright 2014-2022 Security Onion Solutions, LLC
+# Copyright 2014-2023 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -13,11 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/rockylinux:8 as builder 
-RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertools && dnf update -y && \
+FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder 
+RUN dnf -y install dnf-plugins-core && \
+    dnf config-manager --set-enabled crb && \
+    dnf update -y && \ 
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers &&\
+    dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers && \
     dnf group install -y "Development Tools" && \
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
@@ -31,7 +33,7 @@ WORKDIR /zeekbuild
 
 RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN cd zeek-$ZEEKVER && \
-    ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
+    ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --enable-debug --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
     make -j4 && make install 
 RUN yum install -y glibc-common
 RUN /opt/zeek/bin/zkg install --force ja3 && \
@@ -65,7 +67,7 @@ RUN groupadd --gid 937 zeek  && \
     chown -R 937:937 /opt/zeek && \
     chown -R 937:937 /nsm/zeek
     
-FROM ghcr.io/security-onion-solutions/rockylinux:8 
+FROM ghcr.io/security-onion-solutions/rockylinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
@@ -73,7 +75,7 @@ LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Se
 # Common CentOS layer
 RUN dnf update -y && \
     dnf -y install epel-release bash findutils libpcap iproute && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP python3 && \
+    dnf -y install jemalloc numactl libnl3 libdnet gdb python3 && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
@@ -89,4 +91,3 @@ RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-
 HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
-
