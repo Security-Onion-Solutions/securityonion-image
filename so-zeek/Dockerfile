@@ -31,7 +31,7 @@ WORKDIR /zeekbuild
 
 RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN cd zeek-$ZEEKVER && \
-    ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-debug --enable-jemalloc --build-type=$BUILD_TYPE && \
+    ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --enable-debug --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
     make -j4 && make install 
 RUN yum install -y glibc-common
 RUN /opt/zeek/bin/zkg install --force ja3 && \
@@ -81,6 +81,8 @@ RUN dnf update -y && \
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
 
+VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/etc/"]
+
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
 RUN chmod +x /usr/local/sbin/zeek.sh
@@ -89,4 +91,3 @@ RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-
 HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
-
