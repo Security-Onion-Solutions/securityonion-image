@@ -31,7 +31,7 @@ WORKDIR /zeekbuild
 
 RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN cd zeek-$ZEEKVER && \
-    ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
+    ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-debug --enable-jemalloc --build-type=$BUILD_TYPE && \
     make -j4 && make install 
 RUN yum install -y glibc-common
 RUN /opt/zeek/bin/zkg install --force ja3 && \
