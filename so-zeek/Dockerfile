@@ -39,7 +39,7 @@ RUN yum install -y glibc-common
 RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
-    /opt/zeek/bin/zkg install --force zeek-community-id 
+    /opt/zeek/bin/zkg install --force zeek-community-id && \
     #/opt/zeek/bin/zkg install --force bzar && \
     #/opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/bzar --version=master && \
     #/opt/zeek/bin/zkg install --force --skiptests icsnpp-bacnet && \
