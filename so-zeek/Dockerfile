@@ -37,6 +37,7 @@ RUN cd zeek-$ZEEKVER && \
     make -j4 && make install 
 RUN yum install -y glibc-common
 RUN /opt/zeek/bin/zkg install --force ja3 && \
+    /opt/zeek/bin/zkg install --force https://github.com/JustinAzoff/zeek-jemalloc-profiling && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
     /opt/zeek/bin/zkg install --force zeek-community-id && \
@@ -75,7 +76,7 @@ LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Se
 # Common CentOS layer
 RUN dnf update -y && \
     dnf -y install epel-release bash findutils libpcap iproute && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb python3 && \
+    dnf -y install jemalloc jemalloc-devel numactl libnl3 libdnet gdb python3 && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
