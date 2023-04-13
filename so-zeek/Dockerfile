@@ -18,11 +18,13 @@ RUN dnf -y install dnf-plugins-core && \
     dnf config-manager --set-enabled crb && \
     dnf update -y && \ 
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers && \
+    dnf -y install numactl libnl3 libdnet gdb git && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel python3-devel kernel-devel kernel-headers && \
     dnf group install -y "Development Tools" && \
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
+
+RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_0.rpm
 
 ENV ZEEKVER=5.0.8
 ARG BUILD_TYPE=Release
@@ -76,11 +78,13 @@ LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Se
 # Common CentOS layer
 RUN dnf update -y && \
     dnf -y install epel-release bash findutils libpcap iproute && \
-    dnf -y install jemalloc jemalloc-devel numactl libnl3 libdnet gdb python3 && \
+    dnf -y install numactl libnl3 libdnet gdb python3 && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
-    
+
+RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_0.rpm
+
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
 
