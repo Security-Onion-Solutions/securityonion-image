@@ -22,7 +22,7 @@ RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertoo
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=5.0.7
+ENV ZEEKVER=5.0.8
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -80,8 +80,6 @@ RUN dnf update -y && \
     
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
-
-VOLUME ["/nsm/zeek/logs", "/nsm/zeek/spool", "/opt/zeek/share/bro", "/opt/zeek/etc/"]
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
