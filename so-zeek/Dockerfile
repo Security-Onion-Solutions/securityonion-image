@@ -21,6 +21,7 @@ RUN dnf -y install dnf-plugins-core && \
     dnf -y install numactl libnl3 libdnet gdb git && \
     dnf -y install libpcap-devel openssl-devel zlib-devel python3-devel kernel-devel kernel-headers && \
     dnf group install -y "Development Tools" && \
+    dnf -y install libunwind-devel && \
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
@@ -80,6 +81,7 @@ RUN dnf update -y && \
     dnf -y install epel-release bash findutils libpcap iproute && \
     dnf -y install numactl libnl3 libdnet gdb python3 && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
+    dnf -y install libunwind-devel && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
