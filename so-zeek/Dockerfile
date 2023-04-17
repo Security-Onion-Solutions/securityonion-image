@@ -80,8 +80,8 @@ LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Se
 RUN dnf update -y && \
     dnf -y install epel-release bash findutils libpcap iproute && \
     dnf -y install numactl libnl3 libdnet gdb python3 && \
-    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     dnf -y install libunwind-devel && \
+    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
