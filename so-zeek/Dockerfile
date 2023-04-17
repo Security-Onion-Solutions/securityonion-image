@@ -24,7 +24,7 @@ RUN dnf -y install dnf-plugins-core && \
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_0.rpm
+RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_1.rpm
 
 ENV ZEEKVER=5.0.8
 ARG BUILD_TYPE=Release
@@ -83,7 +83,7 @@ RUN dnf update -y && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
-RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_0.rpm
+RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_1.rpm
 
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
