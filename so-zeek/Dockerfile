@@ -18,14 +18,11 @@ RUN dnf -y install dnf-plugins-core && \
     dnf config-manager --set-enabled crb && \
     dnf update -y && \ 
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
-    dnf -y install numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel python3-devel kernel-devel kernel-headers && \
+    dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers && \
     dnf group install -y "Development Tools" && \
-    dnf -y install libunwind-devel && \
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
-
-RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_1.rpm
 
 ENV ZEEKVER=5.0.8
 ARG BUILD_TYPE=Release
@@ -40,7 +37,6 @@ RUN cd zeek-$ZEEKVER && \
     make -j4 && make install 
 RUN yum install -y glibc-common
 RUN /opt/zeek/bin/zkg install --force ja3 && \
-    /opt/zeek/bin/zkg install --force https://github.com/JustinAzoff/zeek-jemalloc-profiling && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
     /opt/zeek/bin/zkg install --force zeek-community-id && \
@@ -79,13 +75,11 @@ LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Se
 # Common CentOS layer
 RUN dnf update -y && \
     dnf -y install epel-release bash findutils libpcap iproute && \
-    dnf -y install numactl libnl3 libdnet gdb python3 && \
+    dnf -y install jemalloc numactl libnl3 libdnet gdb python3 && \
     dnf -y install libunwind-devel && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
-
-RUN rpm -i https://repo.securityonion.net/file/so-repo/2.4/securityonion-jemalloc-5.3.0_1.rpm
 
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
