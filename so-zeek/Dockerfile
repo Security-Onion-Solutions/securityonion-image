@@ -1,4 +1,4 @@
-# Copyright 2014-2022 Security Onion Solutions, LLC
+# Copyright 2014-2023 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ RUN dnf -y install dnf-plugins-core && \
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=5.0.7
+ENV ZEEKVER=5.0.8
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -76,10 +76,11 @@ LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Se
 RUN dnf update -y && \
     dnf -y install epel-release bash findutils libpcap iproute && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb python3 && \
+    dnf -y install libunwind-devel && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
-    
+
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
 
@@ -91,4 +92,3 @@ RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-
 HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
-
