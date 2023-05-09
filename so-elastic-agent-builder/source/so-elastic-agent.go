@@ -29,7 +29,6 @@ var fleetHost = ""
 var fleetHostFlag string
 var hostFile string
 
-// var installSysmon string
 var enrollmentToken, enrollmentTokenFlag string
 
 func check(err error, context string) {
