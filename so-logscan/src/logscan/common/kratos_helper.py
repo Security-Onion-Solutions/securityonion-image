@@ -16,12 +16,14 @@ def filter_kratos_log(all_log_lines: List) -> List:
 
 
 def __create_sparse_entry(log_line: Dict):
+    timestr = log_line["time"]
+    if len(log_line["time"]) > 20:
+        timestr = timestr[0:19] + "Z"
     return [
-        dt.datetime.strptime(log_line["time"], "%Y-%m-%dT%H:%M:%SZ").timestamp(),
+        dt.datetime.strptime(timestr, "%Y-%m-%dT%H:%M:%SZ").timestamp(),
         1 if KRATOS_SUCCESS_STR in log_line['msg'] else 0,
         log_line["http_request"]["headers"]["x-forwarded-for"].split(',')[-1]
     ]
-
 
 def sparse_data(filtered_log: List, ip_sort: bool=True) -> List:
     sparse_data = list(map(lambda x: __create_sparse_entry(x), filtered_log))
