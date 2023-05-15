@@ -184,7 +184,10 @@ func main() {
 	arg4 := "--certificate-authorities=" + installPath + "soca.crt"
 	arg5 := "-n"
 
-	cmd := exec.Command(prg, arg1, arg2, arg3, arg4, arg5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
+	defer cancel()
+
+	exec.CommandContext(ctx, prg, arg1, arg2, arg3, arg4, arg5)
 
 	//strings.join the following
 	statusLogs("Executing the following: " + prg + " " + arg1 + " " + arg2 + " " + arg3 + " " + arg4 + " " + arg5)
