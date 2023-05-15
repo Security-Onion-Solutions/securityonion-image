@@ -5,19 +5,21 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	_ "embed"
 	"flag"
 	"fmt"
-	"github.com/apex/log"
-	"github.com/apex/log/handlers/logfmt"
-	"github.com/apex/log/handlers/text"
-	"github.com/mholt/archiver/v3"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/logfmt"
+	"github.com/apex/log/handlers/text"
+	"github.com/mholt/archiver/v3"
 )
 
 //go:embed files/cert/intca.crt
@@ -41,8 +43,21 @@ func check(err error, context string) {
 }
 
 func cleanupInstall() {
-	os.Remove("./so-elastic-agent_source.tar.gz")
-	os.RemoveAll("./so-elastic-agent_source")
+	err := os.Remove("./so-elastic-agent_source.tar.gz")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"Context":       "Unable to delete so-elastic-agent_source.tar.gz - it can be deleted manually.",
+			"Error Details": err,
+		}).Error("Installation Progress")
+	}
+
+	err = os.RemoveAll("./so-elastic-agent_source")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"Context":       "Unable to delete so-elastic-agent_source folder - it can be deleted manually.",
+			"Error Details": err,
+		}).Error("Installation Progress")
+	}
 }
 
 func statusLogs(status string) {
@@ -109,6 +124,8 @@ func main() {
 	for i := 0; i < len(fleetHostURLs); i++ {
 
 		req, err := http.NewRequest("GET", fleetHostURLs[i], nil)
+		check(err, "Error creating constructing FleetHostURL HTTP Request")
+
 		resp, err := client.Do(req)
 
 		if (err != nil) || (resp.StatusCode != http.StatusNotFound) {
@@ -154,7 +171,7 @@ func main() {
 
 	// Copy over embedded tar & extract it to the local system
 	_ = os.WriteFile("so-elastic-agent_source.tar.gz", agentFiles, 0755)
-	archiver.Unarchive("./so-elastic-agent_source.tar.gz", "so-elastic-agent_source")
+	err = archiver.Unarchive("./so-elastic-agent_source.tar.gz", "so-elastic-agent_source")
 	check(err, "Error extracting Elastic Agent source.")
 
 	// Install Elastic Agent
@@ -169,7 +186,8 @@ func main() {
 
 	cmd := exec.Command(prg, arg1, arg2, arg3, arg4, arg5)
 
-	statusLogs("Executing the following: " + prg + arg1 + arg2 + arg3 + arg4 + arg5)
+	//strings.join the following
+	statusLogs("Executing the following: " + prg + " " + arg1 + " " + arg2 + " " + arg3 + " " + arg4 + " " + arg5)
 
 	output, err := cmd.CombinedOutput()
 	check(err, string(output))
