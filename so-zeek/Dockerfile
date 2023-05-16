@@ -52,9 +52,7 @@ RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVE
 RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE --with-openssl=/usr/local/ssl && \
     time make -j4 && time make install && \
-    fips-mode-setup --enable && \
-    fips-mode-setup --check && \
-    rm -rf /zeekbuild
+    fips-mode-setup --enable
 RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
@@ -79,7 +77,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
     /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
-    rm -rf /opt/zeek/var/lib/zkg/scratch
+    rm -rf /opt/zeek/var/lib/zkg/scratch && \
+    rm -rf /zeekbuild
 RUN groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
     chown -R 937:937 /opt/zeek && \
