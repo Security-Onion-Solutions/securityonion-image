@@ -188,8 +188,6 @@ class MockElastAlerter(object):
         es_client = elasticsearch_client(conf)
         eqlClient = eql_client(conf)
         ts = conf.get('timestamp_field', '@timestamp')
-        print("starttime before query " + str(self.starttime))
-        print("filter " + str(conf['filter']))
         ElastAlerter.eql = True
         query = ElastAlerter.get_query(
             conf['filter'],
@@ -202,7 +200,6 @@ class MockElastAlerter(object):
 
         # Get one document for schema
         try:
-            print("filter " + str(query))
             res = eqlClient.search(index=index, body=query)
         except Exception as e:
             print("Error running your filter:", file=sys.stderr)
@@ -211,7 +208,6 @@ class MockElastAlerter(object):
                 exit(3)
             return None
         num_hits = len(res['hits']['events'])
-        print("starttime " + str(self.starttime))
         if not num_hits:
             print("Didn't get any results.")
             return []
