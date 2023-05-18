@@ -51,14 +51,14 @@ def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None
             ea_index,
         )
     for index_name in index_names:
-        if es_index.exists(index_name):
+        if es_index.exists(index=index_name):
             print('Deleting index ' + index_name + '.')
             try:
-                es_index.delete(index_name)
+                es_index.delete(index=index_name)
             except NotFoundError:
                 # Why does this ever occur?? It shouldn't. But it does.
                 pass
-        es_index.create(index_name)
+        es_index.create(index=index_name)
 
     # To avoid a race condition. TODO: replace this with a real check
     time.sleep(2)
