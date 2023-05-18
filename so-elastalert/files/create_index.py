@@ -8,34 +8,19 @@ import time
 
 import elasticsearch.helpers
 import yaml
-from elasticsearch import RequestsHttpConnection
 from elasticsearch.client import Elasticsearch
 from elasticsearch.client import IndicesClient
 from elasticsearch.exceptions import NotFoundError
 from envparse import Env
 
 from elastalert.auth import Auth
+from elastalert.util import get_version_from_cluster_info
 
 env = Env(ES_USE_SSL=bool)
 
 
-def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None, index_settings=None):
-    if index_settings is not None:
-        settings = {'settings': {'index': {}}}
-        if index_settings["shards"] is not None:
-            settings["settings"]["index"]["number_of_shards"] = index_settings["shards"]
-        if index_settings["replicas"] is not None:
-            settings["settings"]["index"]["number_of_replicas"] = index_settings["replicas"]
-    else:
-        settings = None
-
-    esinfo = es_client.info()['version']
-    if esinfo.get('distribution') == "opensearch":
-        # OpenSearch is based on Elasticsearch 7.10.2, currently only v1.0.0 exists
-        # https://opensearch.org/
-        esversion = "7.10.2"
-    else:
-        esversion = esinfo['number']
+def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None):
+    esversion = get_version_from_cluster_info(es_client)
 
     es_index_mappings = {}
     if is_atleasteight(esversion):
@@ -48,7 +33,7 @@ def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None
 
     es_index = IndicesClient(es_client)
     if not recreate:
-        if es_index.exists(ea_index):
+        if es_index.exists(index=ea_index):
             print('Index ' + ea_index + ' already exists. Skipping index creation.')
             return None
 
@@ -73,7 +58,7 @@ def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None
             except NotFoundError:
                 # Why does this ever occur?? It shouldn't. But it does.
                 pass
-        es_index.create(index_name, body=settings)
+        es_index.create(index_name)
 
     # To avoid a race condition. TODO: replace this with a real check
     time.sleep(2)
@@ -177,7 +162,7 @@ def main():
     if filename:
         with open(filename) as config_file:
             data = yaml.load(config_file, Loader=yaml.FullLoader)
-        host = args.host if args.host else data.get('es_host')
+        host = args.host if args.host else data.get('es_hosts')
         port = args.port if args.port else data.get('es_port')
         username = args.username if args.username else data.get('es_username')
         password = args.password if args.password else data.get('es_password')
@@ -193,14 +178,13 @@ def main():
         client_key = data.get('client_key')
         index = args.index if args.index is not None else data.get('writeback_index')
         old_index = args.old_index if args.old_index is not None else None
-        index_settings = data.get('index_settings')
     else:
         username = args.username if args.username else None
         password = args.password if args.password else None
         bearer = args.bearer if args.bearer else None
         api_key = args.api_key if args.api_key else None
         aws_region = args.aws_region
-        host = args.host if args.host else input('Enter Elasticsearch host: ')
+        host = args.hosts if args.host else input('Enter Elasticsearch host: ')
         port = args.port if args.port else int(input('Enter Elasticsearch port: '))
         use_ssl = (args.ssl if args.ssl is not None
                    else input('Use SSL? t/f: ').lower() in ('t', 'true'))
@@ -219,20 +203,12 @@ def main():
         client_cert = None
         client_key = None
         index = args.index if args.index is not None else input('New index name? (Default elastalert_status) ')
-        index_settings = None
         if not index:
             index = 'elastalert_status'
         old_index = (args.old_index if args.old_index is not None
                      else input('Name of existing index to copy? (Default None) '))
 
     timeout = args.timeout
-
-    auth = Auth()
-    http_auth = auth(host=host,
-                     username=username,
-                     password=password,
-                     aws_region=aws_region,
-                     profile_name=args.profile)
 
     headers = {}
     if bearer is not None:
@@ -241,21 +217,16 @@ def main():
         headers.update({'Authorization': f'ApiKey {api_key}'})
 
     es = Elasticsearch(
-        host=host,
-        port=port,
+        hosts=host,
         timeout=timeout,
-        use_ssl=use_ssl,
         verify_certs=verify_certs,
-        connection_class=RequestsHttpConnection,
-        http_auth=http_auth,
+        basic_auth=(username,password),
         headers=headers,
-        url_prefix=url_prefix,
-        send_get_body_as=send_get_body_as,
         client_cert=client_cert,
         ca_certs=ca_certs,
         client_key=client_key)
 
-    create_index_mappings(es_client=es, ea_index=index, recreate=args.recreate, old_ea_index=old_index, index_settings=index_settings)
+    create_index_mappings(es_client=es, ea_index=index, recreate=args.recreate, old_ea_index=old_index)
 
 
 if __name__ == '__main__':
