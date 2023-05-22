@@ -16,9 +16,9 @@ ARG VERSION
 
 FROM docker.elastic.co/package-registry/distribution:$VERSION as original_image
 
-# Cleanup unneeded packages
+# Cleanup unneeded packages, keeping the two most recent versons of each one
 RUN cd /packages/package-storage/ \
-&& rm -rf suricata-* zeek-* snort-* dga-* \
+&& rm -rf suricata-* zeek-* snort-* dga-* endpoint*preview* endpoint*dev* endpoint*next* \
 && cd /packages/package-storage/ && LIST=$(ls | awk -F'[-]' '{print $1}' | sort | uniq ) \
 && for item in $LIST; do ls $item-*.zip | head -n-2 | xargs rm -r; done
 
