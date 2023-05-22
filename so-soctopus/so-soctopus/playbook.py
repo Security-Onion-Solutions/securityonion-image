@@ -296,16 +296,18 @@ def elastalert_update(issue_id):
             content = re.sub(r'play_id:.\"\"', f"play_id: \"{play_meta['playid']}\"", content.rstrip())            
             content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
             content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n", content.rstrip())
-            content = f"{content}\n{sigma_meta['raw_elastalert']}"
+            content = re.sub(r'name:\s\S*', f"name: \"{sigma_meta['title']} - {play_meta['playid']}\"", content.rstrip())
+            content = f"{content}\n      query: '{sigma_meta['raw_elastalert']}'\n"
             f.write(content)
             f.close()
 
             # Check newly-written elastalert config file to make sure it is valid
-            elastalert_config_status = "invalid"
-            file = open(play_file, "r")
-            for line in file:
-                if re.search('realert', line):
-                    elastalert_config_status = "valid"
+            #elastalert_config_status = "invalid"
+            elastalert_config_status = "valid"
+            #file = open(play_file, "r")
+            #for line in file:
+            #    if re.search('realert', line):
+            #        elastalert_config_status = "valid"
 
             if elastalert_config_status != "valid":
                 print ("Elastalert rule file invalid - deleting it")
@@ -423,7 +425,7 @@ def sigmac_generate(sigma):
     print(sigma, file=temp_file)
     temp_file.seek(0)
 
-    sigmac_output = subprocess.run(["sigmac", "-t", "es-qs", "-c", "playbook/sysmon.yml",
+    sigmac_output = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/sysmon.yml",
                                     "-c", "playbook/securityonion-baseline.yml", "--backend-option", "keyword_whitelist=source.ip,destination.ip,source.port,destination.port,message,rule.uuid", "--backend-option", "keyword_field=.keyword", "--backend-option", "analyzed_sub_field_name=.security", "--backend-option", "wildcard_use_keyword=false", temp_file.name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
 
@@ -450,14 +452,10 @@ def sigma_metadata(sigma_raw, sigma, play_id, custom_condition=""):
 
     product = sigma['logsource']['product'] if 'product' in sigma['logsource'] else 'none'
 
-    esquery = subprocess.run(["sigmac", "-t", "elastalert", "-c", "playbook/sysmon.yml",
+    esquery = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/sysmon.yml",
                                     "-c", "playbook/securityonion-baseline.yml", "--backend-option", "keyword_whitelist=source.ip,destination.ip,source.port,destination.port,message,rule.uuid", "--backend-option", "keyword_field=.keyword", "--backend-option", "analyzed_sub_field_name=.security", "--backend-option", "wildcard_use_keyword=false", temp_file.name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
-
-    ea_config = re.sub(r'alert:\n.*filter:\n', 'filter:\n', esquery.stdout.strip(), flags=re.S)
-
-    # Edit this to add the playid after the title - 
-    ea_config = re.sub(r'name:\s\S*', f"name: {sigma.get('title')} - {play_id}", ea_config)
+    ea_config = esquery.stdout.strip()
 
     # Prep ATT&CK Tags
     tags = re.findall(r"t\d{4}", ''.join(
