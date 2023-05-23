@@ -303,7 +303,6 @@ def elastalert_update(issue_id):
 
             # Check newly-written elastalert config file to make sure it is valid
             elastalert_config_status = "invalid"
-            elastalert_config_status = "valid"
             file = open(play_file, "r")
             for line in file:
                 if re.search('realert', line):
