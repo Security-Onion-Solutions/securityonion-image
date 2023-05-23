@@ -302,12 +302,11 @@ def elastalert_update(issue_id):
             f.close()
 
             # Check newly-written elastalert config file to make sure it is valid
-            #elastalert_config_status = "invalid"
-            elastalert_config_status = "valid"
-            #file = open(play_file, "r")
-            #for line in file:
-            #    if re.search('realert', line):
-            #        elastalert_config_status = "valid"
+            elastalert_config_status = "invalid"
+            file = open(play_file, "r")
+            for line in file:
+                if re.search('realert', line):
+                    elastalert_config_status = "valid"
 
             if elastalert_config_status != "valid":
                 print ("Elastalert rule file invalid - deleting it")
@@ -425,8 +424,7 @@ def sigmac_generate(sigma):
     print(sigma, file=temp_file)
     temp_file.seek(0)
 
-    sigmac_output = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/sysmon.yml",
-                                    "-c", "playbook/securityonion-baseline.yml", "--backend-option", "keyword_whitelist=source.ip,destination.ip,source.port,destination.port,message,rule.uuid", "--backend-option", "keyword_field=.keyword", "--backend-option", "analyzed_sub_field_name=.security", "--backend-option", "wildcard_use_keyword=false", temp_file.name],
+    sigmac_output = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/securityonion-baseline.yml", temp_file.name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
 
     es_query = sigmac_output.stdout.strip() + sigmac_output.stderr.strip()
@@ -452,8 +450,7 @@ def sigma_metadata(sigma_raw, sigma, play_id, custom_condition=""):
 
     product = sigma['logsource']['product'] if 'product' in sigma['logsource'] else 'none'
 
-    esquery = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/sysmon.yml",
-                                    "-c", "playbook/securityonion-baseline.yml", "--backend-option", "keyword_whitelist=source.ip,destination.ip,source.port,destination.port,message,rule.uuid", "--backend-option", "keyword_field=.keyword", "--backend-option", "analyzed_sub_field_name=.security", "--backend-option", "wildcard_use_keyword=false", temp_file.name],
+    esquery = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/securityonion-baseline.yml", temp_file.name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
     ea_config = esquery.stdout.strip()
 
