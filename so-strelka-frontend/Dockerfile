@@ -1,6 +1,6 @@
 FROM ghcr.io/security-onion-solutions/golang AS build
 LABEL maintainer "Security Onion Solutions, LLC"
-ARG STRELKA_RELEASE_VERSION=0.23.01.07
+ARG STRELKA_RELEASE_VERSION=0.23.05.22
 
 RUN mkdir -p src/github.com/target/strelka && \
     git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka src/github.com/target/strelka && \
