@@ -34,7 +34,7 @@ RUN pip install -r requirements.txt && \
 
 COPY ./so-soctopus /SOCtopus
 
-# Temp Patch for 2.3.30 - fixes Sigmac Playbook issues
+# Temp Patch for 2.4 - fixes Sigmac EQL issue
 COPY ./elasticsearch.py /usr/local/lib/python3.9/site-packages/sigma/backends/elasticsearch.py
 
 ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:7000", "wsgi:app", "--log-file", "/var/log/SOCtopus/soctopus.log"]

@@ -14,9 +14,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ARG VERSION
 
+FROM docker.elastic.co/package-registry/distribution:$VERSION as original_image
 
-FROM docker.elastic.co/package-registry/distribution:$VERSION
+# Cleanup unneeded packages, keeping the two most recent versons of each one
+RUN cd /packages/package-storage/ \
+&& rm -rf suricata-* zeek-* snort-* dga-* endpoint*preview* endpoint*dev* endpoint*next* \
+&& cd /packages/package-storage/ && LIST=$(ls | awk -F'[-]' '{print $1}' | sort | uniq ) \
+&& for item in $LIST; do ls $item-*.zip | head -n-2 | xargs rm -r; done
 
-#Commented out 12/22 - Needs to be reworked to bring image size down
-#RUN for dir in /packages/production/*; do ls -d $dir/* | head -n -3 | xargs rm -r; done
+FROM scratch
 
+COPY --from=original_image / /
+WORKDIR /package-registry
+
+EXPOSE 8080
+ENTRYPOINT ["./package-registry"]
+
+ENV EPR_ADDRESS=0.0.0.0:8080
+
+HEALTHCHECK --interval=1s --retries=30 CMD curl --silent --fail localhost:8080/health || exit 1

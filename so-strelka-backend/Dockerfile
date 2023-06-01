@@ -19,7 +19,7 @@ ARG CAPA_VERSION=5.0.0
 ARG EXIFTOOL_VERSION=12.52
 
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
-ARG STRELKA_RELEASE_VERSION=0.23.03.14
+ARG STRELKA_RELEASE_VERSION=0.23.05.22
 RUN mkdir /strelka && \
     mkdir /etc/strelka && \
     mkdir /tmp/strelka && \
