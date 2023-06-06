@@ -7,8 +7,6 @@ ARG USERNAME=so-elastalert
 
 USER root
 
-RUN pip install elasticsearch==8.7.0 --upgrade
-
 RUN groupadd -g ${GID} ${USERNAME} && \
     useradd -u ${UID} -g ${GID} -M -b /opt/elastalert -s /sbin/nologin \
         -c "ElastAlert 2 User" ${USERNAME}
