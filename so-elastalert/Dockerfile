@@ -1,4 +1,4 @@
-FROM jertel/elastalert2:eql
+FROM jertel/elastalert2:latest
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=933
