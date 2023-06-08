@@ -297,7 +297,7 @@ def elastalert_update(issue_id):
             content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
             content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n", content.rstrip())
             content = re.sub(r'name:\s\S*', f"name: \"{sigma_meta['title']} - {play_meta['playid']}\"", content.rstrip())
-            content = f"{content}\n      query: '{sigma_meta['raw_elastalert']}'\n"
+            content = f"{content}\n- eql: '{sigma_meta['raw_elastalert']}'\n"
             f.write(content)
             f.close()
 

@@ -1,4 +1,4 @@
-FROM ghcr.io/jertel/elastalert2/elastalert2:2.9.0
+FROM ghcr.io/jertel/elastalert2/elastalert2:latest
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=933
@@ -6,8 +6,6 @@ ARG UID=933
 ARG USERNAME=so-elastalert
 
 USER root
-
-RUN pip install elasticsearch==8.7.0 --upgrade
 
 RUN groupadd -g ${GID} ${USERNAME} && \
     useradd -u ${UID} -g ${GID} -M -b /opt/elastalert -s /sbin/nologin \

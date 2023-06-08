@@ -8,13 +8,13 @@ import time
 
 import elasticsearch.helpers
 import yaml
+from elasticsearch import RequestsHttpConnection
 from elasticsearch.client import Elasticsearch
 from elasticsearch.client import IndicesClient
 from elasticsearch.exceptions import NotFoundError
 from envparse import Env
 
 from elastalert.auth import Auth
-from elastalert.util import get_version_from_cluster_info
 
 env = Env(ES_USE_SSL=bool)
 
@@ -48,7 +48,7 @@ def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None
 
     es_index = IndicesClient(es_client)
     if not recreate:
-        if es_index.exists(index=ea_index):
+        if es_index.exists(ea_index):
             print('Index ' + ea_index + ' already exists. Skipping index creation.')
             return None
 
@@ -66,14 +66,14 @@ def create_index_mappings(es_client, ea_index, recreate=False, old_ea_index=None
             ea_index,
         )
     for index_name in index_names:
-        if es_index.exists(index=index_name):
+        if es_index.exists(index_name):
             print('Deleting index ' + index_name + '.')
             try:
-                es_index.delete(index=index_name)
+                es_index.delete(index_name)
             except NotFoundError:
                 # Why does this ever occur?? It shouldn't. But it does.
                 pass
-        es_index.create(index=index_name, body=settings)
+        es_index.create(index_name, body=settings)
 
     # To avoid a race condition. TODO: replace this with a real check
     time.sleep(2)
@@ -177,7 +177,7 @@ def main():
     if filename:
         with open(filename) as config_file:
             data = yaml.load(config_file, Loader=yaml.FullLoader)
-        host = args.host if args.host else data.get('es_hosts')
+        host = args.host if args.host else data.get('es_host')
         port = args.port if args.port else data.get('es_port')
         username = args.username if args.username else data.get('es_username')
         password = args.password if args.password else data.get('es_password')
@@ -227,6 +227,13 @@ def main():
 
     timeout = args.timeout
 
+    auth = Auth()
+    http_auth = auth(host=host,
+                     username=username,
+                     password=password,
+                     aws_region=aws_region,
+                     profile_name=args.profile)
+
     headers = {}
     if bearer is not None:
         headers.update({'Authorization': f'Bearer {bearer}'})
@@ -234,11 +241,16 @@ def main():
         headers.update({'Authorization': f'ApiKey {api_key}'})
 
     es = Elasticsearch(
-        hosts=host,
+        host=host,
+        port=port,
         timeout=timeout,
+        use_ssl=use_ssl,
         verify_certs=verify_certs,
-        basic_auth=(username,password),
+        connection_class=RequestsHttpConnection,
+        http_auth=http_auth,
         headers=headers,
+        url_prefix=url_prefix,
+        send_get_body_as=send_get_body_as,
         client_cert=client_cert,
         ca_certs=ca_certs,
         client_key=client_key)
