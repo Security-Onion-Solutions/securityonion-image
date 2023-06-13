@@ -1,7 +1,7 @@
 # This Dockerfile was based on the official Kibana Docker image:
 # https://github.com/elastic/kibana-docker
 
-# Copyright 2014-2022 Security Onion Solutions, LLC
+# Copyright 2014-2023 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
