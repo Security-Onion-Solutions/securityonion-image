@@ -20,7 +20,7 @@ FROM docker.elastic.co/package-registry/distribution:$VERSION as original_image
 RUN cd /packages/package-storage/ \
 && rm -rf suricata-* zeek-* snort-* dga-* endpoint*preview* endpoint*dev* endpoint*next* \
 && cd /packages/package-storage/ && LIST=$(ls | awk -F'[-]' '{print $1}' | sort | uniq ) \
-&& for item in $LIST; do ls $item-*.zip | head -n-2 | xargs rm -r; done
+&& for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "$item-"{} |  xargs rm -r; done
 
 FROM scratch
 
