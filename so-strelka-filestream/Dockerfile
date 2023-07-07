@@ -1,6 +1,6 @@
 FROM ghcr.io/security-onion-solutions/golang:alpine AS build
 LABEL maintainer "Security Onion Solutions, LLC"
-ARG STRELKA_RELEASE_VERSION=0.23.05.22
+ARG STRELKA_RELEASE_VERSION=0.23.07.04
 
 RUN CGO_ENABLED=0 go install github.com/target/strelka/src/go/cmd/strelka-filestream@$STRELKA_RELEASE_VERSION
 
