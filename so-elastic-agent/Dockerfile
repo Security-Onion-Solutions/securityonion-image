@@ -1,7 +1,7 @@
 # This Dockerfile was based on the official Elastic Agent Docker image:
 # https://hub.docker.com/r/elastic/elastic-agent
 
-# Copyright 2014-2022 Security Onion Solutions, LLC
+# Copyright Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
