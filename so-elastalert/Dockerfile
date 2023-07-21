@@ -15,9 +15,7 @@ COPY ./files /custom
 
 RUN cp -fr /custom/* $(find /usr -name elastalert -type d) && rm -fr /custom
 
-RUN sed -i 's|\"enabled\": \"false\"|\"enabled\": "true"|' /usr/local/lib/*/site-packages/elastalert/es_mappings/8/*elastalert.json && \
-    sed -i 's|\"type\": \"object\"|\"type\": \"object\",|' /usr/local/lib/*/site-packages/elastalert/es_mappings/8/*elastalert.json && \
-    sed -i "/\"type\": \"object\",/a\ \"properties\": {\n \"host\": {\n \"properties\": {\n \"os\": {\n \"properties\": {\n \"version\": {\n \"type\": \"keyword\"\n }\n }\n }\n }\n }\n }" /usr/local/lib/*/site-packages/elastalert/es_mappings/8/*elastalert.json
+RUN sed -i 's|\"enabled\": \"false\"|\"enabled\": "true"|' /usr/local/lib/*/site-packages/elastalert/es_mappings/8/*elastalert.json
 
 RUN sed -i -e '$s,$, >> /var/log/elastalert/stdout.log 2>> /var/log/elastalert/stderr.log,' /opt/elastalert/run.sh
 
