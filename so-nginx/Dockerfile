@@ -16,7 +16,7 @@
 # Navigator build stage
 FROM ghcr.io/security-onion-solutions/node:16-alpine as navigator-builder
 
-ARG NAVIGATOR_VERSION=4.8.0
+ARG NAVIGATOR_VERSION=4.8.2
 
 RUN apk add git && \
     git config --global advice.detachedHead false && \
