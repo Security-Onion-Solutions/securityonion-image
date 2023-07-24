@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "rule_name": {
+      "type": "keyword"
+    },
+    "match_body": {
+      "type": "object",
+      "enabled": "true",
+      "properties": {
+        "host" : {
+          "properties": {
+            "os": {
+              "properties": {
+                "version" : {
+                  "type": "keyword"
+                }
+              }    
+            }
+          }
+        }
+      }
+    },
+    "@timestamp": {
+      "type": "date",
+      "format": "date_optional_time"
+    },
+    "aggregate_id": {
+      "type": "keyword"
+    }
+  }
+}
