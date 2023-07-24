@@ -297,7 +297,7 @@ def elastalert_update(issue_id):
             content = re.sub(r'event\.severity:.*', f"event.severity: {event_severity}", content.rstrip())
             content = re.sub(r'sigma_level:.\"\"', f"sigma_level: \"{sigma_meta['level']}\"\n", content.rstrip())
             content = re.sub(r'name:\s\S*', f"name: \"{sigma_meta['title']} - {play_meta['playid']}\"", content.rstrip())
-            content = f"{content}\n- eql: '{sigma_meta['raw_elastalert']}'\n"
+            content = f"{content}\n- eql: >\n   {sigma_meta['raw_elastalert']}\n"
             f.write(content)
             f.close()
 
@@ -424,7 +424,7 @@ def sigmac_generate(sigma):
     print(sigma, file=temp_file)
     temp_file.seek(0)
 
-    sigmac_output = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/securityonion-baseline.yml", temp_file.name],
+    sigmac_output = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/securityonion-baseline.yml", "--backend-option", "keyword_whitelist=source.ip,destination.ip,source.port,destination.port,message,rule.uuid", temp_file.name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
 
     es_query = sigmac_output.stdout.strip() + sigmac_output.stderr.strip()
@@ -450,7 +450,7 @@ def sigma_metadata(sigma_raw, sigma, play_id, custom_condition=""):
 
     product = sigma['logsource']['product'] if 'product' in sigma['logsource'] else 'none'
 
-    esquery = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/securityonion-baseline.yml", temp_file.name],
+    esquery = subprocess.run(["sigmac", "-t", "es-eql", "-c", "playbook/securityonion-baseline.yml", "--backend-option", "keyword_whitelist=source.ip,destination.ip,source.port,destination.port,message,rule.uuid", temp_file.name],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='ascii')
     ea_config = esquery.stdout.strip()
 
