@@ -16,7 +16,7 @@
 # Navigator build stage
 FROM ghcr.io/security-onion-solutions/node:16-alpine as navigator-builder
 
-ARG NAVIGATOR_VERSION=4.8.0
+ARG NAVIGATOR_VERSION=4.8.2
 
 RUN apk add git && \
     git config --global advice.detachedHead false && \
@@ -36,7 +36,7 @@ HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=10.4.0
+ARG CYBERCHEF_VERSION=10.5.2
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist /opt/socore/html/navigator

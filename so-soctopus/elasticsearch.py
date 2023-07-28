@@ -444,7 +444,7 @@ class ElasticsearchEQLBackend(DeepFieldMappingMixin, ElasticsearchWildcardHandli
         try:
             category, fieldname = fieldname.split('.', 1)
             # check against https://www.elastic.co/guide/en/ecs/1.8/ecs-allowed-values-event-category.html
-            if category in ("authentication", "configuration", "database", "driver", "file", "host", "iam", "intrusion_detection", "malware", "network", "package", "process", "registry", "session", "web"):
+            if category in ("notapplicable"):
                 self.categories.add(category)
         except ValueError:
             pass
