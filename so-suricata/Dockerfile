@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/centos:7 as builder
+FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
 
 RUN yum -y install epel-release
 RUN yum -y install jansson-devel libpcap-devel python3 libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 curl wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
@@ -27,7 +27,7 @@ RUN curl -vO https://www.openinfosecfoundation.org/download/suricata-$SURIVERSIO
     cd suricata-$SURIVERSION && ./configure --enable-rust --enable-luajit --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var && make
 RUN mkdir suriinstall && cd suricata-$SURIVERSION && make install DESTDIR=/suricata/suriinstall && make install-conf DESTDIR=/suricata/suriinstall && rm -rf /suricata/suriinstall/var/run
 
-FROM ghcr.io/security-onion-solutions/centos:7
+FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
