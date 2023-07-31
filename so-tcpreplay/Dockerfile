@@ -22,6 +22,7 @@ LABEL description="Replay PCAPs to sniffing interface(s)"
 COPY files/tcpreplay /usr/local/bin/tcpreplay
 
 # Setup our utilities, download the pcap samples, convert them to RPM and install them
+RUN dnf config-manager --enable ol9_codeready_builder
 RUN yum update -y && \
     yum clean all && \
     yum -y install epel-release && \
