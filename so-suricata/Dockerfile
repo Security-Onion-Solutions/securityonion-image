@@ -15,9 +15,13 @@
 
 FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
 
-RUN yum -y install epel-release
-RUN yum -y install jansson-devel libpcap-devel python3 libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 curl wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
+RUN yum -y install epel-release && \
+    dnf config-manager --enable ol9_codeready_builder
 
+RUN dnf -y install oraclelinux-developer-release-el9 
+RUN dnf repolist
+RUN dnf -y install jansson-devel libpcap-devel libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers curl wget make gcc pkg-config libevent pcre-devel zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
+#RUN dnf -y install libjansson libgeoip liblua5.1 libhiredis libpcre libmagic
 ENV SURIVERSION=6.0.13
 RUN mkdir /suricata
 
@@ -35,7 +39,7 @@ LABEL description="Suricata running in a docker with AF_Packet for use with Secu
 COPY --from=builder /suricata/suriinstall/ /
 
 RUN yum -y install epel-release bash libpcap iproute && \
-    yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
+    yum -y install luajit libnet jansson libyaml cargo rustc && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
     groupadd --gid 940 suricata && \
     adduser --uid 940 --gid 940 --home-dir /etc/suricata --no-create-home suricata && \
