@@ -20,8 +20,8 @@ RUN yum -y install epel-release && \
 
 RUN dnf -y install oraclelinux-developer-release-el9 
 RUN dnf repolist
-RUN yum -y install jansson-devel libpcap-devel libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 curl wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
-
+RUN dnf -y install jansson-devel libpcap-devel libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers curl wget make gcc pkg-config libevent pcre-devel zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
+#RUN dnf -y install libjansson libgeoip liblua5.1 libhiredis libpcre libmagic
 ENV SURIVERSION=6.0.13
 RUN mkdir /suricata
 
