@@ -16,8 +16,9 @@
 FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
 
 RUN yum -y install epel-release && \
-    dnf config-manager --enable ol9_codeready_builder && \
-    dnf -y install oraclelinux-developer-release-el9 
+    dnf config-manager --enable ol9_codeready_builder
+
+RUN dnf -y install oraclelinux-developer-release-el9 
 
 RUN yum -y install jansson-devel libpcap-devel libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 curl wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
 
