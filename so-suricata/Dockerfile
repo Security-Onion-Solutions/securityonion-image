@@ -20,8 +20,13 @@ RUN yum -y install epel-release && \
 
 RUN dnf -y install oraclelinux-developer-release-el9 
 RUN dnf repolist
-RUN dnf -y install jansson-devel libpcap-devel libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers curl wget make gcc pkg-config libevent pcre-devel zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
-#RUN dnf -y install libjansson libgeoip liblua5.1 libhiredis libpcre libmagic
+RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
+               jansson-devel jq libcap-ng-devel libevent-devel \
+               libmaxminddb-devel libnet-devel libnetfilter_queue-devel \
+               libnfnetlink-devel libpcap-devel libtool libyaml-devel \
+               lua-devel lz4-devel make nss-devel pcre-devel pcre2-devel pkgconfig \
+               python3-devel python3-sphinx python3-yaml sudo which cargo \
+               zlib-devel luajit-devel cargo && cargo install --force cbindgen
 ENV SURIVERSION=6.0.13
 RUN mkdir /suricata
 
