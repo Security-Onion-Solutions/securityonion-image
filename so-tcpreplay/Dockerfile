@@ -1,4 +1,4 @@
-# Copyright Security Onion Solutions, LLC
+# Copyright 2014-2023 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/oraclelinux:9
+FROM ghcr.io/security-onion-solutions/centos:7
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Replay PCAPs to sniffing interface(s)"
@@ -22,7 +22,6 @@ LABEL description="Replay PCAPs to sniffing interface(s)"
 COPY files/tcpreplay /usr/local/bin/tcpreplay
 
 # Setup our utilities, download the pcap samples, convert them to RPM and install them
-RUN dnf config-manager --enable ol9_codeready_builder
 RUN yum update -y && \
     yum clean all && \
     yum -y install epel-release && \
@@ -41,4 +40,3 @@ rm *.deb && \
 rm *.rpm
 
 ENTRYPOINT ["/bin/bash"]
-
