@@ -3,8 +3,10 @@
 # Convert EVTX to JSON
 evtx2json -q "/tmp/data.evtx" --output-file /tmp/evtx/import.json
 
-# Re-format JSON so that it is line-delimited
-cat /tmp/evtx/import.json | jq -c .[] > /tmp/evtx/data.json
+# Check for timeshift
+if [[ -z "${SHIFTTS}" ]]; then
+timeshift.py /tmp/evtx/import.json "${SHIFTTS}" event.created
+fi
 
 # Remove older import file
 [ -f /tmp/evtx/import.json ] && rm -f /tmp/evtx/import.json
