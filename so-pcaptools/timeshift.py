@@ -61,7 +61,7 @@ def write_jsonl_data_to_file(file_path, json_data):
 
 def main():
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Shift the @timestamp field in JSON data and write as JSONL.")
+    parser = argparse.ArgumentParser(description="Shift the @timestamp field for Windows Event Logs")
     parser.add_argument("file_path", help="Path to the file containing JSON data (JSON array).")
     parser.add_argument("reference_date", nargs="?", default=None, help="Reference date in custom format (e.g., '2023-08-01T16:00:00Z').")
     parser.add_argument("nested_key", help="Nested key in the JSON objects containing the timestamp to be shifted (e.g., 'data.created_at').")
