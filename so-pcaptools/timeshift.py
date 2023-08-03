@@ -57,8 +57,7 @@ def read_json_data_from_file(file_path):
 
 def write_jsonl_data_to_file(file_path, json_data):
     with open(file_path, "w") as file:
-        for data in json_data:
-            file.write(json.dumps(data) + "\n")
+        json.dump(json_data, file)
 
 def main():
     # Parse command-line arguments
