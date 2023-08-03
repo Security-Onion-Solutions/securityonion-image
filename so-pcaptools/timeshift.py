@@ -34,6 +34,7 @@ def shift_timestamp(json_data, reference_date_str, nested_key):
                 data['@timestamp'] = shifted_datetime.isoformat() + "Z"
                 data['timestamp'] = shifted_datetime.isoformat() + "Z"
                 data['event']['created'] = shifted_datetime.isoformat() + "Z"
+                data['event_data']['UtcTime'] = shifted_datetime.isoformat() + "Z"
         except KeyError:
             pass
 
