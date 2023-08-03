@@ -30,8 +30,9 @@ def shift_timestamp(json_data, reference_date_str, nested_key):
                 date_datetime = parse_custom_date(date_str)
                 shifted_datetime = date_datetime + time_shift
 
-                # Update the '@timestamp' field with the shifted timestamp value
+                # Update the '@timestamp' and event.created fields with the shifted timestamp value
                 data['@timestamp'] = shifted_datetime.isoformat() + "Z"
+                data['event']['created'] = shifted_datetime.isoformat() + "Z"
         except KeyError:
             pass
 
