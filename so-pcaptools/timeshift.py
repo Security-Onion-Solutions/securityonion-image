@@ -78,7 +78,7 @@ def main():
     shifted_json_data = shift_timestamp(json_data, reference_date_str, args.nested_key)
 
     # Save the updated JSON data as JSONL back to the file (optional, depending on your use case)
-    write_jsonl_data_to_file("/tmp/evtx/data.json", shifted_json_data)
+    write_jsonl_data_to_file("/tmp/evtx/tmp.json", shifted_json_data)
 
 if __name__ == "__main__":
     main()
