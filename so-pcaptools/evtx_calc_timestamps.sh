@@ -9,7 +9,7 @@ if [[ -z "${SHIFTTS}" ]]; then
 cat /tmp/evtx/import.json | jq -c .[] > /tmp/evtx/data.json
 else
 # Shift timestamp
-/timeshift.py /tmp/evtx/import.json "${SHIFTTS}" event.created
+python timeshift.py /tmp/evtx/import.json "${SHIFTTS}" event.created
 fi
 
 # Remove older import file
