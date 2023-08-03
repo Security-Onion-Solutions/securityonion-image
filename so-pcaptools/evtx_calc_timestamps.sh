@@ -10,6 +10,7 @@ cat /tmp/evtx/import.json | jq -c .[] > /tmp/evtx/data.json
 else
 # Shift timestamp
 python timeshift.py /tmp/evtx/import.json "${SHIFTTS}" event.created
+cat /tmp/evtx/import.json | jq -c .[] > /tmp/evtx/data.json
 fi
 
 # Remove older import file
