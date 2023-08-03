@@ -34,7 +34,7 @@ def shift_timestamp(json_data, reference_date_str, nested_key):
                 data['@timestamp'] = shifted_datetime.isoformat() + "Z"
                 data['timestamp'] = shifted_datetime.isoformat() + "Z"
                 data['event']['created'] = shifted_datetime.isoformat() + "Z"
-                data['winlog']['event_data']['UtcTime'] = shifted_datetime.isoformat() + "Z"
+                data['winlog']['event_data']['UtcTime'] = shifted_datetime.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         except KeyError:
             pass
 
@@ -82,4 +82,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
