@@ -6,6 +6,9 @@ evtx2json -q "/tmp/data.evtx" --output-file /tmp/evtx/import.json
 # Check for timeshift
 if [[ -z "${SHIFTTS}" ]]; then
 timeshift.py /tmp/evtx/import.json "${SHIFTTS}" event.created
+else
+# Ensure JSON is line-delimited
+cat /tmp/evtx/import.json | jq -c .[] > /tmp/evtx/data.json
 fi
 
 # Remove older import file
