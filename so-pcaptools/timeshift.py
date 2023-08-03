@@ -64,7 +64,7 @@ def main():
     parser = argparse.ArgumentParser(description="Shift the @timestamp field for Windows Event Logs")
     parser.add_argument("file_path", help="Path to the file containing JSON data (JSON array).")
     parser.add_argument("reference_date", nargs="?", default=None, help="Reference date in custom format (e.g., '2023-08-01T16:00:00Z').")
-    parser.add_argument("nested_key", help="Nested key in the JSON objects containing the timestamp to be shifted (e.g., 'data.created_at').")
+    parser.add_argument("nested_key", help="Nested key in the JSON objects containing the timestamp to be shifted (e.g., 'event.created').")
     args = parser.parse_args()
 
     # Read JSON data from the file
