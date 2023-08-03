@@ -19,6 +19,9 @@ FROM ghcr.io/security-onion-solutions/python:3-slim
 ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
 RUN chmod +x /evtx_calc_timestamps.sh
 
+ADD timeshift.py /timeshift.py
+RUN chmod +x /timeshift.py
+
 # libwiretap11 is required for capinfo libaries
 # jq is required for evtx timestamp script
 RUN apt-get update && apt-get install -y --no-install-recommends --force-yes libwiretap11 git jq && rm -rf /var/lib/apt/lists/*
