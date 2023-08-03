@@ -76,7 +76,7 @@ def main():
     # Call the function to shift the '@timestamp' field relative to the reference date
     shifted_json_data = shift_timestamp(json_data, reference_date_str, args.nested_key)
 
-    # Save the updated JSON data as JSONL back to the file (optional, depending on your use case)
+    # Save the updated JSON data back to the file
     write_jsonl_data_to_file("/tmp/evtx/import.json", shifted_json_data)
 
 if __name__ == "__main__":
