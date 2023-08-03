@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import json
 import argparse
 from datetime import datetime, timedelta
