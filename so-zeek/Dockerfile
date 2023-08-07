@@ -13,10 +13,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/rockylinux:9 as builder 
+FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder 
 
 RUN dnf -y install dnf-plugins-core && \
-    dnf config-manager --set-enabled crb && \
+    dnf config-manager --enable ol9_codeready_builder && \
     dnf update -y && \ 
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
@@ -85,7 +85,7 @@ RUN groupadd --gid 937 zeek  && \
     chown -R 937:937 /nsm/zeek && \
     chown -R 937:937 /usr/local/ssl
     
-FROM ghcr.io/security-onion-solutions/rockylinux:9
+FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion"
