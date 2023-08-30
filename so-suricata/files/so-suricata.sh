@@ -4,7 +4,7 @@ AFPACKET=
 if [ -n "$INTERFACE" ]; then
   AFPACKET=--af-packet=$INTERFACE
 fi
-# delete the old PID do Suricata will start
+# delete the old PID so Suricata will start
 mkdir -p /var/run/suricata
 chown 940:940 /var/run/suricata
 chmod 770 /var/run/suricata
