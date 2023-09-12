@@ -22,10 +22,6 @@ ARG YARA_PYTHON_VERSION=4.3.0
 ARG CAPA_VERSION=5.0.0
 ARG EXIFTOOL_VERSION=12.52
 
-# Set up package pinning for future releases (mantic 23.04, 7zip 23.01+dfsg-2)
-COPY ./pin.pref /etc/apt/preferences.d/pin.pref
-COPY ./lunar.list /etc/apt/sources.list.d/lunar.list
-
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
@@ -40,7 +36,7 @@ RUN mkdir /strelka && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
     cp -fr /tmp/strelka/build/python/backend/pin.pref /etc/apt/preferences.d/ && \
-    cp -fr /tmp/strelka/build/python/backend/kinetic.list /etc/apt/sources.list.d/ && \
+    cp -fr /tmp/strelka/build/python/backend/lunar.list /etc/apt/sources.list.d/ && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
 
