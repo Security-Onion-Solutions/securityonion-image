@@ -23,8 +23,8 @@ ARG CAPA_VERSION=5.0.0
 ARG EXIFTOOL_VERSION=12.52
 
 # Set up package pinning for future releases (mantic 23.04, 7zip 23.01+dfsg-2)
-COPY ./build/python/backend/pin.pref /etc/apt/preferences.d/pin.pref
-COPY ./build/python/backend/lunar.list /etc/apt/sources.list.d/lunar.list
+COPY ./pin.pref /etc/apt/preferences.d/pin.pref
+COPY ./lunar.list /etc/apt/sources.list.d/lunar.list
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
