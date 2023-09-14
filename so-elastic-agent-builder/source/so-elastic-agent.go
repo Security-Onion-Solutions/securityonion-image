@@ -130,7 +130,7 @@ func main() {
 
 		if (err != nil) || (resp.StatusCode != http.StatusNotFound) {
 			// Cannot access Fleet Host URL
-			fmt.Println("Not Accessible")
+			// fmt.Println("Not Accessible")
 			log.WithFields(log.Fields{
 				"Fleet Host Connectivity Check": "Failed",
 				"Fleet Host URL":                fleetHostURLs[i],
