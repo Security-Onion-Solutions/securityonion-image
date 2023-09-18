@@ -32,4 +32,4 @@ ENTRYPOINT ["./package-registry"]
 
 ENV EPR_ADDRESS=0.0.0.0:8080
 
-HEALTHCHECK --interval=1s --retries=30 CMD curl --silent --fail localhost:8080/health || exit 1
+HEALTHCHECK --interval=1m --retries=30 CMD curl --silent --fail localhost:8080/health || exit 1
