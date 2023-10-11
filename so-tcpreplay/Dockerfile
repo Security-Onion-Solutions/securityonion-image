@@ -1,4 +1,4 @@
-# Copyright Security Onion Solutions, LLC
+# Copyright 2014-2023 Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,4 +40,3 @@ rm *.deb && \
 rm *.rpm
 
 ENTRYPOINT ["/bin/bash"]
-

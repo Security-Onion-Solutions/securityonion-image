@@ -13,21 +13,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/centos:7 as builder
+FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
 
-RUN yum -y install epel-release
-RUN yum -y install jansson-devel libpcap-devel python3 libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel kernel-devel kernel-headers libjansson libgeoip liblua5.1 curl wget make gcc pkg-config libhiredis libevent pcre-devel libpcre libmagic zlib libyaml rustc cargo libyaml-devel libcap-ng-devel file-devel nss-devel nspr-devel python3-yaml luajit-devel luajit
+RUN yum -y install epel-release && \
+    dnf config-manager --enable ol9_codeready_builder
 
-ENV SURIVERSION=6.0.13
+RUN dnf -y install oraclelinux-developer-release-el9 
+RUN dnf repolist
+RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
+               jansson-devel jq libcap-ng-devel libevent-devel \
+               libmaxminddb-devel libnet-devel libnetfilter_queue-devel \
+               libnfnetlink-devel libpcap-devel libtool libyaml-devel \
+               lua-devel lz4-devel make nss-devel pcre-devel pcre2-devel pkgconfig \
+               python3-devel python3-sphinx python3-yaml sudo which cargo \
+               zlib-devel luajit-devel cargo && cargo install --force cbindgen
+ENV SURIVERSION=6.0.14
 RUN mkdir /suricata
 
 WORKDIR /suricata
 
 RUN curl -vO https://www.openinfosecfoundation.org/download/suricata-$SURIVERSION.tar.gz && tar zxvf suricata-$SURIVERSION.tar.gz && \
-    cd suricata-$SURIVERSION && ./configure --enable-rust --enable-luajit --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var && make
+    cd suricata-$SURIVERSION && ./configure --enable-rust --enable-luajit --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var && make -j4
 RUN mkdir suriinstall && cd suricata-$SURIVERSION && make install DESTDIR=/suricata/suriinstall && make install-conf DESTDIR=/suricata/suriinstall && rm -rf /suricata/suriinstall/var/run
 
-FROM ghcr.io/security-onion-solutions/centos:7
+FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
@@ -35,7 +44,7 @@ LABEL description="Suricata running in a docker with AF_Packet for use with Secu
 COPY --from=builder /suricata/suriinstall/ /
 
 RUN yum -y install epel-release bash libpcap iproute && \
-    yum -y install GeoIP luajit libnet jansson libyaml cargo rustc && \
+    yum -y install luajit libnet jansson libyaml cargo rustc nss nss-devel && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
     groupadd --gid 940 suricata && \
     adduser --uid 940 --gid 940 --home-dir /etc/suricata --no-create-home suricata && \

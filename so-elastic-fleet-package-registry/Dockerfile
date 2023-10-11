@@ -17,10 +17,11 @@ ARG VERSION
 FROM docker.elastic.co/package-registry/distribution:$VERSION as original_image
 
 # Cleanup unneeded packages, keeping the two most recent versons of each one
+# Except for endpoint packages, keep all versions
 RUN cd /packages/package-storage/ \
-&& rm -rf suricata-* zeek-* snort-* dga-* endpoint*preview* endpoint*dev* endpoint*next* \
-&& cd /packages/package-storage/ && LIST=$(ls | awk -F'[-]' '{print $1}' | sort | uniq ) \
-&& for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "$item-"{} |  xargs rm -r; done
+&& rm -rf suricata-* zeek-* snort-* dga-* endpoint*dev* endpoint*next* *preview* *beta* \
+&& cd /packages/package-storage/ && LIST=$(ls --ignore="endpoint-*" | awk -F'[-]' '{print $1}' | sort | uniq ) \
+&& for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "$item-"{} |  xargs -r rm -fr; done
 
 FROM scratch
 
@@ -32,4 +33,4 @@ ENTRYPOINT ["./package-registry"]
 
 ENV EPR_ADDRESS=0.0.0.0:8080
 
-HEALTHCHECK --interval=1s --retries=30 CMD curl --silent --fail localhost:8080/health || exit 1
+HEALTHCHECK --interval=1m --retries=30 CMD curl --silent --fail localhost:8080/health || exit 1

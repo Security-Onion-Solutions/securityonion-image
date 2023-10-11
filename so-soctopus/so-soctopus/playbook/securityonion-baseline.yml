@@ -216,7 +216,7 @@ logsources:
 defaultindex: "*:so-*"
 fieldmappings:
     #START: SO Specific Mappings
-    DestinationIsIpv6: 
+    logtype: event.code
     EventID: event.code
     Channel: winlog.channel
     Protocol: network.transport
