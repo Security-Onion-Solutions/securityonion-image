@@ -12,9 +12,13 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-ARG VERSION
+ARG VERSION=8.8.2
 
 FROM docker.elastic.co/package-registry/distribution:$VERSION as original_image
+
+COPY scripts /scripts
+
+RUN chmod +x /scripts/supported-integrations.sh && bash /scripts/supported-integrations.sh
 
 # Cleanup unneeded packages, keeping the two most recent versons of each one
 # Except for endpoint packages, keep all versions
