@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/rockylinux:8 as builder 
+FROM ghcr.io/security-onion-solutions/rockylinux:8 as builder
 RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertools && dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb GeoIP git && \
@@ -22,7 +22,7 @@ RUN dnf -y install dnf-plugins-core && dnf config-manager --set-enabled powertoo
     pip3 install GitPython semantic-version requests && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
-ENV ZEEKVER=5.0.10
+ENV ZEEKVER=6.0.1
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -32,13 +32,10 @@ WORKDIR /zeekbuild
 RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVER.tar.gz
 RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE && \
-    make -j4 && make install 
+    make -j4 && make install
 RUN yum install -y glibc-common
 RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force hassh && \
-    /opt/zeek/bin/zkg install --force https://github.com/TOoSmOotH/zeek-af_packet-plugin --version=master && \
-    /opt/zeek/bin/zkg install --force zeek-community-id && \
-    #/opt/zeek/bin/zkg install --force bzar && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/bzar --version=master && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-bacnet && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-bsap && \
@@ -50,11 +47,9 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
     git clone https://github.com/cisagov/icsnpp-s7comm && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-s7comm && \
-    git clone https://github.com/amzn/zeek-plugin-profinet && \
-    /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-profinet && \
-    git clone https://github.com/amzn/zeek-plugin-tds && \
-    /opt/zeek/bin/zkg install --force --skiptests zeek-plugin-tds && \
-    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \ 
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/zeek-plugin-profinet --version master && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/zeek-plugin-tds --version master && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
     /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
@@ -64,11 +59,11 @@ RUN groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek && \
     chown -R 937:937 /opt/zeek && \
     chown -R 937:937 /nsm/zeek
-    
-FROM ghcr.io/security-onion-solutions/rockylinux:8 
+
+FROM ghcr.io/security-onion-solutions/rockylinux:8
 
 LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="Zeek running in a docker with AF_Packet 3.2.0 for use with Security Onion."
+LABEL description="Zeek running in docker for use with Security Onion."
 
 # Common CentOS layer
 RUN dnf update -y && \
@@ -77,14 +72,14 @@ RUN dnf update -y && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
-    
+
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
 RUN chmod +x /usr/local/sbin/zeek.sh
-RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el7.x86_64.rpm
+RUN rpm -Uvh https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el7_9.x86_64.rpm
 
 HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
