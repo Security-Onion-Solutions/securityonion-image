@@ -65,10 +65,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
     git clone https://github.com/cisagov/icsnpp-s7comm && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-s7comm && \
-    #git clone https://github.com/amzn/zeek-plugin-profinet && \
-    #/opt/zeek/bin/zkg install --force --skiptests zeek-plugin-profinet && \
-    #git clone https://github.com/amzn/zeek-plugin-tds && \
-    #/opt/zeek/bin/zkg install --force --skiptests zeek-plugin-tds && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/zeek-plugin-profinet --version=master && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/zeek-plugin-tds --version=master && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
@@ -105,6 +103,6 @@ COPY files/zeek.sh /usr/local/sbin/zeek.sh
 RUN chmod +x /usr/local/sbin/zeek.sh
 RUN rpm -Uvh https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el7_9.x86_64.rpm
 
-HEALTHCHECK --interval=10m --timeout=2m CMD /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
+HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
