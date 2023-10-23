@@ -4,7 +4,7 @@ LABEL description="Telegraf running in Docker container for use with Security On
 
 USER root
 
-RUN apk add --no-cache redis curl jq
+RUN apk add --no-cache redis curl jq bash
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["telegraf"]
