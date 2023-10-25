@@ -57,6 +57,7 @@ ti_misp-
 ti_otx-
 ti_recordedfuture-
 udp-
+vsphere-
 windows-
 zscaler_zia-
 zscaler_zpa-
