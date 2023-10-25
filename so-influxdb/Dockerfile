@@ -1,12 +1,12 @@
-ARG INFLUX_VERSION=2.7.1
+ARG INFLUX_VERSION=2.6.1
 
-FROM ghcr.io/security-onion-solutions/ubuntu:23.04 as builder
+FROM ghcr.io/security-onion-solutions/ubuntu:22.04 as builder
 
 ARG INFLUX_VERSION
-ARG NODE_VERSION=v20.8.1
+ARG NODE_VERSION=v18.14.0
 ARG NODE_ARCH=linux-x64
 
-RUN apt update -y && apt install -y git wget xz-utils
+RUN apt update -y && apt install -y git wget xz-utils 
 RUN git clone https://github.com/influxdata/ui -b OSS-v$INFLUX_VERSION
 RUN wget https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_ARCH.tar.xz -O /node.xz
 RUN tar -xJf /node.xz
@@ -34,7 +34,7 @@ RUN chmod a+x /redirect_to_file.sh && groupmod -g 939 influxdb
 
 COPY --from=builder /ui/build /ui
 
-RUN apt update -y && apt install netcat-traditional -y && apt clean -y
+RUN apt update -y && apt install netcat -y && apt clean -y
 
 ENTRYPOINT ["/redirect_to_file.sh"]
 CMD ["/entrypoint.sh", "influxd"]
