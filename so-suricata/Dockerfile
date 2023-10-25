@@ -27,7 +27,7 @@ RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
                lua-devel lz4-devel make nss-devel pcre-devel pcre2-devel pkgconfig \
                python3-devel python3-sphinx python3-yaml sudo which cargo \
                zlib-devel luajit-devel cargo && cargo install --force cbindgen
-ENV SURIVERSION=6.0.14
+ENV SURIVERSION=7.0.2
 RUN mkdir /suricata
 
 WORKDIR /suricata
@@ -55,6 +55,6 @@ RUN yum -y install epel-release bash libpcap iproute && \
 ADD files/so-suricata.sh /usr/local/sbin/so-suricata.sh
 
 RUN chmod +x /usr/local/sbin/so-suricata.sh
-RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el7.x86_64.rpm
+RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el7_9.x86_64.rpm
 
 ENTRYPOINT ["/usr/local/sbin/so-suricata.sh"]
