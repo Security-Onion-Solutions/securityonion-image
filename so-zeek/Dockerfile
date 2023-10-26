@@ -32,8 +32,6 @@ RUN wget https://www.openssl.org/source/old/3.0/openssl-3.0.1.tar.gz && tar zxvf
 
 WORKDIR /opensslbuild/openssl-3.0.1
 RUN dnf -y install perl && \
-    # echo 'yes' | cpan && \
-    # cpan Test::More && \
     ./Configure --prefix=/usr/local/ssl --openssldir=/usr/local/ssl enable-fips && \
     time make -j4 && \
     time make install && \
