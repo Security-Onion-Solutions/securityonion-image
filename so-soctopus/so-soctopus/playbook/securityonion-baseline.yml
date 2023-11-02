@@ -232,6 +232,7 @@ fieldmappings:
     username: user.name
     uid: user.uid
     sid: rule.uuid
+    answer: answers
     query: dns.query.name
     src_ip: destination.ip.keyword
     src_port: source.port
