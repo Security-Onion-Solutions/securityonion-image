@@ -1,26 +1,30 @@
-FROM ghcr.io/security-onion-solutions/ubuntu:23.04
+FROM ghcr.io/security-onion-solutions/ubuntu:22.04
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# Test configuration
 ARG CONFIG_TESTS=false
 
+ARG YARA_VERSION=4.3.1
+ARG CAPA_VERSION=6.1.0
+ARG EXIFTOOL_VERSION=12.60
+
+# Environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONFAULTHANDLER 1
+ENV PYTHONUNBUFFERED 1
+
+# User configuration
 ARG USERNAME=strelka
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
-
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PIP_BREAK_SYSTEM_PACKAGES 1
-
-# Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME
 
-ARG YARA_VERSION=4.3.0
-ARG YARA_PYTHON_VERSION=4.3.0
-ARG CAPA_VERSION=5.0.0
-ARG EXIFTOOL_VERSION=12.52
+# Set up package pinning for release (mantic 23.10, 7zip 23.01+dfsg-2)
+COPY ./build/python/backend/pin.pref /etc/apt/preferences.d/pin.pref
+COPY ./build/python/backend/mantic.list /etc/apt/sources.list.d/mantic.list
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
@@ -40,9 +44,8 @@ RUN mkdir /strelka && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
 
-# Update packages
-RUN apt-get -q update && \
 # Install build packages
+RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
     automake \
     build-essential \
@@ -50,6 +53,8 @@ RUN apt-get -q update && \
     curl \
     gcc \
     git \
+    dirmngr \
+    gnupg \
     gpg \
     libglu1-mesa \
     libtool \
@@ -59,8 +64,10 @@ RUN apt-get -q update && \
     python3-pip \
     python3-wheel \
     python-is-python3 \
-    pkg-config
-
+    pkg-config \
+    supervisor \
+    ncat
+    
 # Install runtime packages
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
@@ -68,8 +75,6 @@ RUN apt-get -q update && \
     antiword \
     binwalk \
     libarchive-dev \
-    # 7z2john.pl
-    libcompress-raw-lzma-perl \
     libfuzzy-dev \
     libjansson-dev \
     libmagic-dev \
@@ -83,14 +88,7 @@ RUN apt-get -q update && \
     unzip \
     upx \
     jq && \
-# Download and compile Archive library, needed for exiftool to work best
-    cd /tmp/ && \
-    curl -OL https://cpan.metacpan.org/authors/id/P/PH/PHRED/Archive-Zip-1.68.tar.gz && \
-    tar -xzf Archive-Zip-1.68.tar.gz && \
-    cd Archive-Zip-1.68/ && \
-    perl Makefile.PL && \
-    make && \
-    make install && \
+
 # Download and compile exiftool
     cd /tmp/ && \
     curl -OL https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VERSION.tar.gz && \
@@ -159,6 +157,21 @@ RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/
 RUN pip3 install --no-cache-dir -r /strelka/requirements.txt && \
     pip3 install --index-url https://lief-project.github.io/packages --trusted-host lief.quarkslab.com lief
 
+# Set the working directory and copy the project files
+WORKDIR /strelka/
+COPY pyproject.toml poetry.lock ./
+
+# Use Poetry to install the project dependencies globally
+# This step is after the COPY step because it is more likely to change,
+# and therefore should not be included in earlier layers that can be cached.
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-dev && \
+    rm -rf /root/.cache/pypoetry
+
+# Copy Strelka files
+COPY ./src/python/ /strelka/
+COPY ./configs/python/backend/ /etc/strelka/
+
 # Install Strelka
 RUN cd /strelka/ && \
     python3 setup.py -q build && \
@@ -195,9 +208,11 @@ RUN echo '[+] Run build checks' && \
 
 USER root
 
-# Remove python build directory
+# Remove build directories and unused files
 RUN cd /strelka/ && \
-    rm -rf /strelka/
+    rm -rf /strelka/ && \
+    rm -rf /root/.cache && \
+    rm -rf /tmp/*
 
 # Remove config directory (will bind mount once built)
 RUN rm -rf /etc/strelka/
