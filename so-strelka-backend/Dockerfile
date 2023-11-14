@@ -168,10 +168,6 @@ RUN poetry config virtualenvs.create false && \
     poetry install --no-dev && \
     rm -rf /root/.cache/pypoetry
 
-# Copy Strelka files
-COPY ./src/python/ /strelka/
-COPY ./configs/python/backend/ /etc/strelka/
-
 # Install Strelka
 RUN cd /strelka/ && \
     python3 setup.py -q build && \
