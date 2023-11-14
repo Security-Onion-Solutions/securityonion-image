@@ -128,32 +128,38 @@ RUN apt-get -q update && \
     python3 setup.py install
 
 # Install JTR
-RUN apt-get -q update \
-  && apt-get install -q -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update -qq && \
+    apt-get install -qq -y --no-install-recommends \
     ca-certificates \
-    libssl-dev \
     zlib1g-dev \
     yasm \
     libgmp-dev \
+    liblzma-dev \
     libpcap-dev \
     libbz2-dev \
-    libgomp1
+    libgomp1 && \
+    cpan -i Compress::Raw::Lzma
 # The maintainer isn't big on releases or tags so grab an arbitrary, but consistent, commit.
 # Additionally jump through some extra hoops to get the single commit to save some download time.
-RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/openwall/john.git && git fetch --depth 1 origin b5c10480f56ff1b5d76c6cbdaf9c817582ee2228 && git reset --hard FETCH_HEAD \
-  && rm -rf /jtr/.git \
-  && cd /jtr/src \
-  && ./configure \
-  && make -s clean \
-  && make -sj4 \
-  && make install \
-  && cp -Tr /jtr/run/ /jtr && rm -rf /jtr/run \
-  && chmod -R 777 /jtr \
-  && chown -R 1001:1001 /jtr
+RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/openwall/john.git && \
+    git fetch --depth 1 origin b5c10480f56ff1b5d76c6cbdaf9c817582ee2228 && \
+    git reset --hard FETCH_HEAD && \
+    rm -rf /jtr/.git && \
+    cd /jtr/src && \
+    ./configure && \
+    make -s clean && \
+    make -sj4 && \
+    make install && \
+    cp -Tr /jtr/run/ /jtr && rm -rf /jtr/run && \
+    chmod -R 777 /jtr && \
+    chown -R $USER_UID:$USER_UID /jtr
 
-# Install Python packages
-RUN pip3 install --no-cache-dir -r /strelka/requirements.txt && \
-    pip3 install --index-url https://lief-project.github.io/packages --trusted-host lief.quarkslab.com lief
+# Install Poetry globally and copy project files
+RUN python3 -m pip install -U pip setuptools && \
+    python3 -m pip install poetry && \
+    rm -rf /root/.cache/pip
 
 # Set the working directory
 WORKDIR /strelka/
