@@ -22,10 +22,6 @@ ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME
 
-# Set up package pinning for release (mantic 23.10, 7zip 23.01+dfsg-2)
-COPY ./build/python/backend/pin.pref /etc/apt/preferences.d/pin.pref
-COPY ./build/python/backend/mantic.list /etc/apt/sources.list.d/mantic.list
-
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
@@ -37,10 +33,12 @@ RUN mkdir /strelka && \
     apt -y update && \ 
     apt install git -y && \
     git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka /tmp/strelka && \
+    cp -fr /tmp/strelka/pyproject.toml /strelka/ && \
+    cp -fr /tmp/strelka/poetry.lock /strelka/ && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
     cp -fr /tmp/strelka/build/python/backend/pin.pref /etc/apt/preferences.d/ && \
-    cp -fr /tmp/strelka/build/python/backend/lunar.list /etc/apt/sources.list.d/ && \
+    cp -fr /tmp/strelka/build/python/backend/mantic.list /etc/apt/sources.list.d/ && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
 
@@ -157,9 +155,8 @@ RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/
 RUN pip3 install --no-cache-dir -r /strelka/requirements.txt && \
     pip3 install --index-url https://lief-project.github.io/packages --trusted-host lief.quarkslab.com lief
 
-# Set the working directory and copy the project files
+# Set the working directory
 WORKDIR /strelka/
-COPY pyproject.toml poetry.lock ./
 
 # Use Poetry to install the project dependencies globally
 # This step is after the COPY step because it is more likely to change,
