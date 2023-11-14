@@ -25,7 +25,7 @@ ARG EXIFTOOL_VERSION=12.52
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
-ARG STRELKA_RELEASE_VERSION=0.23.09.12
+ARG STRELKA_RELEASE_VERSION=0.23.11.10
 RUN mkdir /strelka && \
     mkdir /etc/strelka && \
     mkdir /tmp/strelka && \
