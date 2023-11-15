@@ -99,7 +99,7 @@ RUN apt-get -q update && \
     mkdir -p /etc/capa/rules/ && \
     curl -OL https://github.com/mandiant/capa-rules/archive/refs/tags/v$CAPA_VERSION.zip && \
     unzip v$CAPA_VERSION.zip -d /etc/capa/rules/ && \
-    rm v$CAPA_VERSION.zip && \
+    rm -rf v$CAPA_VERSION.zip && \
     mkdir -p /etc/capa/signatures/ && \
     cd /etc/capa/signatures/ && \
     curl -OL https://github.com/mandiant/capa/raw/master/sigs/1_flare_msvc_rtf_32_64.sig && \
@@ -111,6 +111,7 @@ RUN apt-get -q update && \
     cd /tmp/ && \
     curl -OL https://s3.amazonaws.com/build-artifacts.floss.flare.fireeye.com/travis/linux/dist/floss && \
     chmod +x /tmp/floss && \
+    mv /tmp/floss /bin/floss && \
 # Install YARA
     cd /tmp/ && \
     curl -OL https://github.com/VirusTotal/yara/archive/v$YARA_VERSION.tar.gz && \
@@ -118,12 +119,12 @@ RUN apt-get -q update && \
     cd yara-$YARA_VERSION/ && \
     ./bootstrap.sh && \
     ./configure --with-crypto --enable-magic --enable-cuckoo && \
-    make && make install && make check && \
+    make -s && make -s install && make -s check && \
 # Install yara-python
     cd /tmp/ && \
-    curl -OL https://github.com/VirusTotal/yara-python/archive/v$YARA_PYTHON_VERSION.tar.gz && \
-    tar -zxvf v$YARA_PYTHON_VERSION.tar.gz && \
-    cd yara-python-$YARA_PYTHON_VERSION/ && \
+    curl -OL https://github.com/VirusTotal/yara-python/archive/v$YARA_VERSION.tar.gz && \
+    tar -zxvf v$YARA_VERSION.tar.gz && \
+    cd yara-python-$YARA_VERSION/ && \
     python3 setup.py build --dynamic-linking && \
     python3 setup.py install
 
