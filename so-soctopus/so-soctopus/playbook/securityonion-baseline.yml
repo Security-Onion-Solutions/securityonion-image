@@ -65,6 +65,11 @@ logsources:
     service: driver-framework
     conditions:
       source: 'Microsoft-Windows-DriverFrameworks-UserMode/Operational'
+  windows-sysmon:
+    product: windows
+    service: codeintegrity-operational
+    conditions:
+      log_name: 'Microsoft-Windows-CodeIntegrity/Operational'
   windows-msexchange-management:
     product: windows
     service: msexchange-management
