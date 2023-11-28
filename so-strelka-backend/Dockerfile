@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/ubuntu:22.04
+FROM ghcr.io/security-onion-solutions/ubuntu:23.04
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -9,17 +9,23 @@ ARG USERNAME=strelka
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME
 
-ARG YARA_VERSION=4.2.3
-ARG YARA_PYTHON_VERSION=4.2.3
+ARG YARA_VERSION=4.3.0
+ARG YARA_PYTHON_VERSION=4.3.0
 ARG CAPA_VERSION=5.0.0
 ARG EXIFTOOL_VERSION=12.52
 
+RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
+
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
-ARG STRELKA_RELEASE_VERSION=0.23.05.22
+ARG STRELKA_RELEASE_VERSION=0.23.09.12
 RUN mkdir /strelka && \
     mkdir /etc/strelka && \
     mkdir /tmp/strelka && \
@@ -30,7 +36,7 @@ RUN mkdir /strelka && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
     cp -fr /tmp/strelka/build/python/backend/pin.pref /etc/apt/preferences.d/ && \
-    cp -fr /tmp/strelka/build/python/backend/kinetic.list /etc/apt/sources.list.d/ && \
+    cp -fr /tmp/strelka/build/python/backend/lunar.list /etc/apt/sources.list.d/ && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
 
