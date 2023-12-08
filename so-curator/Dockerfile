@@ -33,8 +33,8 @@ RUN rm -rf /usr/lib/python*/EXTERNALLY-MANAGED && \
 RUN addgroup -g ${GID} ${USERNAME} && \
     adduser -u ${UID} -G ${USERNAME} -D -H ${USERNAME}
 
-COPY ./files/actions.py /usr/lib/python3.10/site-packages/curator/actions.py
-COPY ./files/settings.py /usr/lib/python3.10/site-packages/curator/defaults/settings.py 
+COPY ./files/actions.py /usr/lib/python3.*/site-packages/curator/actions.py
+COPY ./files/settings.py /usr/lib/python3.*/site-packages/curator/defaults/settings.py 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
