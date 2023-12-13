@@ -56,7 +56,6 @@ tenable_sc-
 ti_abusech-
 ti_anomali-
 ti_cybersixgill-
-ti_maltiverse-
 ti_misp-
 ti_otx-
 ti_recordedfuture-
