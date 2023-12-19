@@ -213,6 +213,287 @@ logsources:
       service: appmodel-runtime
       conditions:
           winlog_channel: 'Microsoft-Windows-AppModel-Runtime/Admin'
+
+###############     Experimental     ###############
+#
+# Using elasticagent instead of Sysmon, I have tested these and the translation seems fine, but you should decide yourself if you want these in your enviroment.
+#
+#  elasticagent-file-access:   
+#    product: windows
+#    category: file_access
+#    definition: "Using elasticagent instead of Sysmon(with activated ETW logging)"
+#    conditions:
+#      event.dataset: 'endpoint.events.file'
+#      event.action: 
+#      - creation
+#      - open
+#      - rename
+#      - modification
+#      - overwrite
+#      - deletion
+#  elasticagent-file-rename:   
+#    product: windows
+#    category: file_rename
+#    definition: "Using elasticagent instead of Sysmon(with activated ETW logging)"
+#    conditions:
+#      event.dataset: 'endpoint.events.file'
+#      event.action: rename
+#  elasticagent-network-connection:
+#    product: windows
+#    category: network_connection
+#    definition: "Using elasticagent instead of using Sysmon Event ID 3: Network connection."
+#    conditions:
+#      event.dataset: endpoint.events.network
+#      event.action:
+#      - connection_accepted
+#      - disconnect_received
+#      - connection_attempted
+#
+####################################################
+
+
+###############     CHANNEL: Microsoft-Windows-Sysmon/Operational     ###############
+#
+# The following logsources are based on https://github.com/SigmaHQ/sigma-specification/blob/main/Taxonomy_specification.md this should correspond well with the rules from the Sigma community.
+
+  sysmon-process-creation:
+    product: windows
+    category: process_creation
+    definition: 'Event ID 1: Process creation - The process creation event provides extended information about a newly created process. The full command line provides context on the process execution. The ProcessGUID field is a unique value for this process across a domain to make event correlation easier. The hash is a full hash of the file with the algorithms in the HashType field.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 1
+  sysmon-a-process-changed-a-file-creation-time:   
+    product: windows
+    category: file_change
+    definition: 'Event ID 2: A process changed a file creation time - The change file creation time event is registered when a file creation time is explicitly modified by a process. This event helps tracking the real creation time of a file. Attackers may change the file creation time of a backdoor to make it look like it was installed with the operating system. Note that many processes legitimately change the creation time of a file; it does not necessarily indicate malicious activity.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 2    
+  sysmon-service-configuration-or-status-changed:
+    product: windows
+    category: sysmon_status
+    definition: 'Event ID 4: Sysmon service state changed - The service state change event reports the state of the Sysmon service (started or stopped). | Event ID 16: ServiceConfigurationChange - This event logs changes in the Sysmon configuration - for example when the filtering rules are updated.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 
+      - 4
+      - 16
+  sysmon-process-termination:
+    product: windows
+    category: process_termination
+    definition: 'Event ID 5: Process terminated - The process terminate event reports when a process terminates. It provides the UtcTime, ProcessGuid and ProcessId of the process.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 5     
+  sysmon-driver-load:
+    product: windows
+    category: driver_load
+    definition: 'Event ID 6: Driver loaded - The driver loaded events provides information about a driver being loaded on the system. The configured hashes are provided as well as signature information. The signature is created asynchronously for performance reasons and indicates if the file was removed after loading.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 6
+  sysmon-image-load:
+    product: windows
+    category: image_load
+    definition: 'Event ID 7: Image loaded - The image loaded event logs when a module is loaded in a specific process. This event is disabled by default and needs to be configured with the "-l" option. It indicates the process in which the module is loaded, hashes and signature information. The signature is created asynchronously for performance reasons and indicates if the file was removed after loading. This event should be configured carefully, as monitoring all image load events will generate a significant amount of logging.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 7
+  sysmon-create-remote-thread:
+    product: windows
+    category: create_remote_thread
+    definition: 'Event ID 8: CreateRemoteThread - The CreateRemoteThread event detects when a process creates a thread in another process. This technique is used by malware to inject code and hide in other processes. The event indicates the source and target process. It gives information on the code that will be run in the new thread: StartAddress, StartModule and StartFunction. Note that StartModule and StartFunction fields are inferred, they might be empty if the starting address is outside loaded modules or known exported functions.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 8
+  sysmon-raw-access-thread:
+    product: windows
+    category: raw_access_thread
+    definition: 'Event ID 9: RawAccessRead - The RawAccessRead event detects when a process conducts reading operations from the drive using the \\.\ denotation. This technique is often used by malware for data exfiltration of files that are locked for reading, as well as to avoid file access auditing tools. The event indicates the source process and target device.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 9
+  sysmon-process-access:
+    product: windows
+    category: process_access
+    definition: 'Event ID 10: ProcessAccess - The process accessed event reports when a process opens another process, an operation that’s often followed by information queries or reading and writing the address space of the target process. This enables detection of hacking tools that read the memory contents of processes like Local Security Authority (Lsass.exe) in order to steal credentials for use in Pass-the-Hash attacks. Enabling it can generate significant amounts of logging if there are diagnostic utilities active that repeatedly open processes to query their state, so it generally should only be done so with filters that remove expected accesses.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 10
+  sysmon-file-create:
+    product: windows
+    category: file_event
+    definition: 'Event ID 11: FileCreate - File create operations are logged when a file is created or overwritten. This event is useful for monitoring autostart locations, like the Startup folder, as well as temporary and download directories, which are common places malware drops during initial infection.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 11
+  sysmon-registry-add:
+    product: windows
+    category: registry_add
+    definition: 'Event ID 12: RegistryEvent (Object create and delete) - Registry key and value create and delete operations map to this event type, which can be useful for monitoring for changes to Registry autostart locations, or specific malware registry modifications. Sysmon uses abbreviated versions of Registry root key names, with the following mappings: Key name : Abbreviation, HKEY_LOCAL_MACHINE : HKLM, HKEY_USERS : HKU, HKEY_LOCAL_MACHINE\System\ControlSet00x : HKLM\System\CurrentControlSet, HKEY_LOCAL_MACHINE\Classes : HKCR'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 12
+  sysmon-registry-delete:
+    product: windows
+    category: registry_delete
+    definition: 'Event ID 12: RegistryEvent (Object create and delete) - Registry key and value create and delete operations map to this event type, which can be useful for monitoring for changes to Registry autostart locations, or specific malware registry modifications. Sysmon uses abbreviated versions of Registry root key names, with the following mappings: Key name : Abbreviation, HKEY_LOCAL_MACHINE : HKLM, HKEY_USERS : HKU, HKEY_LOCAL_MACHINE\System\ControlSet00x : HKLM\System\CurrentControlSet, HKEY_LOCAL_MACHINE\Classes : HKCR'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 12
+  sysmon-registry-set:
+    product: windows
+    category: registry_set
+    definition: 'Event ID 13: RegistryEvent (Value Set) - This Registry event type identifies Registry value modifications. The event records the value written for Registry values of type DWORD and QWORD.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 13
+  sysmon-registry-rename:
+    product: windows
+    category: registry_rename
+    definition: 'Event ID 14: RegistryEvent (Key and Value Rename) - Registry key and value rename operations map to this event type, recording the new name of the key or value that was renamed.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 14
+  sysmon-registry-event:
+    product: windows
+    category: registry_event
+    definition: 'Event ID 12: RegistryEvent (Object create and delete) - Registry key and value create and delete operations map to this event type, which can be useful for monitoring for changes to Registry autostart locations, or specific malware registry modifications. Sysmon uses abbreviated versions of Registry root key names, with the following mappings: Key name : Abbreviation, HKEY_LOCAL_MACHINE : HKLM, HKEY_USERS : HKU, HKEY_LOCAL_MACHINE\System\ControlSet00x : HKLM\System\CurrentControlSet, HKEY_LOCAL_MACHINE\Classes : HKCR. | Event ID 13: RegistryEvent (Value Set) - This Registry event type identifies Registry value modifications. The event records the value written for Registry values of type DWORD and QWORD. | Event ID 14: RegistryEvent (Key and Value Rename) - Registry key and value rename operations map to this event type, recording the new name of the key or value that was renamed.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 
+      - 12
+      - 13
+      - 14
+  sysmon-create-stream-hash:
+    product: windows
+    category: create_stream_hash
+    definition: 'Event ID 15: FileCreateStreamHash - This event logs when a named file stream is created, and it generates events that log the hash of the contents of the file to which the stream is assigned (the unnamed stream), as well as the contents of the named stream. There are malware variants that drop their executables or configuration settings via browser downloads, and this event is aimed at capturing that based on the browser attaching a Zone.Identifier "mark of the web" stream.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 15
+  sysmon-pipe-created-or-connected:
+    product: windows
+    category: pipe_created
+    definition: 'Event ID 17: PipeEvent (Pipe Created) - This event generates when a named pipe is created. Malware often uses named pipes for interprocess communication. | Event ID 18: PipeEvent (Pipe Connected) - This event logs when a named pipe connection is made between a client and a server.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code:
+      - 17
+      - 18      
+  sysmon-wmi-event:
+    product: windows
+    category: wmi_event
+    definition: 'Event ID 19: WmiEvent (WmiEventFilter activity detected) - When a WMI event filter is registered, which is a method used by malware to execute, this event logs the WMI namespace, filter name and filter expression. | Event ID 20: WmiEvent (WmiEventConsumer activity detected) - This event logs the registration of WMI consumers, recording the consumer name, log, and destination. | Event ID 21: WmiEvent (WmiEventConsumerToFilter activity detected) - When a consumer binds to a filter, this event logs the consumer name and filter path.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code:
+      - 19
+      - 20
+      - 21      
+  sysmon-dns-event:
+    product: windows
+    category: dns_query
+    definition: 'Event ID 22: DNSEvent (DNS query) - This event is generated when a process executes a DNS query, whether the result is successful or fails, cached or not. The telemetry for this event was added for Windows 8.1 so it is not available on Windows 7 and earlier.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 22 
+  sysmon-file-delete:
+    product: windows
+    category: file_delete
+    definition: 'Event ID 23: FileDelete (File Delete archived) - A file was deleted. Additionally to logging the event, the deleted file is also saved in the ArchiveDirectory (which is C:\Sysmon by default). Under normal operating conditions this directory might grow to an unreasonable size - see event ID 26: FileDeleteDetected for similar behavior but without saving the deleted files. | Event ID 26: FileDeleteDetected (File Delete logged) - A file was deleted.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code:
+      - 23
+      - 26       
+  sysmon-clipboard-change:
+    product: windows
+    category: clipboard_capture
+    definition: 'Event ID 24: ClipboardChange (New content in the clipboard) - This event is generated when the system clipboard contents change.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 24 
+  sysmon-process-tampering:
+    product: windows
+    category: process_tampering
+    definition: 'Event ID 25: ProcessTampering (Process image change) - This event is generated when process hiding techniques such as "hollow" or "herpaderp" are being detected.'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 25  
+  sysmon-error:
+    product: windows
+    category: sysmon_error
+    definition: 'Event ID 255: Error - This event is generated when an error occurred within Sysmon. They can happen if the system is under heavy load and certain tasks could not be performed or a bug exists in the Sysmon service, or even if certain security and integrity conditions are not met. You can report any bugs on the Sysinternals forum or over Twitter(@markrussinovich).'
+    conditions:
+      winlog.channel: 'Microsoft-Windows-Sysmon/Operational'
+      event.code: 255        
+  sysmon-ps-classic-start:
+    product: windows
+    category: ps_classic_start
+    definition: 
+    conditions:
+      winlog.channel: 'Windows PowerShell'
+      event.code: 400  
+  sysmon-ps-classic-provider-start:
+    product: windows
+    category: ps_classic_provider_start
+    conditions:
+      winlog.channel: 'Windows PowerShell'
+      event.code: 600  
+  sysmon-ps-classic-script:
+    product: windows
+    category: ps_classic_script
+    conditions:
+      winlog.channel: 'Windows PowerShell'
+      event.code: 800
+  sysmon-dns-server-audit:
+    product: windows
+    service: dns-server-audit
+    conditions:
+      winlog.channel: 'Microsoft-Windows-DNS-Server/Audit'
+  sysmon-dns-server-analytic:
+    product: windows
+    service: dns-server-analytic
+    conditions:
+      winlog.channel: 'Microsoft-Windows-DNS-Server/Analytical'
+  sysmon-taskscheduler:
+    product: windows
+    service: taskscheduler
+    conditions:
+      winlog.channel: 'Microsoft-Windows-TaskScheduler/Operational'
+  sysmon-wmi:
+    product: windows
+    service: wmi
+    conditions:
+      winlog.channel: 'Microsoft-Windows-WMI-Activity/Operational'
+
+# Sysmon for Linux
+  linux-process-creation:
+    product: linux
+    category: process_creation
+    service: sysmon
+    definition: 'Event ID 1: Process creation - The process creation event provides extended information about a newly created process. The full command line provides context on the process execution. The ProcessGUID field is a unique value for this process across a domain to make event correlation easier. The hash is a full hash of the file with the algorithms in the HashType field.'
+    conditions:
+      event.code: 1
+  linux-network-connection:
+    product: linux
+    category: network_connection
+    service: sysmon
+    definition: 'Event ID 3: Network connection - The network connection event logs TCP/UDP connections on the machine. It is disabled by default. Each connection is linked to a process through the ProcessId and ProcessGuid fields. The event also contains the source and destination host names IP addresses, port numbers and IPv6 status.'
+    conditions:
+      event.code: 3  
+  linux-file-create:
+    product: linux
+    category: file_event
+    service: sysmon
+    definition: 'Event ID 11: FileCreate - File create operations are logged when a file is created or overwritten. This event is useful for monitoring autostart locations, like the Startup folder, as well as temporary and download directories, which are common places malware drops during initial infection.'
+    conditions:
+      event.code: 11
+
+#####################################################################################
+
 defaultindex: "*:so-*"
 fieldmappings:
     #START: SO Specific Mappings
