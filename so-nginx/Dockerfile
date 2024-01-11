@@ -16,7 +16,7 @@
 # Navigator build stage
 FROM ghcr.io/security-onion-solutions/node:16-alpine as navigator-builder
 
-ARG NAVIGATOR_VERSION=4.8.2
+ARG NAVIGATOR_VERSION=4.9.1
 
 RUN apk add git && \
     git config --global advice.detachedHead false && \
@@ -27,7 +27,7 @@ WORKDIR /attack-navigator/nav-app/
 RUN npm ci && npx ng build
 
 # Delete base href line from index html to fix url path issues
-RUN sed -i '/<base href="\/">/d' ./dist/index.html
+RUN sed -i '/<base href="\/"\/>/d' ./dist/index.html
 
 ###################################
 
