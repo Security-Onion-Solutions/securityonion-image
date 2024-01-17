@@ -206,7 +206,7 @@ def navigator_update():
             if custom_field['id'] == 15 and (custom_field['value']):
                 technique_id = custom_field['value'][0]
                 technique_payload.append(
-                    {"techniqueID": technique_id, "color": "#5AADFF", "comment": "", "enabled": True, "metadata": []})
+                    {"techniqueID": technique_id, "score": 100, "comment": "", "enabled": True, "metadata": []})
 
     try:
         with open('/etc/playbook/nav_layer_playbook.json') as nav_layer_r:
@@ -233,7 +233,7 @@ def navigator_update():
                 "hideDisabled": False,
                 "techniques": technique_payload,
                 "gradient": {
-                    "colors": ["#ff6666", "#ffe766", "#8ec843"],
+                    "colors": ["#ffffff00", "#66b1ffff"],
                     "minValue": 0,
                     "maxValue": 100
                 },
