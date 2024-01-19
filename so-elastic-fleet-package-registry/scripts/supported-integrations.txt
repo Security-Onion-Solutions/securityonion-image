@@ -13,6 +13,8 @@ cisco_ios-
 cisco_ise-
 cisco_meraki-
 cisco_umbrella-
+citrix_adc-
+citrix_waf-
 cloudflare-
 crowdstrike-
 darktrace-
@@ -42,6 +44,7 @@ microsoft_sqlserver-
 mimecast-
 mysql-
 netflow-
+nginx-
 o365-
 okta-
 osquery_manager-
@@ -72,6 +75,7 @@ ti_threatq-
 udp-
 vsphere-
 windows-
+winlog-
 zscaler_zia-
 zscaler_zpa-
 1password-
