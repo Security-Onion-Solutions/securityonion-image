@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM alpine:3
+FROM alpine:3.18.4
 
 LABEL maintainer "Security Onion Solutions, LLC" 
 
