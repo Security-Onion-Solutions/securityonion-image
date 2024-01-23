@@ -2,7 +2,7 @@ FROM ghcr.io/security-onion-solutions/golang:1.21.5-alpine AS build
 LABEL maintainer "Security Onion Solutions, LLC"
 ARG STRELKA_RELEASE_VERSION=0.24.01.18
 
-RUN RUN apk add openssl-dev \
+RUN apk add openssl-dev \
     bash \
     build-base \ 
     pkgconfig \
