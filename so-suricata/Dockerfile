@@ -22,7 +22,7 @@ RUN dnf -y install oraclelinux-developer-release-el9
 RUN dnf repolist
 RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
                jansson-devel jq libcap-ng-devel libevent-devel \
-               libmaxminddb-devel libnet-devel libnetfilter_queue-devel \
+               libmaxminddb-devel libmaxminddb libnet-devel libnetfilter_queue-devel \
                libnfnetlink-devel libpcap-devel libtool libyaml-devel \
                lua-devel lz4-devel make nss-devel pcre-devel pcre2-devel pkgconfig \
                python3-devel python3-sphinx python3-yaml sudo which cargo \
@@ -33,7 +33,7 @@ RUN mkdir /suricata
 WORKDIR /suricata
 
 RUN curl -vO https://www.openinfosecfoundation.org/download/suricata-$SURIVERSION.tar.gz && tar zxvf suricata-$SURIVERSION.tar.gz && \
-    cd suricata-$SURIVERSION && ./configure --enable-rust --enable-luajit --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var && make -j4
+    cd suricata-$SURIVERSION && ./configure --enable-rust --enable-luajit --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var --enable-geoip && make -j4
 RUN mkdir suriinstall && cd suricata-$SURIVERSION && make install DESTDIR=/suricata/suriinstall && make install-conf DESTDIR=/suricata/suriinstall && rm -rf /suricata/suriinstall/var/run
 
 FROM ghcr.io/security-onion-solutions/oraclelinux:9
@@ -44,7 +44,7 @@ LABEL description="Suricata running in a docker with AF_Packet for use with Secu
 COPY --from=builder /suricata/suriinstall/ /
 
 RUN yum -y install epel-release bash libpcap iproute && \
-    yum -y install luajit libnet jansson libyaml cargo rustc nss nss-devel && \
+    yum -y install luajit libnet jansson libyaml cargo rustc nss nss-devel libmaxminddb && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
     groupadd --gid 940 suricata && \
     adduser --uid 940 --gid 940 --home-dir /etc/suricata --no-create-home suricata && \
