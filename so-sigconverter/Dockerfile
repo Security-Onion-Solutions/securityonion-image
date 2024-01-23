@@ -34,8 +34,7 @@ ENV PATH="${PATH}:${POETRY_VENV}/bin"
 WORKDIR /app
 
 # Install dependencies
-RUN cp /sigconverter.io/poetry.lock ./
-RUN cp /sigconverter.io/pyproject.toml ./
+COPY pyproject.toml ./
 RUN poetry install
 
 # Copy the flask app to the working directory
