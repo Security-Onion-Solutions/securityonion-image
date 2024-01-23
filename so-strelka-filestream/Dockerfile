@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/golang:alpine AS build
+FROM ghcr.io/security-onion-solutions/golang:1.21.5-alpine AS build
 LABEL maintainer "Security Onion Solutions, LLC"
 ARG STRELKA_RELEASE_VERSION=0.24.01.18
 
