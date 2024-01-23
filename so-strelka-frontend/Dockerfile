@@ -2,7 +2,8 @@ FROM ghcr.io/security-onion-solutions/golang AS build
 LABEL maintainer "Security Onion Solutions, LLC"
 ARG STRELKA_RELEASE_VERSION=0.24.01.18
 
-RUN CGO_ENABLED=0 go install github.com/target/strelka/src/go/cmd/strelka-frontend@$STRELKA_RELEASE_VERSION
+RUN go version && \
+    CGO_ENABLED=0 go install github.com/target/strelka/src/go/cmd/strelka-frontend@$STRELKA_RELEASE_VERSION
 
 FROM ghcr.io/security-onion-solutions/alpine
 COPY --from=build /go/bin/strelka-frontend /usr/local/bin/
