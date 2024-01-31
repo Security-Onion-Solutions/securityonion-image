@@ -25,7 +25,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
-ARG STRELKA_RELEASE_VERSION=0.23.12.01
+ARG STRELKA_RELEASE_VERSION=0.24.01.18
 RUN mkdir /strelka && \
     mkdir /etc/strelka && \
     mkdir /tmp/strelka && \
