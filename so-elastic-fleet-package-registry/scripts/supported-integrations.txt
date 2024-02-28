@@ -1,4 +1,5 @@
 apache-
+arista_ngfw-
 auditd-
 auth0-
 aws-
@@ -32,12 +33,17 @@ google_workspace-
 http_endpoint-
 httpjson-
 iis-
+imperva-
+imperva_cloud_waf-
+influxdb-
 juniper-
+journald-
 juniper_srx-
 kafka_log-
 lastpass-
 log-
 m365_defender-
+memcached-
 microsoft_defender_endpoint-
 microsoft_dhcp-
 microsoft_sqlserver-
