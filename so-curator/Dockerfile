@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM alpine:3
+FROM alpine:3.18.4
 
 LABEL maintainer "Security Onion Solutions, LLC" 
 
@@ -26,7 +26,7 @@ ENV LC_ALL=en_US.UTF-8
 USER root
 
 RUN apk --no-cache add python3 py-setuptools py-pip gcc libffi py-cffi python3-dev libffi-dev py-openssl musl-dev linux-headers openssl-dev && \
-    pip install elasticsearch-curator && \
+    pip install urllib3==2.0.7 certifi==2023.7.22 elastic-transport==8.10.0 voluptuous==0.13.1 elasticsearch-curator==8.0.8 && \
     apk del gcc python3-dev libffi-dev musl-dev linux-headers openssl-dev
 
 RUN addgroup -g ${GID} ${USERNAME} && \
