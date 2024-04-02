@@ -18,8 +18,8 @@ FROM ghcr.io/security-onion-solutions/oraclelinux:9
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Kafka running in a docker container for use with Security Onion"
 
-ARG KAFKA_DOWNLOAD=https://downloads.apache.org/kafka/3.5.1/
-ARG KAFKA_TARNAME=kafka_2.13-3.5.1
+ARG KAFKA_DOWNLOAD=https://downloads.apache.org/kafka/3.7.0/
+ARG KAFKA_TARNAME=kafka_2.13-3.7.0
 
 RUN dnf update -y && \
     dnf install -y java-11-openjdk java-11-openjdk-devel curl && \
