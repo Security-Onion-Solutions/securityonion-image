@@ -32,6 +32,9 @@ RUN rm -f ${KAFKA_TARNAME}.tgz && \
     mv ${KAFKA_TARNAME} kafka && \
     rm -f jolokia-${JOLOKIA_VERSION}-bin.tar.gz && \
     mv jolokia-${JOLOKIA_VERSION} jolokia && \
-    chown -R 960:960 kafka
+    chown -R 960:960 kafka && \
+    chown -R 960:960 jolokia
+
+ADD files/jolokia.xml /jolokia/jolokia.xml
 
 ENTRYPOINT ["/kafka/bin/kafka-server-start.sh", "/kafka/config/kraft/server.properties"]
