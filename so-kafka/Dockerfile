@@ -21,14 +21,12 @@ RUN dnf update -y && \
 WORKDIR /
 
 RUN groupadd --gid 960 kafka && \
-    adduser --uid 960 --gid 960 kafka
-
-RUN curl -O ${KAFKA_DOWNLOAD}${KAFKA_TARNAME}.tgz && \
+    adduser --uid 960 --gid 960 kafka && \
+    curl -O ${KAFKA_DOWNLOAD}${KAFKA_TARNAME}.tgz && \
     tar -xzf ${KAFKA_TARNAME}.tgz && \
     curl -LO ${JOLOKIA_DOWNLOAD} && \
-    tar -xzf jolokia-${JOLOKIA_VERSION}-bin.tar.gz
-
-RUN rm -f ${KAFKA_TARNAME}.tgz && \
+    tar -xzf jolokia-${JOLOKIA_VERSION}-bin.tar.gz && \
+    rm -f ${KAFKA_TARNAME}.tgz && \
     mv ${KAFKA_TARNAME} kafka && \
     rm -f jolokia-${JOLOKIA_VERSION}-bin.tar.gz && \
     mv jolokia-${JOLOKIA_VERSION} jolokia && \
