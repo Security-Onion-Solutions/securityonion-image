@@ -3,36 +3,29 @@
 # https://securityonion.net/license; you may not use this file except in compliance with the
 # Elastic License 2.0.
 
-FROM ghcr.io/security-onion-solutions/oraclelinux:9
+FROM ghcr.io/security-onion-solutions/kafka:3.7.0
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Kafka running in a docker container for use with Security Onion"
 
-ARG KAFKA_DOWNLOAD=https://downloads.apache.org/kafka/3.7.0/
-ARG KAFKA_TARNAME=kafka_2.13-3.7.0
-
 ARG JOLOKIA_VERSION=2.0.2
 ARG JOLOKIA_DOWNLOAD=https://github.com/jolokia/jolokia/releases/download/v${JOLOKIA_VERSION}/jolokia-${JOLOKIA_VERSION}-bin.tar.gz
 
-RUN dnf update -y && \
-    dnf install -y java-11-openjdk java-11-openjdk-devel curl && \
-    dnf clean all
+WORKDIR /opt
 
-WORKDIR /
+USER root
 
-RUN groupadd --gid 960 kafka && \
-    adduser --uid 960 --gid 960 kafka && \
-    curl -O ${KAFKA_DOWNLOAD}${KAFKA_TARNAME}.tgz && \
-    tar -xzf ${KAFKA_TARNAME}.tgz && \
-    curl -LO ${JOLOKIA_DOWNLOAD} && \
+RUN addgroup -g 960 kafka && \
+    adduser -D --uid 960 --ingroup kafka kafka && \
+    wget ${JOLOKIA_DOWNLOAD} && \
     tar -xzf jolokia-${JOLOKIA_VERSION}-bin.tar.gz && \
-    rm -f ${KAFKA_TARNAME}.tgz && \
-    mv ${KAFKA_TARNAME} kafka && \
     rm -f jolokia-${JOLOKIA_VERSION}-bin.tar.gz && \
     mv jolokia-${JOLOKIA_VERSION} jolokia && \
     chown -R 960:960 kafka && \
     chown -R 960:960 jolokia
 
-ADD files/jolokia.xml /jolokia/jolokia.xml
+USER kafka
 
-ENTRYPOINT ["/kafka/bin/kafka-server-start.sh", "/kafka/config/kraft/server.properties"]
+ADD files/jolokia.xml /opt/jolokia/jolokia.xml
+
+ENTRYPOINT ["/opt/kafka/bin/kafka-server-start.sh", "/opt/kafka/config/kraft/server.properties"]
