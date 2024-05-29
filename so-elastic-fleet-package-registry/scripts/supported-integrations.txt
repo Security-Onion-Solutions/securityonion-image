@@ -5,6 +5,7 @@ aws-
 azure-
 barracuda-
 carbonblack_edr-
+cef-
 checkpoint-
 cisco_asa-
 cisco_duo-

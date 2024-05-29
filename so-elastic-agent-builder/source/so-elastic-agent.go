@@ -29,6 +29,8 @@ var fleetHostURLsList = ""
 var fleetHostFlag string
 
 var enrollmentToken, enrollmentTokenFlag string
+var delayEnrollFlag bool
+var timeoutFlag time.Duration
 
 func check(err error, context string) {
 	if err != nil {
@@ -93,6 +95,8 @@ func main() {
 	// Allow runtime configuration
 	flag.StringVar(&enrollmentTokenFlag, "token", "", "Override default Enrollment Token")
 	flag.StringVar(&fleetHostFlag, "fleet", "", "Override default Fleet Host")
+	flag.BoolVar(&delayEnrollFlag, "delay-enroll", false, "Add delay enroll flag")
+	flag.DurationVar(&timeoutFlag, "timeout", 5*time.Minute, "Set the timeout duration (default: 5 minutes)")
 	flag.Parse()
 
 	if enrollmentTokenFlag != "" {
@@ -184,13 +188,17 @@ func main() {
 	arg4 := "--certificate-authorities=" + installPath + "soca.crt"
 	arg5 := "-n"
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
+	args := []string{arg1, arg2, arg3, arg4, arg5}
+	if delayEnrollFlag {
+		args = append(args, "--delay-enroll")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutFlag)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, prg, arg1, arg2, arg3, arg4, arg5)
+	cmd := exec.CommandContext(ctx, prg, args...)
 
-	//strings.join the following
-	statusLogs("Executing the following: " + prg + " " + arg1 + " " + arg2 + " " + arg3 + " " + arg4 + " " + arg5)
+	statusLogs("Executing the following: " + prg + " " + strings.Join(args, " "))
 
 	output, err := cmd.CombinedOutput()
 	check(err, string(output))
@@ -199,5 +207,4 @@ func main() {
 
 	statusLogs("Elastic Agent installation completed")
 	fmt.Println("\n\nInstallation completed successfully.")
-
 }
