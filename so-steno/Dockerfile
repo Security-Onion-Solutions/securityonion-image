@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/centos:7
+FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Google Stenographer running in a docker for use with Security Onion."
