@@ -25,6 +25,7 @@ RUN yum -y install epel-release bash libpcap iproute && \
     groupadd -g 941 stenographer && \
     useradd stenographer -u 941 -g 941 && \
     rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/stenographer-v101/securityonion-stenographer-v1.0.1.0.rpm && \
+    chmod 755 /usr/bin/steno* && \
     setcap 'CAP_NET_RAW+ep CAP_NET_ADMIN+ep CAP_IPC_LOCK+ep CAP_SETGID+ep' /usr/bin/stenotype && \
     mkdir -p /nsm/pcap/files && \
     mkdir -p /nsm/pcap/index && \
