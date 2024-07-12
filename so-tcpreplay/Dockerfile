@@ -19,7 +19,7 @@ LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Replay PCAPs to sniffing interface(s)"
 
 # Copy over tcpreplay - using v4.2.6 instead of 4.3.x because of known bugs: https://github.com/appneta/tcpreplay/issues/557
-#COPY files/tcpreplay /usr/local/bin/tcpreplay
+COPY files/tcpreplay /usr/local/bin/tcpreplay
 
 # Setup our utilities, download the pcap samples, convert them to RPM and install them
 RUN yum update -y && \
@@ -28,7 +28,7 @@ RUN yum update -y && \
     yum -y install libpcap && \
     yum -y install rpmrebuild && \
     yum -y install alien && \
-    yum -y install wget tcpreplay && \
+    yum -y install wget && \
 \
 for i in securityonion-samples_20121202-0ubuntu0securityonion4_all.deb securityonion-samples-bro_20170824-1ubuntu1securityonion3_all.deb securityonion-samples-markofu_20130522-0ubuntu0securityonion3_all.deb securityonion-samples-mta_20190514-1ubuntu1securityonion1_all.deb securityonion-samples-shellshock_20140926-0ubuntu0securityonion2_all.deb; do wget https://launchpad.net/~securityonion/+archive/ubuntu/stable/+files/$i; done && \
 \ 
