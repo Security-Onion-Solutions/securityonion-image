@@ -17,7 +17,7 @@ ARG VERSION
 FROM docker.elastic.co/package-registry/distribution:$VERSION as original_image
 
 # Add bash because it is not included in the new default base image of wolfi-base (default sh shell)
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash coreutils
 
 # Remove unsupported packages
 COPY scripts /scripts
