@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM ghcr.io/security-onion-solutions/node:16-alpine as navigator-builder
+FROM ghcr.io/security-onion-solutions/node:22.4.1-alpine as navigator-builder
 
 ARG NAVIGATOR_VERSION=4.9.1
 
