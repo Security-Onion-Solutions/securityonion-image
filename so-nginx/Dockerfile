@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM ghcr.io/security-onion-solutions/node:16-alpine as navigator-builder
+FROM ghcr.io/security-onion-solutions/node:22.4.1-alpine as navigator-builder
 
 ARG NAVIGATOR_VERSION=4.9.1
 
@@ -31,12 +31,12 @@ RUN sed -i '/<base href="\/"\/>/d' ./dist/index.html
 
 ###################################
 
-FROM nginx:1.22.1-alpine
+FROM nginx:1.26.1-alpine
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=10.18.6
+ARG CYBERCHEF_VERSION=10.19.0
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist /opt/socore/html/navigator

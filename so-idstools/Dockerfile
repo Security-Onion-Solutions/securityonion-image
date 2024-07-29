@@ -36,7 +36,8 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
     useradd --uid ${UID} --gid ${GID} \
     --home-dir /opt/so --no-create-home ${USERNAME}
 
-RUN pip install https://github.com/jasonish/py-idstools/archive/master.zip
+#RUN pip install https://github.com/jasonish/py-idstools/archive/master.zip
+RUN pip install https://github.com/Security-Onion-Solutions/py-idstools/archive/master.zip
 
 RUN apk del .build-deps
 

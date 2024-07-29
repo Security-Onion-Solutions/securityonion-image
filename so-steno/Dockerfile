@@ -13,18 +13,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/centos:7
+FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
-LABEL maintainer "Security Onion Solutions, LLC"
+LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Google Stenographer running in a docker for use with Security Onion."
 
 # Common CentOS layer
 RUN yum -y install epel-release bash libpcap iproute && \
-    yum -y install https://repo.ius.io/ius-release-el7.rpm && \
-    yum -y install snappy leveldb tcpdump jq libaio libseccomp golang which openssl python36u python36u-pip && \
-    /usr/bin/pip3.6 install && \
+    yum -y install snappy leveldb tcpdump jq libaio libseccomp golang which openssl && \
     yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
-    rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/Stenoupgrade/stenographer-0-1.20200922gite8db1ee.el7.x86_64.rpm && \
+    groupadd -g 941 stenographer && \
+    useradd stenographer -u 941 -g 941 && \
+    rpm -i https://github.com/Security-Onion-Solutions/securityonion-docker-rpm/releases/download/stenographer-v101/securityonion-stenographer-v1.0.1.0.rpm && \
+    chmod 755 /usr/bin/steno* && \
     setcap 'CAP_NET_RAW+ep CAP_NET_ADMIN+ep CAP_IPC_LOCK+ep CAP_SETGID+ep' /usr/bin/stenotype && \
     mkdir -p /nsm/pcap/files && \
     mkdir -p /nsm/pcap/index && \

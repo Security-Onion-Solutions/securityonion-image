@@ -1,4 +1,4 @@
-# Copyright 2014-2023 Security Onion Solutions, LLC
+# Copyright Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -13,9 +13,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/centos:7
+FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
-LABEL maintainer "Security Onion Solutions, LLC"
+LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Replay PCAPs to sniffing interface(s)"
 
 # Copy over tcpreplay - using v4.2.6 instead of 4.3.x because of known bugs: https://github.com/appneta/tcpreplay/issues/557
@@ -23,12 +23,12 @@ COPY files/tcpreplay /usr/local/bin/tcpreplay
 
 # Setup our utilities, download the pcap samples, convert them to RPM and install them
 RUN yum update -y && \
-    yum clean all && \
+    yum clean all && dnf config-manager --enable ol9_codeready_builder && dnf -y install oraclelinux-developer-release-el9 && dnf repolist && \
     yum -y install epel-release && \
     yum -y install libpcap && \
     yum -y install rpmrebuild && \
     yum -y install alien && \
-    yum -y install wget && \
+    yum -y install wget libnsl && \
 \
 for i in securityonion-samples_20121202-0ubuntu0securityonion4_all.deb securityonion-samples-bro_20170824-1ubuntu1securityonion3_all.deb securityonion-samples-markofu_20130522-0ubuntu0securityonion3_all.deb securityonion-samples-mta_20190514-1ubuntu1securityonion1_all.deb securityonion-samples-shellshock_20140926-0ubuntu0securityonion2_all.deb; do wget https://launchpad.net/~securityonion/+archive/ubuntu/stable/+files/$i; done && \
 \ 
