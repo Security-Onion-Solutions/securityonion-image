@@ -84,7 +84,7 @@ LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in docker for use with Security Onion"
 
 # Common Oracle layer
-RUN dnf update -y && dnf -y install epel-release bash libpcap iproute
+RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* 
 
 # Packages Specific to this Container
