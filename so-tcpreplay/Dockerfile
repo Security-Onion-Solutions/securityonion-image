@@ -27,7 +27,7 @@ RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
 
 # Packages Specific to this Container
 RUN dnf config-manager --enable ol9_codeready_builder && dnf -y install oraclelinux-developer-release-el9 && dnf repolist && \ 
-    dnf -y install rpmrebuild alien wget libnsl %% \
+    dnf -y install rpmrebuild alien wget libnsl && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
 
 # User configuration
