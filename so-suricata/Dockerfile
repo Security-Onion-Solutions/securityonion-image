@@ -41,8 +41,6 @@ FROM ghcr.io/security-onion-solutions/oraclelinux:9
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
 
-COPY --from=builder /suricata/suriinstall/ /
-
 # Common Oracle layer
 RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* 
@@ -50,6 +48,8 @@ RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
 # Packages Specific to this Container
 RUN dnf -y install luajit libnet jansson libyaml cargo rustc nss nss-devel libmaxminddb && \ 
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
+
+COPY --from=builder /suricata/suriinstall/ /
 
 # User configuration
 RUN groupadd --gid 940 suricata && \
