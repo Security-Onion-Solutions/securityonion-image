@@ -15,9 +15,9 @@
 
 FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
 
-RUN yum -y install epel-release && \
+RUN dnf update -y && \
+    dnf -y install epel-release && \
     dnf config-manager --enable ol9_codeready_builder
-
 RUN dnf -y install oraclelinux-developer-release-el9 
 RUN dnf repolist
 RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
@@ -43,10 +43,16 @@ LABEL description="Suricata running in a docker with AF_Packet for use with Secu
 
 COPY --from=builder /suricata/suriinstall/ /
 
-RUN yum -y install epel-release bash libpcap iproute && \
-    yum -y install luajit libnet jansson libyaml cargo rustc nss nss-devel libmaxminddb && \
-    yum -y erase epel-release && yum clean all && rm -rf /var/cache/yum && \
-    groupadd --gid 940 suricata && \
+# Common Oracle layer
+RUN dnf update -y && dnf -y install epel-release bash libpcap iproute
+    dnf clean all && rm -rf /var/cache/dnf/* 
+
+# Packages Specific to this Container
+RUN dnf -y install luajit libnet jansson libyaml cargo rustc nss nss-devel libmaxminddb && \ 
+    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
+
+# User configuration
+RUN groupadd --gid 940 suricata && \
     adduser --uid 940 --gid 940 --home-dir /etc/suricata --no-create-home suricata && \
     chown -R 940:940 /etc/suricata && \
     chown -R 940:940 /var/log/suricata
@@ -54,7 +60,6 @@ RUN yum -y install epel-release bash libpcap iproute && \
 # Copy over the entry script.
 ADD files/so-suricata.sh /usr/local/sbin/so-suricata.sh
 
-RUN chmod +x /usr/local/sbin/so-suricata.sh
-RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm
+RUN chmod +x /usr/local/sbin/so-suricata.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm
 
 ENTRYPOINT ["/usr/local/sbin/so-suricata.sh"]

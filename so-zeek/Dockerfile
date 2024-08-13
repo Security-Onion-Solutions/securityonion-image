@@ -83,13 +83,16 @@ FROM ghcr.io/security-onion-solutions/oraclelinux:9
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Zeek running in docker for use with Security Onion"
 
-# Common CentOS layer
-RUN dnf update -y && \
-    dnf -y install epel-release bash findutils libpcap iproute && \
-    dnf -y install jemalloc numactl libnl3 libdnet gdb python3 && \
-    dnf -y install libunwind-devel && \
-    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf && \
-    groupadd --gid 937 zeek  && \
+# Common Oracle layer
+RUN dnf update -y && dnf -y install epel-release bash libpcap iproute
+    dnf clean all && rm -rf /var/cache/dnf/* 
+
+# Packages Specific to this Container
+RUN dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \ 
+    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
+
+# User configuration
+RUN groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
 COPY --from=builder /nsm/zeek /nsm/zeek
@@ -98,8 +101,7 @@ COPY --from=builder /usr/local/ssl/ /usr/local/ssl
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
-RUN chmod +x /usr/local/sbin/zeek.sh
-RUN rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el9.x86_64.rpm
+RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el9.x86_64.rpm
 
 HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
