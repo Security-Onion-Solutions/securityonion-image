@@ -22,7 +22,7 @@ LABEL description="Replay PCAPs to sniffing interface(s)"
 COPY files/tcpreplay /usr/local/bin/tcpreplay
 
 # Common Oracle layer
-RUN dnf update -y && dnf -y install epel-release bash libpcap iproute
+RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* 
 
 # Packages Specific to this Container
