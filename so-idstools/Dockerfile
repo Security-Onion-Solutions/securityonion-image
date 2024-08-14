@@ -13,20 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/python:3-alpine
+FROM ghcr.io/security-onion-solutions/python:3.12.5-slim
 
 LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="IDSTools for downloading rules"
+LABEL description="IDSTools for downloading NIDS rules"
 
 ARG GID=939
 ARG UID=939
 ARG USERNAME=socore
 ARG VERSION=0.6.3
-
-RUN apk add --no-cache --virtual .build-deps\
-    shadow
-
-RUN apk add --no-cache bash
 
 RUN mkdir -p /opt/so/idstools/bin && mkdir /opt/so/idstools/etc
 COPY entrypoint.sh /opt/so/idstools/bin
@@ -38,8 +33,6 @@ RUN groupadd --gid ${GID} ${USERNAME} && \
 
 #RUN pip install https://github.com/jasonish/py-idstools/archive/master.zip
 RUN pip install https://github.com/Security-Onion-Solutions/py-idstools/archive/master.zip
-
-RUN apk del .build-deps
 
 USER ${USERNAME}
 WORKDIR /opt/so/idstools/bin
