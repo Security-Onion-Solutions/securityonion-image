@@ -2,7 +2,7 @@
 # or more contributor license agreements. Licensed under the Elastic License 2.0; you may not use
 # this file except in compliance with the Elastic License 2.0.
    
-FROM golang:1.20-alpine
+FROM ghcr.io/security-onion-solutions/golang:1.22.6-alpine
 
 RUN mkdir /workspace
 ADD source /workspace

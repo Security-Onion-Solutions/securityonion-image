@@ -1,9 +1,10 @@
-ARG INFLUX_VERSION=2.7.1
+ARG INFLUX_VERSION=2.7.9
 
-FROM ghcr.io/security-onion-solutions/ubuntu:23.04 as builder
+FROM ghcr.io/security-onion-solutions/ubuntu:24.10 as builder
 
 ARG INFLUX_VERSION
-ARG NODE_VERSION=v20.8.1
+#v20.x is LTS 
+ARG NODE_VERSION=v20.16.0
 ARG NODE_ARCH=linux-x64
 
 RUN apt update -y && apt install -y git wget xz-utils
