@@ -30,7 +30,8 @@ RUN mkdir /strelka && \
     mkdir /etc/strelka && \
     mkdir /tmp/strelka && \
     mkdir /var/log/strelka && \
-    apt -y update && \ 
+    apt -y update && \
+    apt -y upgrade && \
     apt install git -y && \
     git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka /tmp/strelka && \
     cp -fr /tmp/strelka/pyproject.toml /strelka/ && \
