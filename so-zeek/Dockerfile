@@ -50,6 +50,12 @@ RUN wget https://download.zeek.org/zeek-$ZEEKVER.tar.gz && tar zxvf zeek-$ZEEKVE
 RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE --with-openssl=/usr/local/ssl && \
     time make -j4 && time make install
+RUN mkdir oui-logging && \
+    git clone https://github.com/iamckn/oui-logging oui-logging && \
+    cd oui-logging && \
+    git fetch origin pull/2/head:m0duspwnens && \
+    git checkout m0duspwnens && \
+    cd /zeekbuild
 RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/bzar --version=master && \
@@ -67,7 +73,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/zeek-plugin-tds --version=master && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
-    /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
+    /opt/zeek/bin/zkg install --force --skiptests oui-logging && \
     /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch && \
