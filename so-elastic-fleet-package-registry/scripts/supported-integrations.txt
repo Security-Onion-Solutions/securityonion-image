@@ -77,6 +77,8 @@ ti_misp-
 ti_otx-
 ti_recordedfuture-
 ti_threatq-
+trendmicro-
+trend_micro_vision_one-
 udp-
 vsphere-
 windows-
