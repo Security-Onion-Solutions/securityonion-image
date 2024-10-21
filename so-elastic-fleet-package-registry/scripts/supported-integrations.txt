@@ -19,7 +19,6 @@ citrix_adc-
 citrix_waf-
 cloudflare-
 crowdstrike-
-cybereason-
 darktrace-
 elasticsearch-
 endpoint-
