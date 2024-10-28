@@ -1,5 +1,4 @@
 alpine:3.20.2
-jertel/elastalert2:2.20.0
 golang:1.22.6-alpine
 influxdb:2.7.9
 apache/kafka:3.8.0
@@ -9,6 +8,6 @@ oraclelinux:9
 python:3.12.5-slim
 redis:7.2.5-alpine
 registry:2.8.3
-telegraf:1.31.3-alpine
+telegraf:1.32.1-alpine
 ubuntu:22.04
 ubuntu:24.10
