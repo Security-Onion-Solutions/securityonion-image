@@ -1,8 +1,8 @@
 alpine:3.20.2
-elastalert2:2.20.0
+jertel/elastalert2:2.20.0
 golang:1.22.6-alpine
 influxdb:2.7.9
-kafka:3.8.0
+apache/kafka:3.8.0
 nginx:1.26.1-alpine
 node:22.6.0-alpine
 oraclelinux:9
