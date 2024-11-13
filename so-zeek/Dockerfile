@@ -20,7 +20,7 @@ RUN dnf -y install dnf-plugins-core && \
     dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel && \
     dnf group install -y "Development Tools" && \
     yum install -y glibc-common && \
     pip3 install GitPython semantic-version requests && \
@@ -68,6 +68,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mitrecnd/bro-http2 --version master && \
     /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch && \
@@ -87,8 +88,13 @@ LABEL description="Zeek running in docker for use with Security Onion"
 RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* 
 
+# Zeek http2
+RUN dnf config-manager --enable ol9_codeready_builder && \
+    dnf -y install libnghttp2-devel brotli-devel && \
+    dnf config-manager --disable ol9_codeready_builder
+
 # Packages Specific to this Container
-RUN dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \ 
+RUN dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
 
 # User configuration
