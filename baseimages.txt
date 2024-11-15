@@ -1,11 +1,12 @@
 alpine:3.20.2
-golang:1.22.6-alpine
-influxdb:2.7.9
 apache/kafka:3.9.0
+golang:1.23.3
+golang:1.23.3-alpine
+influxdb:2.7.9
 nginx:1.26.1-alpine
 node:22.6.0-alpine
 oraclelinux:9
-python:3.12.5-slim
+python:3.13.0-slim
 redis:7.2.5-alpine
 registry:2.8.3
 telegraf:1.32.1-alpine
