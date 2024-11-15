@@ -14,6 +14,7 @@ cisco_ftd-
 cisco_ios-
 cisco_ise-
 cisco_meraki-
+cisco_secure_email_gateway-
 cisco_umbrella-
 citrix_adc-
 citrix_waf-
@@ -75,6 +76,7 @@ ti_cybersixgill-
 ti_maltiverse-
 ti_misp-
 ti_otx-
+ti_rapid7_threat_command-
 ti_recordedfuture-
 ti_threatq-
 trendmicro-
