@@ -39,9 +39,12 @@ RUN mkdir /strelka && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
     cp -fr /tmp/strelka/build/python/backend/pin.pref /etc/apt/preferences.d/ && \
-    cp -fr /tmp/strelka/build/python/backend/mantic.list /etc/apt/sources.list.d/ && \
+    # cp -fr /tmp/strelka/build/python/backend/mantic.list /etc/apt/sources.list.d/ && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
+
+# Use local version of Mantic.list until upstream https://github.com/target/strelka/pull/476 is merged
+ADD mantic.list /etc/apt/sources.list.d/mantic.list
 
 # Install build packages
 RUN apt-get -q update && \
