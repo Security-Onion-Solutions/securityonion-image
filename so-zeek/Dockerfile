@@ -88,10 +88,13 @@ LABEL description="Zeek running in docker for use with Security Onion"
 RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* && \
     dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
-    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* && \
     dnf config-manager --enable ol9_codeready_builder && \
     dnf -y install libnghttp2-devel brotli-devel && \
     dnf config-manager --disable ol9_codeready_builder && \
+    dnf -y remove epel-release && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf/ && rm -rf /var/cache/yum/ && \
+    rm -rf /usr/share/doc/oraclelinux-release/OL9-RELNOTES9-4.zip && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
@@ -101,7 +104,7 @@ COPY --from=builder /usr/local/ssl/ /usr/local/ssl
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
-RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm
+RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm && rm -rf /opt/zeek/share/btest/data/pcaps/*
 
 HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
