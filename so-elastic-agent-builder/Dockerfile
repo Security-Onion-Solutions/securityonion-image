@@ -4,7 +4,7 @@
 
 ARG MSITOOLS_VERSION=v0.103
 
-FROM alpine:3.19 as msibuilder
+FROM ghcr.io/security-onion-solutions/alpine:3.20.2 AS msibuilder
 
 # Re-declare ARG to make it available in this stage
 ARG MSITOOLS_VERSION
@@ -26,7 +26,7 @@ RUN git clone https://github.com/GNOME/msitools.git /build/msitools \
     && ninja -C builddir install
 
 # Final stage with Go
-  FROM ghcr.io/security-onion-solutions/golang:1.22.6-alpine
+FROM ghcr.io/security-onion-solutions/golang:1.23.3-alpine
 
 # Install runtime dependencies for wixl
 RUN apk add --no-cache \
@@ -38,8 +38,11 @@ COPY --from=msibuilder /usr/local/bin/wixl* /usr/local/bin/
 COPY --from=msibuilder /usr/local/lib/libmsi* /usr/local/lib/
 COPY --from=msibuilder /usr/local/share/wixl-0.103 /usr/local/share/wixl-0.103
 
-# Set up Go workspace
+# Set up workspace:
+# source is go code
+# msi is config & lib for wixl
 RUN mkdir /workspace
 ADD source /workspace
+ADD msi /workspace
 WORKDIR /workspace
 RUN go get .
