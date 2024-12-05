@@ -69,6 +69,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/mitrecnd/bro-http2 --version master && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn && \
     /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch && \
