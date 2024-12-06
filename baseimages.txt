@@ -3,8 +3,8 @@ apache/kafka:3.9.0
 golang:1.23.3
 golang:1.23.3-alpine
 influxdb:2.7.9
-nginx:1.26.1-alpine
-node:22.6.0-alpine
+nginx:1.26.2-alpine
+node:22.12.0-alpine
 oraclelinux:9
 python:3.13.0-slim
 redis:7.2.5-alpine
