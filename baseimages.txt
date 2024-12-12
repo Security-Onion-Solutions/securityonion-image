@@ -7,8 +7,8 @@ nginx:1.26.2-alpine
 node:22.12.0-alpine
 oraclelinux:9
 python:3.13.0-slim
-redis:7.2.5-alpine
+redis:7.2.6-alpine
 registry:2.8.3
-telegraf:1.32.1-alpine
+telegraf:1.32.3-alpine
 ubuntu:22.04
 ubuntu:24.10

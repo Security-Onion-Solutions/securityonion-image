@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/python:3.12.5-slim
+FROM ghcr.io/security-onion-solutions/python:3.13.0-slim
 
 WORKDIR /root/
 
