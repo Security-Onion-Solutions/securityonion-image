@@ -75,6 +75,7 @@ ti_anomali-
 ti_cybersixgill-
 ti_maltiverse-
 ti_misp-
+ti_opencti-
 ti_otx-
 ti_rapid7_threat_command-
 ti_recordedfuture-

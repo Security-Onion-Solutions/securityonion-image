@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
+FROM ghcr.io/security-onion-solutions/oraclelinux:9 AS builder
 
 RUN dnf -y install dnf-plugins-core && \
     dnf config-manager --enable ol9_codeready_builder && \
@@ -39,7 +39,7 @@ RUN dnf -y install perl && \
 
 WORKDIR /
 
-ENV ZEEKVER=7.0.4
+ENV ZEEKVER=7.0.5
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -83,7 +83,7 @@ RUN groupadd --gid 937 zeek  && \
 
 FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
-LABEL maintainer "Security Onion Solutions, LLC"
+LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Zeek running in docker for use with Security Onion"
 
 # Common Oracle layer, Packages specific to container, User configuration
