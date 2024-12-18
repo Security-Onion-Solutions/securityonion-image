@@ -43,7 +43,6 @@ RUN mkdir /strelka && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
 
-# Use local version of Mantic.list until upstream https://github.com/target/strelka/pull/476 is merged
 ADD mantic.list /etc/apt/sources.list.d/mantic.list
 
 # Install build packages
