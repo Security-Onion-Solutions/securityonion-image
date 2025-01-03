@@ -70,8 +70,12 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/mitrecnd/bro-http2 --version master && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
-    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn && \
-    /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn
+
+    # overwrite the default oui.py until https://github.com/iamckn/oui-logging/pull/3 is merged upstream
+COPY files/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.py
+    # oui.py script has been problematic in the past. Run it separately to avoid longer than necessary troubleshooting.
+RUN /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch && \
     rm -rf /zeekbuild
