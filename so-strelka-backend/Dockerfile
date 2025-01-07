@@ -162,7 +162,8 @@ RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/
 
 # Install Poetry globally and copy project files
 RUN python3 -m pip install -U pip setuptools && \
-    python3 -m pip install poetry && \
+#   Install specific version of poetry, in >= 2.0.0 --no-dev is removed and causes build errors in strelka <= 0.24.01.18
+    python3 -m pip install poetry==1.8.5 && \
     rm -rf /root/.cache/pip
 
 # Set the working directory
