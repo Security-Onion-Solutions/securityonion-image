@@ -14,9 +14,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM  ghcr.io/security-onion-solutions/node:22.6.0-alpine as navigator-builder
+FROM  ghcr.io/security-onion-solutions/node:22.12.0-alpine AS navigator-builder
 
-ARG NAVIGATOR_VERSION=4.9.1
+ARG NAVIGATOR_VERSION=5.1.0
 
 RUN apk add git && \
     git config --global advice.detachedHead false && \
@@ -31,7 +31,7 @@ RUN sed -i '/<base href="\/"\/>/d' ./dist/index.html
 
 ###################################
 
-FROM  ghcr.io/security-onion-solutions/nginx:1.26.1-alpine
+FROM  ghcr.io/security-onion-solutions/nginx:1.26.2-alpine
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Security Onion Core Functions Docker"
