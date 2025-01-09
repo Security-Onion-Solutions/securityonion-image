@@ -18,7 +18,7 @@ FROM  ghcr.io/security-onion-solutions/node:22.12.0-alpine AS navigator-builder
 
 ARG NAVIGATOR_VERSION=5.1.0
 
-RUN apk add git jq wget
+RUN apk add git wget
 
 # Git clone the specified version of Navigator
 RUN git config --global advice.detachedHead false && \
