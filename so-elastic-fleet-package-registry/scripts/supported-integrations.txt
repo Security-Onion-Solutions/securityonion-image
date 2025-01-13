@@ -19,6 +19,7 @@ cisco_umbrella-
 citrix_adc-
 citrix_waf-
 cloudflare-
+cloudflare_logpush-
 crowdstrike-
 darktrace-
 elasticsearch-
