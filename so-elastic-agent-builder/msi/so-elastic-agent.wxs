@@ -9,25 +9,25 @@
         <Directory Id="CompanyFolder" Name="Elastic">
           <Directory Id="INSTALLLOCATION" Name="Agent">
             <Component Id="installer" Guid="2cbb30bc-0a99-aa6b-f2b3-5495290ae580" Win64="yes">
-              <File Id="installer" Source="/output/so-elastic-agent_windows_amd64" KeyPath="yes" />
+              <File Id="installer" Source="so-elastic-agent_windows_amd64.exe" KeyPath="yes" />
             </Component>
           </Directory>
         </Directory>
       </Directory>
     </Directory>
-    <Feature Id="SOElasticAgent" Title="SOElasticAgent" Description="Installs all the files needed for SOElasticAgent" Level="1" AllowAdvertise="no" ConfigurableDirectory="INSTALLLOCATION">
+    <Feature Id="SOAgent" Title="SOAgent" Description="Installs all the files needed for Elastic Agent, managed by Security Onion" Level="1" AllowAdvertise="no" ConfigurableDirectory="INSTALLLOCATION">
       <ComponentRef Id="installer"/>
     </Feature>
     <Binary Id="WixCA" SourceFile="wixca.dll" />
     <CustomAction Id="SetInstall" Property="Install" Value="&quot;[#installer]&quot;"></CustomAction>
-    <CustomAction Id="SetUninstall" Property="Uninstall" Value="&quot;[INSTALLLOCATION]elastic-agent.exe&quot; uninstall"></CustomAction>
+    <CustomAction Id="SetUninstall" Property="Uninstall" Value="&quot;[INSTALLLOCATION]elastic-agent.exe&quot; uninstall -f"></CustomAction>
     <CustomAction Id="Uninstall" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
     <CustomAction Id="Install" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
     <InstallExecuteSequence>
       <Custom Action="SetUninstall" After="InstallInitialize">REMOVE=&quot;ALL&quot;</Custom>
       <Custom Action="Uninstall" After="SetUninstall">REMOVE=&quot;ALL&quot;</Custom>
       <Custom Action="SetInstall" Before="Install">Not Installed</Custom>
-      <Custom Action="Install" Before="InstallFinalize">Not Installed</Custom>
+      <Custom Action="Install" After="InstallFiles">Not Installed</Custom>
     </InstallExecuteSequence>
   </Product>
 </Wix>
