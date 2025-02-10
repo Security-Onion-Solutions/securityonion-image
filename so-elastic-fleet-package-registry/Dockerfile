@@ -28,7 +28,8 @@ RUN chmod +x /scripts/supported-integrations.sh && bash /scripts/supported-integ
 RUN cd /packages/package-storage/ \
 && rm -rf suricata-* zeek-* dga-* endpoint*dev* endpoint*next* *preview* *beta* \
 && cd /packages/package-storage/ && LIST=$(ls --ignore="endpoint-*" | awk -F'[-]' '{print $1}' | sort | uniq ) \
-&& for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "$item-"{} |  xargs -r rm -fr; done
+&& for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "$item-"{} |  xargs -r rm -fr; done \
+&& for item in $LIST; do ls $item-*.zip.sig | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "Removing signature file: $item-"{} |  xargs -r rm -fr; done
 
 FROM scratch
 
