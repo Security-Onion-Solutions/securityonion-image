@@ -34,6 +34,9 @@ RUN  ln -s /usr/share/kibana /opt/kibana
 
 ENV PATH=/usr/share/kibana/bin:$PATH
 
+# Disable hardcoded Integrations from showing up
+RUN sed -i 's/"server": true,/"server": false,/g' /usr/share/kibana/node_modules/@kbn/custom-integrations-plugin/kibana.jsonc
+
 # Copy over the dashboards
 RUN mkdir /usr/share/kibana/dashboards
 
