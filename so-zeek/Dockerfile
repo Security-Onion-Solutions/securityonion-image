@@ -13,14 +13,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
+FROM ghcr.io/security-onion-solutions/oraclelinux:9 AS builder
 
 RUN dnf -y install dnf-plugins-core && \
     dnf config-manager --enable ol9_codeready_builder && \
     dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel && \
     dnf group install -y "Development Tools" && \
     yum install -y glibc-common && \
     pip3 install GitPython semantic-version requests && \
@@ -39,7 +39,7 @@ RUN dnf -y install perl && \
 
 WORKDIR /
 
-ENV ZEEKVER=6.0.8
+ENV ZEEKVER=7.0.5
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -68,7 +68,14 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
-    /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mitrecnd/bro-http2 --version master && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
+    /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn
+
+    # overwrite the default oui.py until https://github.com/iamckn/oui-logging/pull/3 is merged upstream
+COPY files/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.py
+    # oui.py script has been problematic in the past. Run it separately to avoid longer than necessary troubleshooting.
+RUN /bin/python3 /opt/zeek/share/zeek/site/oui-logging/oui.py /opt/zeek/share/zeek/site/oui-logging/oui.dat && \
     rm -rf /opt/zeek/var/lib/zkg/testing && \
     rm -rf /opt/zeek/var/lib/zkg/scratch && \
     rm -rf /zeekbuild
@@ -80,19 +87,21 @@ RUN groupadd --gid 937 zeek  && \
 
 FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
-LABEL maintainer "Security Onion Solutions, LLC"
+LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Zeek running in docker for use with Security Onion"
 
-# Common Oracle layer
+# Common Oracle layer, Packages specific to container, User configuration
 RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
-    dnf clean all && rm -rf /var/cache/dnf/* 
-
-# Packages Specific to this Container
-RUN dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \ 
-    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
-
-# User configuration
-RUN groupadd --gid 937 zeek  && \
+    dnf clean all && rm -rf /var/cache/dnf/* && \
+    dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
+    dnf config-manager --enable ol9_codeready_builder && \
+    dnf -y install libnghttp2-devel brotli-devel && \
+    dnf config-manager --disable ol9_codeready_builder && \
+    dnf -y remove epel-release && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf/ && rm -rf /var/cache/yum/ && \
+    rm -rf /usr/share/doc/oraclelinux-release/OL9-RELNOTES9-4.zip && \
+    groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
 COPY --from=builder /nsm/zeek /nsm/zeek
@@ -101,7 +110,7 @@ COPY --from=builder /usr/local/ssl/ /usr/local/ssl
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
-RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/fxlibpcap-1.9.1/fx-libpcap-1.9.1-1.el9.x86_64.rpm
+RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm && rm -rf /opt/zeek/share/btest/data/pcaps/*
 
 HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 

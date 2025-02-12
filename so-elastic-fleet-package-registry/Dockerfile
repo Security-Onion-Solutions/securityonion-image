@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ARG VERSION
 
-FROM docker.elastic.co/package-registry/distribution:$VERSION as original_image
+FROM docker.elastic.co/package-registry/distribution:$VERSION AS original_image
 
 # Add bash because it is not included in the new default base image of wolfi-base (default sh shell)
 RUN apk add --no-cache bash coreutils
