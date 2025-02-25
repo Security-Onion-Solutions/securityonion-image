@@ -1,4 +1,4 @@
-FROM oraclelinux:9-slim AS builder
+FROM ghcr.io/security-onion-solutions/oraclelinux:9-slim AS builder
 
 ARG ARG PCAPFIX_VERSION=1.1.7
 
@@ -10,7 +10,7 @@ RUN microdnf update && microdnf install --enablerepo=ol9_appstream -y wireshark-
     make && \
     make install
 
-FROM oraclelinux:9-slim
+FROM ghcr.io/security-onion-solutions/oraclelinux:9-slim
 
 ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
 ADD timeshift.py /timeshift.py
