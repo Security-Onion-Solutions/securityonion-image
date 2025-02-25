@@ -1,32 +1,29 @@
-FROM ghcr.io/security-onion-solutions/python:3.13.0-slim AS builder
+FROM oraclelinux:9-slim AS builder
 
-LABEL maintainer="Security Onion Solutions, LLC"
-LABEL description="Tools for use with PCAP & EVTX files"
+ARG ARG PCAPFIX_VERSION=1.1.7
 
-ARG PCAPFIX_VERSION=1.1.4
-# DEBIAN_FRONTEND=noninteractive is required for non-interactive install of tshark
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y tshark
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential wget && rm -rf /var/lib/apt/lists/*
-RUN wget http://f00l.de/pcapfix/pcapfix-${PCAPFIX_VERSION}.tar.gz && \
+RUN microdnf update && microdnf install --enablerepo=ol9_appstream -y wireshark-cli gcc gcc-c++ make automake autoconf libtool cmake pkg-config &&\
+    wget http://f00l.de/pcapfix/pcapfix-${PCAPFIX_VERSION}.tar.gz && \
     tar xf pcapfix-${PCAPFIX_VERSION}.tar.gz && \
     cd pcapfix-${PCAPFIX_VERSION} && \
     sed -i'' -e 's/OPTFLAGS =.* -D/OPTFLAGS = -include sys\/types.h -D/' Makefile && \
     make && \
     make install
 
-FROM ghcr.io/security-onion-solutions/python:3.13.0-slim
+FROM oraclelinux:9-slim
 
 ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
-RUN chmod +x /evtx_calc_timestamps.sh
-
 ADD timeshift.py /timeshift.py
-RUN chmod +x /timeshift.py
 
-# libwiretap13 is required for capinfo libaries
-# jq is required for evtx timestamp script
-RUN apt-get update && apt-get install -y --no-install-recommends --force-yes libwiretap13 git jq && rm -rf /var/lib/apt/lists/*
-RUN pip3 install evtx elasticsearch==7.17.1 tqdm orjson importlib_metadata
-RUN pip3 install evtx2es --no-dependencies
+# libwiretap provided by wireshark-cli pkg
+RUN chmod +x /timeshift.py && \
+    chmod +x /evtx_calc_timestamps.sh && \
+    microdnf update && \
+    microdnf install --enablerepo=ol9_appstream -y jq git python3 python3-pip wireshark-cli && \
+    pip3 install evtx elasticsearch==8.17.1 tqdm orjson importlib_metadata && \
+    pip3 install evtx2es --no-dependencies && \
+    microdnf clean all && \
+    rm -rf /var/cache/* /var/lib/dnf/*
 
 COPY --from=builder /usr/bin/pcapfix /usr/bin/
 COPY --from=builder /usr/bin/capinfos /usr/bin/
