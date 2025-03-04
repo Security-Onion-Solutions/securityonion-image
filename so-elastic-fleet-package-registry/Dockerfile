@@ -21,7 +21,7 @@ RUN apk add --no-cache bash coreutils
 
 # Remove unsupported packages
 COPY scripts /scripts
-RUN chmod +x /scripts/supported-integrations.sh && bash /scripts/supported-integrations.sh && rm -rf /scripts
+RUN chmod +x /scripts/unsupported-integrations.sh && bash /scripts/unsupported-integrations.sh && rm -rf /scripts
 
 # Cleanup unneeded packages, keeping the two most recent versons of each one
 # Except for endpoint packages, keep all versions
