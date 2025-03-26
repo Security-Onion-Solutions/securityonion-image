@@ -21,15 +21,17 @@ RUN apk add --no-cache bash coreutils
 
 # Remove unsupported packages
 COPY scripts /scripts
-RUN chmod +x /scripts/unsupported-integrations.sh && bash /scripts/unsupported-integrations.sh && rm -rf /scripts
+COPY versions /versions
+RUN bash /scripts/maintained-versions.sh && bash /scripts/unsupported-integrations.sh && rm -rf /scripts
 
 # Cleanup unneeded packages, keeping the two most recent versons of each one
 # Except for endpoint packages, keep all versions
 RUN cd /packages/package-storage/ \
 && rm -rf suricata-* zeek-* dga-* endpoint*dev* endpoint*next* *preview* *beta* \
 && cd /packages/package-storage/ && LIST=$(ls --ignore="endpoint-*" | awk -F'[-]' '{print $1}' | sort | uniq ) \
-&& for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "$item-"{} |  xargs -r rm -fr; done \
-&& for item in $LIST; do ls $item-*.zip.sig | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-2 | xargs -I {} echo "Removing signature file: $item-"{} |  xargs -r rm -fr; done
+&& for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-1 | xargs -I {} echo "$item-"{} |  xargs -r rm -fr; done \
+&& for item in $LIST; do ls $item-*.zip.sig | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-1 | xargs -I {} echo "Removing signature file: $item-"{} |  xargs -r rm -fr; done \
+&& mv /packages/saved-packages/* /packages/package-storage/
 
 FROM scratch
 
