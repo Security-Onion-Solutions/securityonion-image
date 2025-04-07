@@ -3,7 +3,7 @@
 # https://securityonion.net/license; you may not use this file except in compliance with the
 # Elastic License 2.0.
 
-FROM ghcr.io/security-onion-solutions/kafka:4.0.0
+FROM ghcr.io/security-onion-solutions/kafka:3.9.0
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Kafka running in a docker container for use with Security Onion"
@@ -28,4 +28,4 @@ USER kafka
 
 ADD files/jolokia.xml /opt/jolokia/jolokia.xml
 
-ENTRYPOINT ["/opt/kafka/bin/kafka-server-start.sh", "/opt/kafka/config/server.properties"]
+ENTRYPOINT ["/opt/kafka/bin/kafka-server-start.sh", "/opt/kafka/config/kraft/server.properties"]
