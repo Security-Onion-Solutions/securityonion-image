@@ -27,6 +27,9 @@ RUN dnf config-manager --enable ol9_codeready_builder && dnf -y install oracleli
     dnf -y install rpmrebuild alien wget libnsl && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
 
+# Manually patch bug fix in rpmrebuild v2.20. See https://sourceforge.net/p/rpmrebuild/bugs/18/ for more info.
+# Can remove once v2.21 is released.
+RUN sed -i "s/rpm2archive \\$/rpm2archive - < $/" /usr/lib/rpmrebuild/rpmrebuild.sh
 
 # Copy over tcpreplay - using v4.2.6 instead of 4.3.x because of known bugs: https://github.com/appneta/tcpreplay/issues/557
 COPY files/tcpreplay /usr/local/bin/tcpreplay
