@@ -1,4 +1,4 @@
-module so-elastic-agent
+module so-elastic-agent-builder
 
 go 1.21
 
