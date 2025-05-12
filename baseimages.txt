@@ -1,6 +1,6 @@
 alpine:3.20.2
 alpine:3.21.0
-apache/kafka:3.9.0
+apache/kafka:4.0.0
 golang:1.24.0
 golang:1.24.0-alpine
 influxdb:2.7.10
