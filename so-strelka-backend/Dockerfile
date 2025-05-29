@@ -68,7 +68,7 @@ RUN apt-get -q update && \
     pkg-config \
     supervisor \
     ncat
-    
+
 # Install runtime packages
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \

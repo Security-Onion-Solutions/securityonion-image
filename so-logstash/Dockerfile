@@ -60,6 +60,7 @@ RUN cd /usr/share/logstash && LOGSTASH_PACK_URL=https://artifacts.elastic.co/dow
                           logstash-filter-elasticsearch \
                           logstash-filter-rest \
                           logstash-integration-kafka \
-                          logstash-output-syslog
+                          logstash-output-syslog \
+                          logstash-filter-json_encode
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
