@@ -1,4 +1,4 @@
-ARG INFLUX_VERSION=2.7.10
+ARG INFLUX_VERSION=2.7.11
 
 FROM ghcr.io/security-onion-solutions/ubuntu:24.10 as builder
 
