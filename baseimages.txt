@@ -1,5 +1,5 @@
 alpine:3.20.2
-alpine:3.21.0
+alpine:3.21.3
 apache/kafka:4.0.0
 golang:1.24.3
 golang:1.24.3-alpine

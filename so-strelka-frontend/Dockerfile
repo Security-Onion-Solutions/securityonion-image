@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/golang:1.23.3-alpine AS build
+FROM ghcr.io/security-onion-solutions/golang:1.24.3-alpine AS build
 ARG STRELKA_RELEASE_VERSION=0.24.01.18
 
 RUN apk add openssl-dev \
@@ -9,7 +9,7 @@ RUN apk add openssl-dev \
     librdkafka-dev && \
     CGO_ENABLED=1 go install -tags musl github.com/target/strelka/src/go/cmd/strelka-frontend@$STRELKA_RELEASE_VERSION
 
-FROM ghcr.io/security-onion-solutions/alpine:3.21.0
+FROM ghcr.io/security-onion-solutions/alpine:3.21.3
 LABEL maintainer="Security Onion Solutions, LLC"
 
 COPY --from=build /go/bin/strelka-frontend /usr/local/bin/
