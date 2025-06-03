@@ -19,7 +19,8 @@ import (
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/logfmt"
 	"github.com/apex/log/handlers/text"
-	"github.com/mholt/archiver/v3"
+
+	"so-elastic-agent-builder/utils"
 )
 
 //go:embed files/cert/intca.crt
@@ -45,6 +46,7 @@ func check(err error, context string) {
 }
 
 func cleanupInstall() {
+	statusLogs("Starting cleanup of installation files")
 	err := os.Remove("./so-elastic-agent_source.tar.gz")
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -66,6 +68,10 @@ func statusLogs(status string) {
 	log.WithFields(log.Fields{
 		"Status": status,
 	}).Info("Installation Progress")
+}
+
+func extractTarGz(sourceFile string, destDir string) error {
+	return utils.ExtractTarGz(sourceFile, destDir)
 }
 
 func InitLogging(logFilename string, logLevel string) (*os.File, error) {
@@ -175,8 +181,10 @@ func main() {
 
 	// Copy over embedded tar & extract it to the local system
 	_ = os.WriteFile("so-elastic-agent_source.tar.gz", agentFiles, 0755)
-	err = archiver.Unarchive("./so-elastic-agent_source.tar.gz", "so-elastic-agent_source")
-	check(err, "Error extracting Elastic Agent source.")
+
+	// Extract the tar.gz file
+	err = extractTarGz("./so-elastic-agent_source.tar.gz", "so-elastic-agent_source")
+	check(err, "Failed to extract archive")
 
 	// Install Elastic Agent
 	statusLogs("Executing Elastic Agent installer")
