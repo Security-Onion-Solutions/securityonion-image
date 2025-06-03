@@ -9,7 +9,7 @@ node:22.12.0-alpine
 oraclelinux:9
 python:3.13.3-slim
 redis:7.2.6-alpine
-registry:2.8.3
+registry:3.0.0
 telegraf:1.32.3-alpine
 ubuntu:22.04
 ubuntu:24.10
