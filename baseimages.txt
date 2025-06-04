@@ -10,6 +10,6 @@ oraclelinux:9
 python:3.13.3-slim
 redis:7.2.9-alpine
 registry:3.0.0
-telegraf:1.32.3-alpine
+telegraf:1.34.4-alpine
 ubuntu:22.04
 ubuntu:24.10
