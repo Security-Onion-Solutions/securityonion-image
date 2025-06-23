@@ -2,7 +2,7 @@
 # or more contributor license agreements. Licensed under the Elastic License 2.0; you may not use
 # this file except in compliance with the Elastic License 2.0.
 
-ARG MSITOOLS_VERSION=v0.106
+ARG MSITOOLS_VERSION=v0.103
 
 FROM ghcr.io/security-onion-solutions/alpine:3.21.3 AS msibuilder
 
@@ -36,7 +36,7 @@ RUN apk add --no-cache \
 # Copy msitools files from builder
 COPY --from=msibuilder /usr/local/bin/wixl* /usr/local/bin/
 COPY --from=msibuilder /usr/local/lib/libmsi* /usr/local/lib/
-COPY --from=msibuilder /usr/local/share/wixl-0.106 /usr/local/share/wixl-0.106
+COPY --from=msibuilder /usr/local/share/wixl-0.103 /usr/local/share/wixl-0.103
 
 # Set up workspace:
 # source is go code
