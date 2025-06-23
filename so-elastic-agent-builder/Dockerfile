@@ -2,9 +2,9 @@
 # or more contributor license agreements. Licensed under the Elastic License 2.0; you may not use
 # this file except in compliance with the Elastic License 2.0.
 
-ARG MSITOOLS_VERSION=v0.103
+ARG MSITOOLS_VERSION=v0.106
 
-FROM ghcr.io/security-onion-solutions/alpine:3.20.2 AS msibuilder
+FROM ghcr.io/security-onion-solutions/alpine:3.21.3 AS msibuilder
 
 # Re-declare ARG to make it available in this stage
 ARG MSITOOLS_VERSION
@@ -26,7 +26,7 @@ RUN git clone https://github.com/GNOME/msitools.git /build/msitools \
     && ninja -C builddir install
 
 # Final stage with Go
-FROM ghcr.io/security-onion-solutions/golang:1.23.3-alpine
+FROM ghcr.io/security-onion-solutions/golang:1.24.3-alpine
 
 # Install runtime dependencies for wixl
 RUN apk add --no-cache \
@@ -36,7 +36,7 @@ RUN apk add --no-cache \
 # Copy msitools files from builder
 COPY --from=msibuilder /usr/local/bin/wixl* /usr/local/bin/
 COPY --from=msibuilder /usr/local/lib/libmsi* /usr/local/lib/
-COPY --from=msibuilder /usr/local/share/wixl-0.103 /usr/local/share/wixl-0.103
+COPY --from=msibuilder /usr/local/share/wixl-0.106 /usr/local/share/wixl-0.106
 
 # Set up workspace:
 # source is go code
