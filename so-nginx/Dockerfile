@@ -14,32 +14,38 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM ghcr.io/security-onion-solutions/node:16-alpine as navigator-builder
+FROM  ghcr.io/security-onion-solutions/node:22.16.0-alpine AS navigator-builder
 
-ARG NAVIGATOR_VERSION=4.8.2
+ARG NAVIGATOR_VERSION=5.1.0
 
-RUN apk add git && \
-    git config --global advice.detachedHead false && \
+RUN apk add git wget
+
+# Git clone the specified version of Navigator
+RUN git config --global advice.detachedHead false && \
     git clone -b "v${NAVIGATOR_VERSION}" https://github.com/mitre-attack/attack-navigator.git
+
+# Download the latest version of Enterprise ATT&CK
+RUN wget -O /tmp/enterprise-attack.json https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json 
 
 WORKDIR /attack-navigator/nav-app/
 
 RUN npm ci && npx ng build
 
 # Delete base href line from index html to fix url path issues
-RUN sed -i '/<base href="\/">/d' ./dist/index.html
+RUN sed -i '/<base href="\/"\/>/d' ./dist/index.html
 
 ###################################
 
-FROM nginx:1.22.1-alpine
+FROM  ghcr.io/security-onion-solutions/nginx:1.27.5-alpine
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
-LABEL description="Security Onion Core Functions Docker"
+LABEL description "Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=10.5.2
+ARG CYBERCHEF_VERSION=10.19.4
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist /opt/socore/html/navigator
+COPY --from=navigator-builder /tmp/enterprise-attack.json /opt/socore/html/navigator/assets/mitre/enterprise-attack.json
 
 RUN mkdir -p /opt/socore/html/cyberchef && \
     wget -O /tmp/CyberChef.zip https://github.com/gchq/CyberChef/releases/download/v${CYBERCHEF_VERSION}/CyberChef_v${CYBERCHEF_VERSION}.zip  && \

@@ -19,7 +19,8 @@ import (
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/logfmt"
 	"github.com/apex/log/handlers/text"
-	"github.com/mholt/archiver/v3"
+
+	"so-elastic-agent-builder/utils"
 )
 
 //go:embed files/cert/intca.crt
@@ -29,6 +30,8 @@ var fleetHostURLsList = ""
 var fleetHostFlag string
 
 var enrollmentToken, enrollmentTokenFlag string
+var delayEnrollFlag bool
+var timeoutFlag time.Duration
 
 func check(err error, context string) {
 	if err != nil {
@@ -43,6 +46,7 @@ func check(err error, context string) {
 }
 
 func cleanupInstall() {
+	statusLogs("Starting cleanup of installation files")
 	err := os.Remove("./so-elastic-agent_source.tar.gz")
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -64,6 +68,10 @@ func statusLogs(status string) {
 	log.WithFields(log.Fields{
 		"Status": status,
 	}).Info("Installation Progress")
+}
+
+func extractTarGz(sourceFile string, destDir string) error {
+	return utils.ExtractTarGz(sourceFile, destDir)
 }
 
 func InitLogging(logFilename string, logLevel string) (*os.File, error) {
@@ -93,6 +101,8 @@ func main() {
 	// Allow runtime configuration
 	flag.StringVar(&enrollmentTokenFlag, "token", "", "Override default Enrollment Token")
 	flag.StringVar(&fleetHostFlag, "fleet", "", "Override default Fleet Host")
+	flag.BoolVar(&delayEnrollFlag, "delay-enroll", false, "Add delay enroll flag")
+	flag.DurationVar(&timeoutFlag, "timeout", 5*time.Minute, "Set the timeout duration (default: 5 minutes)")
 	flag.Parse()
 
 	if enrollmentTokenFlag != "" {
@@ -171,8 +181,10 @@ func main() {
 
 	// Copy over embedded tar & extract it to the local system
 	_ = os.WriteFile("so-elastic-agent_source.tar.gz", agentFiles, 0755)
-	err = archiver.Unarchive("./so-elastic-agent_source.tar.gz", "so-elastic-agent_source")
-	check(err, "Error extracting Elastic Agent source.")
+
+	// Extract the tar.gz file
+	err = extractTarGz("./so-elastic-agent_source.tar.gz", "so-elastic-agent_source")
+	check(err, "Failed to extract archive")
 
 	// Install Elastic Agent
 	statusLogs("Executing Elastic Agent installer")
@@ -184,13 +196,17 @@ func main() {
 	arg4 := "--certificate-authorities=" + installPath + "soca.crt"
 	arg5 := "-n"
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
+	args := []string{arg1, arg2, arg3, arg4, arg5}
+	if delayEnrollFlag {
+		args = append(args, "--delay-enroll")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutFlag)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, prg, arg1, arg2, arg3, arg4, arg5)
+	cmd := exec.CommandContext(ctx, prg, args...)
 
-	//strings.join the following
-	statusLogs("Executing the following: " + prg + " " + arg1 + " " + arg2 + " " + arg3 + " " + arg4 + " " + arg5)
+	statusLogs("Executing the following: " + prg + " " + strings.Join(args, " "))
 
 	output, err := cmd.CombinedOutput()
 	check(err, string(output))
@@ -199,5 +215,4 @@ func main() {
 
 	statusLogs("Elastic Agent installation completed")
 	fmt.Println("\n\nInstallation completed successfully.")
-
 }

@@ -1,4 +1,4 @@
-# Copyright 2014-2023 Security Onion Solutions, LLC
+# Copyright Security Onion Solutions, LLC
 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -13,24 +13,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-FROM ghcr.io/security-onion-solutions/centos:7
+FROM ghcr.io/security-onion-solutions/oraclelinux:9
 
-LABEL maintainer "Security Onion Solutions, LLC"
+LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Replay PCAPs to sniffing interface(s)"
+
+# Common Oracle layer
+RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
+    dnf clean all && rm -rf /var/cache/dnf/* 
+
+# Packages Specific to this Container
+RUN dnf config-manager --enable ol9_codeready_builder && dnf -y install oraclelinux-developer-release-el9 && dnf repolist && \ 
+    dnf -y install rpmrebuild alien wget libnsl && \
+    dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/* 
+
+# Manually patch bug fix in rpmrebuild v2.20. See https://sourceforge.net/p/rpmrebuild/bugs/18/ for more info.
+# Can remove once v2.21 is released.
+RUN sed -i "s/rpm2archive \\$/rpm2archive - < $/" /usr/lib/rpmrebuild/rpmrebuild.sh
 
 # Copy over tcpreplay - using v4.2.6 instead of 4.3.x because of known bugs: https://github.com/appneta/tcpreplay/issues/557
 COPY files/tcpreplay /usr/local/bin/tcpreplay
 
-# Setup our utilities, download the pcap samples, convert them to RPM and install them
-RUN yum update -y && \
-    yum clean all && \
-    yum -y install epel-release && \
-    yum -y install libpcap && \
-    yum -y install rpmrebuild && \
-    yum -y install alien && \
-    yum -y install wget && \
-\
-for i in securityonion-samples_20121202-0ubuntu0securityonion4_all.deb securityonion-samples-bro_20170824-1ubuntu1securityonion3_all.deb securityonion-samples-markofu_20130522-0ubuntu0securityonion3_all.deb securityonion-samples-mta_20190514-1ubuntu1securityonion1_all.deb securityonion-samples-shellshock_20140926-0ubuntu0securityonion2_all.deb; do wget https://launchpad.net/~securityonion/+archive/ubuntu/stable/+files/$i; done && \
+# User configuration
+
+RUN for i in securityonion-samples_20121202-0ubuntu0securityonion4_all.deb securityonion-samples-bro_20170824-1ubuntu1securityonion3_all.deb securityonion-samples-markofu_20130522-0ubuntu0securityonion3_all.deb securityonion-samples-mta_20190514-1ubuntu1securityonion1_all.deb securityonion-samples-shellshock_20140926-0ubuntu0securityonion2_all.deb; do wget https://launchpad.net/~securityonion/+archive/ubuntu/stable/+files/$i; done && \
 \ 
 alien -r *.deb && \
 \
