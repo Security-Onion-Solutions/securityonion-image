@@ -4,6 +4,7 @@
     <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" />
     <MediaTemplate EmbedCab="yes" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <Property Id="TIMEOUT" Value="5m"/>
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="CompanyFolder" Name="Elastic">
@@ -19,7 +20,8 @@
       <ComponentRef Id="installer"/>
     </Feature>
     <Binary Id="WixCA" SourceFile="wixca.dll" />
-    <CustomAction Id="SetInstall" Property="Install" Value="&quot;[#installer]&quot;"></CustomAction>
+    <CustomAction Id="SetInstall" Property="Install" Value="&quot;[#installer]&quot; -token &quot;[TOKEN]&quot; -timeout &quot;[TIMEOUT]&quot; -fleet &quot;[FLEET]&quot;"></CustomAction>
+    <CustomAction Id="SetInstallWithDelay" Property="Install" Value="&quot;[#installer]&quot; -token &quot;[TOKEN]&quot; -timeout &quot;[TIMEOUT]&quot; -fleet &quot;[FLEET]&quot; -delay-enroll [DELAYENROLL]"></CustomAction>
     <CustomAction Id="SetUninstall" Property="Uninstall" Value="&quot;[INSTALLLOCATION]elastic-agent.exe&quot; uninstall -f"></CustomAction>
     <CustomAction Id="Uninstall" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
     <CustomAction Id="Install" BinaryKey="WixCA" DllEntry="WixQuietExec" Execute="deferred" Return="ignore" Impersonate="no"/>
@@ -27,6 +29,7 @@
       <Custom Action="SetUninstall" After="InstallInitialize">REMOVE=&quot;ALL&quot;</Custom>
       <Custom Action="Uninstall" After="SetUninstall">REMOVE=&quot;ALL&quot;</Custom>
       <Custom Action="SetInstall" Before="Install">Not Installed</Custom>
+      <Custom Action="SetInstallWithDelay" Before="Install">Not Installed AND (DELAYENROLL = "true")</Custom>
       <Custom Action="Install" After="InstallFiles">Not Installed</Custom>
     </InstallExecuteSequence>
   </Product>
