@@ -1,6 +1,6 @@
 ARG INFLUX_VERSION=2.7.12
 
-FROM ghcr.io/security-onion-solutions/ubuntu:24.10 as builder
+FROM ghcr.io/security-onion-solutions/ubuntu:24.04 as builder
 
 ARG INFLUX_VERSION
 #v20.x is LTS 
