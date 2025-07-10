@@ -1,2 +1,3 @@
 apm
 cloud_security_posture
+hpe_aruba_cx
