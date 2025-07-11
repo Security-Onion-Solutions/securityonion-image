@@ -57,8 +57,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-bsap && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-ethercat && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-enip && \
-    git clone -b v1.0.0 https://github.com/cisagov/icsnpp-opcua-binary && \
-    /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary --version=v1.0.0 && \
     sed -i 's|-|_|g' /opt/zeek/share/zeek/site/icsnpp-opcua-binary/main.zeek && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
@@ -116,3 +115,4 @@ RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-
 HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
+
