@@ -57,6 +57,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-bsap && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-ethercat && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-enip && \
+    git clone -b v1.0.0 https://github.com/cisagov/icsnpp-opcua-binary && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary && \
     sed -i 's|-|_|g' /opt/zeek/share/zeek/site/icsnpp-opcua-binary/main.zeek && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-dnp3 && \
