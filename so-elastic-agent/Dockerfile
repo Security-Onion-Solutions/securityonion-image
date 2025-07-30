@@ -25,6 +25,5 @@ ARG USERNAME=elastic-agent
 
 USER root 
 RUN groupmod -g ${GID} ${USERNAME} && \
-    usermod -u ${UID} -g ${GID} ${USERNAME}
-
-RUN chown ${USERNAME}:${USERNAME} /usr/share/elastic-agent/data/elastic-agent-*/components/*
+    usermod -u ${UID} -g ${GID} ${USERNAME} && \
+    chown ${USERNAME}:${USERNAME} /usr/share/elastic-agent/data/elastic-agent-*/components/*
