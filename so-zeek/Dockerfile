@@ -39,7 +39,7 @@ RUN dnf -y install perl && \
 
 WORKDIR /
 
-ENV ZEEKVER=7.0.8
+ENV ZEEKVER=7.0.9
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -51,13 +51,14 @@ RUN cd zeek-$ZEEKVER && \
     ./configure --prefix=/opt/zeek --spooldir=/nsm/zeek/spool --logdir=/nsm/zeek/logs --enable-jemalloc --build-type=$BUILD_TYPE --with-openssl=/usr/local/ssl && \
     time make -j4 && time make install
 RUN /opt/zeek/bin/zkg install --force ja3 && \
+    /opt/zeek/bin/zkg install --force zeek/foxio/ja4 && \
     /opt/zeek/bin/zkg install --force hassh && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/mmguero-dev/bzar --version=master && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-bacnet && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-bsap && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-ethercat && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-enip && \
-    /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary && \
+    /opt/zeek/bin/zkg install --force --skiptests icsnpp-opcua-binary --version=v1.0.0 && \
     sed -i 's|-|_|g' /opt/zeek/share/zeek/site/icsnpp-opcua-binary/main.zeek && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-dnp3 && \
     /opt/zeek/bin/zkg install --force --skiptests icsnpp-modbus && \
@@ -115,3 +116,4 @@ RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-
 HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
 ENTRYPOINT ["/usr/local/sbin/zeek.sh"]
+

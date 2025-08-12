@@ -22,9 +22,11 @@ RUN apk add --no-cache bash coreutils
 # Remove unsupported packages
 COPY scripts /scripts
 COPY versions /versions
+# Keep copy of integrations listed in ./versions/$VERSION. Helps avoid issues during the ES upgrade process.
+# in the future this will also allow for downgrading integration versions.
 RUN bash /scripts/maintained-versions.sh && bash /scripts/unsupported-integrations.sh && rm -rf /scripts
 
-# Cleanup unneeded packages, keeping the two most recent versons of each one
+# Cleanup unneeded packages, keeping the most recent verson of each one
 # Except for endpoint packages, keep all versions
 RUN cd /packages/package-storage/ \
 && rm -rf suricata-* zeek-* dga-* endpoint*dev* endpoint*next* *preview* *beta* \
