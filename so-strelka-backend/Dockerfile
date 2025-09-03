@@ -19,13 +19,15 @@ ENV PYTHONUNBUFFERED 1
 ARG USERNAME=strelka
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
+
+# SO - Pin to release tag, download from GitHub, and prepare container dirs
+ARG STRELKA_RELEASE_VERSION=0.24.01.18
+
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME
 
 RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
-# SO - Pin to release tag, download from GitHub, and prepare container dirs
-ARG STRELKA_RELEASE_VERSION=0.24.01.18
 RUN mkdir /strelka && \
     mkdir /etc/strelka && \
     mkdir /tmp/strelka && \
@@ -48,48 +50,10 @@ ADD mantic.list /etc/apt/sources.list.d/mantic.list
 # Install build packages
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
-    automake \
-    build-essential \
-    cmake \
-    curl \
-    gcc \
-    git \
-    dirmngr \
-    gnupg \
-    gpg \
-    libglu1-mesa \
-    libtool \
-    make \
-    swig \
-    python3-dev \
-    python3-pip \
-    python3-wheel \
-    python-is-python3 \
-    pkg-config \
-    supervisor \
-    ncat
-
+    automake build-essential cmake curl gcc git dirmngr gnupg gpg libglu1-mesa libtool make swig python3-dev python3-pip python3-wheel python-is-python3 pkg-config supervisor ncat && \
 # Install runtime packages
-RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
-    7zip \
-    antiword \
-    binwalk \
-    libarchive-dev \
-    libfuzzy-dev \
-    libjansson-dev \
-    libmagic-dev \
-    libssl-dev \
-    libzbar0 \
-    libgl1 \
-    python3-setuptools \
-    redis-server \
-    tesseract-ocr \
-    unrar \
-    unzip \
-    upx \
-    jq && \
-
+    7zip antiword binwalk libarchive-dev libfuzzy-dev libjansson-dev libmagic-dev libssl-dev libzbar0 libgl1 python3-setuptools redis-server tesseract-ocr unrar unzip upx jq && \
 # Download and compile exiftool
     cd /tmp/ && \
     curl -OL https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VERSION.tar.gz && \
@@ -136,18 +100,11 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update -qq && \
     apt-get install -qq -y --no-install-recommends \
-    ca-certificates \
-    zlib1g-dev \
-    yasm \
-    libgmp-dev \
-    liblzma-dev \
-    libpcap-dev \
-    libbz2-dev \
-    libgomp1 && \
-    cpan -i Compress::Raw::Lzma
+    ca-certificates zlib1g-dev yasm libgmp-dev liblzma-dev libpcap-dev libbz2-dev libgomp1 && \
+    cpan -i Compress::Raw::Lzma && \
 # The maintainer isn't big on releases or tags so grab an arbitrary, but consistent, commit.
 # Additionally jump through some extra hoops to get the single commit to save some download time.
-RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/openwall/john.git && \
+    mkdir jtr && cd jtr && git init && git remote add origin https://github.com/openwall/john.git && \
     git fetch --depth 1 origin b5c10480f56ff1b5d76c6cbdaf9c817582ee2228 && \
     git reset --hard FETCH_HEAD && \
     rm -rf /jtr/.git && \
@@ -158,10 +115,10 @@ RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/
     make install && \
     cp -Tr /jtr/run/ /jtr && rm -rf /jtr/run && \
     chmod -R 777 /jtr && \
-    chown -R $USER_UID:$USER_UID /jtr
+    chown -R $USER_UID:$USER_UID /jtr && \
 
 # Install Poetry globally and copy project files
-RUN python3 -m pip install -U pip setuptools && \
+    python3 -m pip install -U pip setuptools && \
 #   Install specific version of poetry, in >= 2.0.0 --no-dev is removed and causes build errors in strelka <= 0.24.01.18
     python3 -m pip install poetry==1.8.5 && \
     rm -rf /root/.cache/pip
@@ -174,10 +131,9 @@ WORKDIR /strelka/
 # and therefore should not be included in earlier layers that can be cached.
 RUN poetry config virtualenvs.create false && \
     poetry install --no-dev && \
-    rm -rf /root/.cache/pypoetry
-
+    rm -rf /root/.cache/pypoetry && \
 # Install Strelka
-RUN cd /strelka/ && \
+    cd /strelka/ && \
     python3 setup.py -q build && \
     python3 setup.py -q install && \
 # Remove build packages
@@ -185,18 +141,7 @@ RUN cd /strelka/ && \
     rm -rf dist/ strelka.egg-info && \
     pip3 uninstall -y grpcio-tools && \
     apt-get remove -y --purge \
-    automake \
-    build-essential \
-    cmake \
-    curl \
-    gcc \
-    git \
-    gpg \
-    libtool \
-    make \
-    python3-dev \
-    python3-pip \
-    python3-wheel && \
+    automake build-essential cmake curl gcc git gpg libtool make python3-dev python3-pip python3-wheel && \
     apt-get clean -qq && \
     rm -rf /var/lib/apt/lists/* /tmp/yara*
 
@@ -213,12 +158,11 @@ RUN echo '[+] Run build checks' && \
 USER root
 
 # Remove build directories and unused files
+# Remove config directory (will bind mount once built)
 RUN cd /strelka/ && \
     rm -rf /strelka/ && \
     rm -rf /root/.cache && \
-    rm -rf /tmp/*
-
-# Remove config directory (will bind mount once built)
-RUN rm -rf /etc/strelka/
+    rm -rf /tmp/* && \
+    rm -rf /etc/strelka/
 
 USER $USERNAME
