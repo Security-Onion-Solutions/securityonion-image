@@ -8,7 +8,8 @@ VERSION_DIR="/versions"
 mkdir -p "$DEST_DIR"
 
 for version_file in "$VERSION_DIR"/*.txt; do
-    while IFS= read -r file; do
+    echo "Processing version file: $version_file"
+    while IFS= read -r file || [[ -n "$file" ]]; do
         if [[ -f "$SOURCE_DIR/$file" ]]; then
             echo "Backing up $file to $DEST_DIR"
             mv "$SOURCE_DIR/$file" "$DEST_DIR/"
