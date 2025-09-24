@@ -1,8 +1,8 @@
 alpine:3.20.2
 alpine:3.21.3
 apache/kafka:3.9.1
-golang:1.24.3
-golang:1.24.3-alpine
+golang:1.25.1
+golang:1.25.1-alpine
 influxdb:2.7.12
 nginx:1.27.5-alpine
 node:22.16.0-alpine
