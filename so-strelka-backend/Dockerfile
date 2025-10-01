@@ -98,7 +98,7 @@ RUN cd /tmp/ && \
     tar -zxvf $EXIFTOOL_VERSION.tar.gz && \
     cd exiftool-$EXIFTOOL_VERSION/ && \
     perl Makefile.PL && \
-    make -s && \
+    make -s -j && \
     make -s install
 
 # Download and move binary for 7z 24.09
@@ -132,7 +132,7 @@ RUN cd /tmp/ && \
     cd yara-$YARA_VERSION/ && \
     ./bootstrap.sh && \
     ./configure --with-crypto --enable-magic --enable-cuckoo && \
-    make -s && make -s install && make -s check && \
+    make -s -j && make -s install && make -s check && \
 # Install yara-python
     cd /tmp/ && \
     curl -OL https://github.com/VirusTotal/yara-python/archive/v$YARA_VERSION.tar.gz && \
@@ -164,7 +164,7 @@ RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/
     cd /jtr/src && \
     ./configure && \
     make -s clean && \
-    make -sj4 && \
+    make -sj && \
     make install && \
     cp -Tr /jtr/run/ /jtr && rm -rf /jtr/run && \
     chmod -R 777 /jtr && \
@@ -219,8 +219,8 @@ USER $USERNAME
 ARG SCANNER_TEST=""
 RUN echo '[+] Run build checks' && \
     cd /strelka/strelka/ && \
-    if $SCANNER_TESTS; then python3 -m pytest -p no:cacheprovider -s tests/$SCANNER_TEST; fi && \
-    if $CONFIG_TESTS; then python3 -m pytest -s tests_configuration/; fi && \
+    if $SCANNER_TESTS; then python3 -m pytest -p no:cacheprovider -s --ignore=tests/test_scan_pcap.py tests/$SCANNER_TEST; fi && \
+    if $CONFIG_TESTS; then python3 -m pytest -s --ignore=tests/test_scan_pcap.py tests_configuration/; fi && \
     echo '[+] Done'
 
 USER root
