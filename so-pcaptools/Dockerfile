@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/python:3.13.0-slim AS builder
+FROM ghcr.io/security-onion-solutions/python:3.13.7-slim AS builder
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Tools for use with PCAP & EVTX files"
@@ -14,7 +14,7 @@ RUN wget http://f00l.de/pcapfix/pcapfix-${PCAPFIX_VERSION}.tar.gz && \
     make && \
     make install
 
-FROM ghcr.io/security-onion-solutions/python:3.13.3-slim
+FROM ghcr.io/security-onion-solutions/python:3.13.7-slim
 
 ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
 RUN chmod +x /evtx_calc_timestamps.sh
@@ -22,9 +22,9 @@ RUN chmod +x /evtx_calc_timestamps.sh
 ADD timeshift.py /timeshift.py
 RUN chmod +x /timeshift.py
 
-# libwiretap13 is required for capinfo libaries
+# libwiretap is required for capinfo libaries
 # jq is required for evtx timestamp script
-RUN apt-get update && apt-get install -y --no-install-recommends --force-yes libwiretap13 git jq && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends --force-yes libwiretap15 git jq && rm -rf /var/lib/apt/lists/*
 RUN pip3 install evtx elasticsearch==7.17.1 tqdm orjson importlib_metadata
 RUN pip3 install evtx2es --no-dependencies
 
