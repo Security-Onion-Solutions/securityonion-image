@@ -1,5 +1,5 @@
 FROM ghcr.io/security-onion-solutions/golang:1.25.1-alpine AS build
-ARG STRELKA_RELEASE_VERSION=0.24.01.18
+ARG STRELKA_RELEASE_VERSION=1.0.0
 
 RUN apk add openssl-dev
 RUN apk add bash
