@@ -7,10 +7,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG CONFIG_TESTS=false
 
 ARG YARA_VERSION=4.3.1
-# should verify capa version again
 ARG CAPA_VERSION=9.2.1
 ARG EXIFTOOL_VERSION=12.60
-ARG 7Z_VERSION="7z2409"
 
 # Environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -42,7 +40,6 @@ RUN mkdir /strelka && \
     cp -fr /tmp/strelka/poetry.lock /strelka/ && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
-    # cp -fr /tmp/strelka/build/python/backend/pin.pref /etc/apt/preferences.d/ && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
 
@@ -73,9 +70,7 @@ RUN apt-get -q update && \
     ncat
 
 # Install runtime packages
-# 7zip isn't in the latest docker build ------------------------------------------------------------
 RUN apt-get install -q -y --no-install-recommends \
-    7zip \
     antiword \
     binwalk \
     libarchive-dev \
