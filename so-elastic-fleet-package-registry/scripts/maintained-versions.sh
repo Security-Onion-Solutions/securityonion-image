@@ -17,5 +17,7 @@ for version_file in "$VERSION_DIR"/*.txt; do
             cp -fv "$SOURCE_DIR/$file.sig" "$DEST_DIR"
         fi
     done < "$version_file"
+    echo "Done processing: $version_file"
+    echo -e "Current integration storage usage: $(du -sh /packages/saved-packages)"
 done
 
