@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script is running at container build time and is used to keep specific versions
+# of integration packages available for each version of ES used by previous SO versions
+
 SOURCE_DIR="/packages/package-storage"
 DEST_DIR="/packages/saved-packages"
 
