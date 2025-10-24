@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/telegraf:1.34.4-alpine
+FROM ghcr.io/security-onion-solutions/telegraf:1.36.1-alpine
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Telegraf running in Docker container for use with Security Onion"
 
