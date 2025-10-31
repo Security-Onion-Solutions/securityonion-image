@@ -43,8 +43,6 @@ RUN mkdir /strelka && \
     rm -fr /tmp/strelka && \
     chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
 
-# ADD mantic.list /etc/apt/sources.list.d/mantic.list
-
 # Install build packages
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
@@ -167,7 +165,6 @@ RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/
 
 # Install Poetry globally and copy project files
 RUN python3 -m pip install -U pip setuptools && \
-#   Install specific version of poetry, in >= 2.0.0 --no-dev is removed and causes build errors in strelka <= 0.24.01.18
     python3 -m pip install poetry && \
     rm -rf /root/.cache/pip
 
@@ -187,7 +184,6 @@ RUN poetry config virtualenvs.create false && \
 # Remove build packages
     python3 setup.py -q clean --all && \
     rm -rf dist/ strelka.egg-info && \
-    # pip3 uninstall -y grpcio-tools && \
     apt-get purge -y \
     automake \
     build-essential \
