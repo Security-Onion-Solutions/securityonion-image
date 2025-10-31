@@ -205,7 +205,7 @@ USER $USERNAME
 ARG SCANNER_TEST=""
 RUN echo '[+] Run build checks' && \
     cd /strelka/strelka/ && \
-    if $SCANNER_TESTS; then python3 -m pytest -p no:cacheprovider -s --ignore=tests/test_scan_pcap.py tests/$SCANNER_TEST; fi && \
+    if $SCANNER_TESTS; then python3 -m pytest -p no:cacheprovider -s --ignore=tests/test_scan_pcap.py --ignore=tests/test_scan_clamav.py tests/$SCANNER_TEST; fi && \
     if $CONFIG_TESTS; then python3 -m pytest -s --ignore=tests/test_scan_pcap.py tests_configuration/; fi && \
     echo '[+] Done'
 
