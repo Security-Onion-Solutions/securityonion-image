@@ -9,6 +9,6 @@ LABEL maintainer="Security Onion Solutions, LLC"
 COPY --from=build /go/bin/strelka-filestream /usr/local/bin/
 RUN addgroup -g 939 strelka && \
     adduser -u 939 -G strelka strelka --disabled-password \
-    -h /etc/strelka --no-create-home strelka
-RUN apk add --no-cache jq
+    -h /etc/strelka --no-create-home strelka && \
+    apk add --no-cache jq
 USER strelka
