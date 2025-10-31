@@ -65,10 +65,9 @@ RUN apt-get -q update && \
     python-is-python3 \
     pkg-config \
     supervisor \
-    ncat
-
+    ncat && \
 # Install runtime packages
-RUN apt-get install -q -y --no-install-recommends \
+    apt-get install -q -y --no-install-recommends \
     antiword \
     binwalk \
     libarchive-dev \
@@ -84,24 +83,22 @@ RUN apt-get install -q -y --no-install-recommends \
     unrar \
     unzip \
     upx \
-    jq
+    jq && \
 # Download and compile exiftool
-RUN cd /tmp/ && \
+    cd /tmp/ && \
     curl -OL https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VERSION.tar.gz && \
     tar -zxvf $EXIFTOOL_VERSION.tar.gz && \
     cd exiftool-$EXIFTOOL_VERSION/ && \
     perl Makefile.PL && \
     make -s -j && \
-    make -s install
-
+    make -s install && \
 # Download and move binary for 7z 24.09
-RUN cd /tmp/ && \
+    cd /tmp/ && \
     curl -OL https://7-zip.org/a/7z2409-linux-x64.tar.xz && \
     tar -xf 7z2409-linux-x64.tar.xz &&\
-    cp 7zz /usr/local/bin
-    #
+    cp 7zz /usr/local/bin && \
 # Install FireEye CAPA rules and signatures
-RUN mkdir -p /etc/capa/rules/ && \
+    mkdir -p /etc/capa/rules/ && \
     curl -OL https://github.com/mandiant/capa-rules/archive/refs/tags/v$CAPA_VERSION.zip && \
     unzip v$CAPA_VERSION.zip -d /etc/capa/rules/ && \
     rm -rf v$CAPA_VERSION.zip && \
@@ -116,10 +113,9 @@ RUN mkdir -p /etc/capa/rules/ && \
     cd /tmp/ && \
     curl -OL https://s3.amazonaws.com/build-artifacts.floss.flare.fireeye.com/travis/linux/dist/floss && \
     chmod +x /tmp/floss && \
-    mv /tmp/floss /bin/floss
-    #
+    mv /tmp/floss /bin/floss && \
 # Install YARA
-RUN cd /tmp/ && \
+    cd /tmp/ && \
     curl -OL https://github.com/VirusTotal/yara/archive/v$YARA_VERSION.tar.gz && \
     tar -zxvf v$YARA_VERSION.tar.gz && \
     cd yara-$YARA_VERSION/ && \
@@ -147,10 +143,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libpcap-dev \
     libbz2-dev \
     libgomp1 && \
-    cpan -i Compress::Raw::Lzma
+    cpan -i Compress::Raw::Lzma && \
 # The maintainer isn't big on releases or tags so grab an arbitrary, but consistent, commit.
 # Additionally jump through some extra hoops to get the single commit to save some download time.
-RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/openwall/john.git && \
+    mkdir jtr && cd jtr && git init && git remote add origin https://github.com/openwall/john.git && \
     git fetch --depth 1 origin b5c10480f56ff1b5d76c6cbdaf9c817582ee2228 && \
     git reset --hard FETCH_HEAD && \
     rm -rf /jtr/.git && \
@@ -161,10 +157,9 @@ RUN mkdir jtr && cd jtr && git init && git remote add origin https://github.com/
     make install && \
     cp -Tr /jtr/run/ /jtr && rm -rf /jtr/run && \
     chmod -R 777 /jtr && \
-    chown -R $USER_UID:$USER_UID /jtr
-
+    chown -R $USER_UID:$USER_UID /jtr && \
 # Install Poetry globally and copy project files
-RUN python3 -m pip install -U pip setuptools && \
+    python3 -m pip install -U pip setuptools && \
     python3 -m pip install poetry && \
     rm -rf /root/.cache/pip
 
@@ -198,9 +193,9 @@ RUN poetry config virtualenvs.create false && \
     python3-pip \
     python3-wheel && \
     apt-get clean -qq && \
-    rm -rf /var/lib/apt/lists/* /tmp/yara*
+    rm -rf /var/lib/apt/lists/* /tmp/yara* && \
 # Assign permissions to Strelka scan result logging directory
-RUN chgrp -R 0 /var/log/strelka/ && \
+    chgrp -R 0 /var/log/strelka/ && \
     chmod -R g=u /var/log/strelka/
 
 # Run tests as non-root user
