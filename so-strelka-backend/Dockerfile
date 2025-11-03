@@ -25,9 +25,6 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # SO - Pin to release tag, download from GitHub, and prepare container dirs
 ARG STRELKA_RELEASE_VERSION=1.0.1
 
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
-
-
 RUN mkdir /strelka && \
     mkdir /etc/strelka && \
     mkdir /tmp/strelka && \
@@ -41,7 +38,8 @@ RUN mkdir /strelka && \
     cp -fr /tmp/strelka/src/python/* /strelka/ && \
     cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
     rm -fr /tmp/strelka && \
-    chown -R ${USER_UID}:${USER_GID} /var/log/strelka/
+    chown -R ${USER_UID}:${USER_GID} /var/log/strelka/ && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
 
 # Install build packages
 RUN apt-get -q update && \
@@ -66,8 +64,10 @@ RUN apt-get -q update && \
     pkg-config \
     supervisor \
     ncat && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
+
 # Install runtime packages
-    apt-get install -q -y --no-install-recommends \
+RUN apt-get -q update && apt-get install -q -y --no-install-recommends \
     antiword \
     binwalk \
     libarchive-dev \
@@ -84,8 +84,9 @@ RUN apt-get -q update && \
     unzip \
     upx \
     jq && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
 # Download and compile exiftool
-    cd /tmp/ && \
+RUN cd /tmp/ && \
     curl -OL https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VERSION.tar.gz && \
     tar -zxvf $EXIFTOOL_VERSION.tar.gz && \
     cd exiftool-$EXIFTOOL_VERSION/ && \
@@ -131,9 +132,7 @@ RUN apt-get -q update && \
     python3 setup.py install
 
 # Install JTR
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update -qq && \
+RUN apt-get update -qq && \
     apt-get install -qq -y --no-install-recommends \
     ca-certificates \
     zlib1g-dev \
@@ -161,7 +160,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # Install Poetry globally and copy project files
     python3 -m pip install -U pip setuptools && \
     python3 -m pip install poetry && \
-    rm -rf /root/.cache/pip
+    rm -rf /root/.cache/pip && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
 
 # Set the working directory
 WORKDIR /strelka/
@@ -179,6 +179,7 @@ RUN poetry config virtualenvs.create false && \
 # Remove build packages
     python3 setup.py -q clean --all && \
     rm -rf dist/ strelka.egg-info && \
+    apt-get -q update && \
     apt-get purge -y \
     automake \
     build-essential \
@@ -196,7 +197,8 @@ RUN poetry config virtualenvs.create false && \
     rm -rf /var/lib/apt/lists/* /tmp/yara* && \
 # Assign permissions to Strelka scan result logging directory
     chgrp -R 0 /var/log/strelka/ && \
-    chmod -R g=u /var/log/strelka/
+    chmod -R g=u /var/log/strelka/ && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
 
 # Run tests as non-root user
 USER $USERNAME
