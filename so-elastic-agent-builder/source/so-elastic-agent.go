@@ -31,6 +31,7 @@ var fleetHostFlag string
 
 var enrollmentToken, enrollmentTokenFlag string
 var delayEnrollFlag bool
+var forceFlag bool
 var timeoutFlag time.Duration
 
 func check(err error, context string) {
@@ -102,6 +103,7 @@ func main() {
 	flag.StringVar(&enrollmentTokenFlag, "token", "", "Override default Enrollment Token")
 	flag.StringVar(&fleetHostFlag, "fleet", "", "Override default Fleet Host")
 	flag.BoolVar(&delayEnrollFlag, "delay-enroll", false, "Add delay enroll flag")
+	flag.BoolVar(&forceFlag, "force", false, "Add force flag")
 	flag.DurationVar(&timeoutFlag, "timeout", 5*time.Minute, "Set the timeout duration (default: 5 minutes)")
 	flag.Parse()
 
@@ -199,6 +201,9 @@ func main() {
 	args := []string{arg1, arg2, arg3, arg4, arg5}
 	if delayEnrollFlag {
 		args = append(args, "--delay-enroll")
+	}
+	if forceFlag {
+		args = append(args, "--force")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutFlag)
