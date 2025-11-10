@@ -24,6 +24,7 @@ RUN dnf -y install dnf-plugins-core && \
     dnf group install -y "Development Tools" && \
     yum install -y glibc-common && \
     pip3 install GitPython semantic-version requests && \
+    dnf -y install zeromq-devel && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf
 
 RUN mkdir /opensslbuild
