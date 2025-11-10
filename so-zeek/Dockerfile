@@ -39,7 +39,7 @@ RUN dnf -y install perl && \
 
 WORKDIR /
 
-ENV ZEEKVER=7.0.11
+ENV ZEEKVER=8.0.4
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
