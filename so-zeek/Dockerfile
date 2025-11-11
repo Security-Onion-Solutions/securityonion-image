@@ -71,7 +71,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
     git clone https://github.com/mitrecnd/bro-http2 /opt/zeek/var/lib/zkg/clones/package/bro-http2 && \
-    sed -i 's/bool endHeaders, string& name, string& value)/bool endHeaders, std::string\& name, std::string\& value)/g' /opt/zeek/var/lib/zkg/clones/package/bro-http2/src/HTTP2_Stream.cc && \
+    sed -i 's/string& name, string& value)/std::string\& name, std::string\& value)/g' /opt/zeek/var/lib/zkg/clones/package/bro-http2/src/HTTP2_Stream.cc && \
     /opt/zeek/bin/zkg install --force --skiptests /opt/zeek/var/lib/zkg/clones/package/bro-http2 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn
