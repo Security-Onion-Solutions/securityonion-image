@@ -16,9 +16,10 @@
 FROM ghcr.io/security-onion-solutions/oraclelinux:9 AS builder
 
 RUN dnf -y install dnf-plugins-core && \
-    dnf config-manager --enable ol9_codeready_builder ol9_developer_EPEL && \
+    dnf config-manager --enable ol9_codeready_builder && \
     dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
+    dnf config-manager --enable ol9_developer_EPEL && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
     dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel zeromq-devel && \
     dnf group install -y "Development Tools" && \
