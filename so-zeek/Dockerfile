@@ -20,7 +20,7 @@ RUN dnf -y install dnf-plugins-core && \
     dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel zeromq-devel && \
     dnf group install -y "Development Tools" && \
     yum install -y glibc-common && \
     pip3 install GitPython semantic-version requests && \
@@ -97,7 +97,7 @@ RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
     dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
     dnf config-manager --enable ol9_codeready_builder ol9_developer_EPEL && \
     dnf -y install libnghttp2-devel brotli-devel zeromq-devel && \
-    dnf config-manager --disable ol9_codeready_builder && \
+    dnf config-manager --disable ol9_codeready_builder ol9_developer_EPEL && \
     dnf -y remove epel-release && \
     dnf clean all && \
     rm -rf /var/cache/dnf/ && rm -rf /var/cache/yum/ && \
