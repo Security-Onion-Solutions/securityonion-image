@@ -43,24 +43,6 @@ WORKDIR /
 ENV ZEEKVER=8.0.4
 ARG BUILD_TYPE=Release
 
-# Create a patch script for bro-http2
-RUN cat > /tmp/fix-bro-http2.sh << 'EOF'
-#!/bin/bash
-# This script fixes the bro-http2 plugin after zkg clones it
-PLUGIN_DIR="/opt/zeek/var/lib/zkg/clones/package/bro-http2"
-
-if [ -d "$PLUGIN_DIR" ]; then
-    echo "Patching bro-http2 for modern C++ compatibility..."
-    
-    # Fix HTTP2_Stream.cc - add std:: namespace to string parameters
-    sed -i 's/bool endHeaders, string& name, string& value)/bool endHeaders, std::string\& name, std::string\& value)/g' \
-        "$PLUGIN_DIR/src/HTTP2_Stream.cc"
-    
-    echo "Patch applied successfully"
-fi
-EOF
-chmod +x /tmp/fix-bro-http2.sh
-
 RUN mkdir /zeekbuild
 
 WORKDIR /zeekbuild
@@ -88,10 +70,8 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
-    # Clone bro-http2 without building
-    cd /opt/zeek/var/lib/zkg/clones/package && \
-    git clone https://github.com/mitrecnd/bro-http2 && \
-    /tmp/fix-bro-http2.sh && \
+    git clone https://github.com/mitrecnd/bro-http2 /opt/zeek/var/lib/zkg/clones/package/bro-http2 && \
+    sed -i 's/bool endHeaders, string& name, string& value)/bool endHeaders, std::string\& name, std::string\& value)/g' /opt/zeek/var/lib/zkg/clones/package/bro-http2/src/HTTP2_Stream.cc && \
     /opt/zeek/bin/zkg install --force --skiptests /opt/zeek/var/lib/zkg/clones/package/bro-http2 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn
