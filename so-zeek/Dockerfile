@@ -69,7 +69,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
-    /opt/zeek/bin/zkg install --force --skiptests https://github.com/m0duspwnens/bro-http2.git && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/Security-Onion-Solutions/bro-http2.git && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn
 
