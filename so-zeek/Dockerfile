@@ -20,7 +20,7 @@ RUN dnf -y install dnf-plugins-core && \
     dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel zeromq-devel && \
     dnf group install -y "Development Tools" && \
     yum install -y glibc-common && \
     pip3 install GitPython semantic-version requests && \
@@ -39,7 +39,7 @@ RUN dnf -y install perl && \
 
 WORKDIR /
 
-ENV ZEEKVER=7.0.11
+ENV ZEEKVER=8.0.4
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -69,7 +69,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
-    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mitrecnd/bro-http2 --version master && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/Security-Onion-Solutions/bro-http2.git && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn
 
@@ -95,9 +95,9 @@ LABEL description="Zeek running in docker for use with Security Onion"
 RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* && \
     dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
-    dnf config-manager --enable ol9_codeready_builder && \
-    dnf -y install libnghttp2-devel brotli-devel && \
-    dnf config-manager --disable ol9_codeready_builder && \
+    dnf config-manager --enable ol9_codeready_builder ol9_developer_EPEL && \
+    dnf -y install libnghttp2-devel brotli-devel zeromq-devel && \
+    dnf config-manager --disable ol9_codeready_builder ol9_developer_EPEL && \
     dnf -y remove epel-release && \
     dnf clean all && \
     rm -rf /var/cache/dnf/ && rm -rf /var/cache/yum/ && \
