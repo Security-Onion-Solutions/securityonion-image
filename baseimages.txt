@@ -12,3 +12,4 @@ redis:7.2.11-alpine
 registry:3.0.0
 telegraf:1.36.1-alpine
 ubuntu:24.04
+redhat/ubi9:9.7
