@@ -86,22 +86,21 @@ RUN groupadd --gid 937 zeek  && \
     chown -R 937:937 /nsm/zeek && \
     chown -R 937:937 /usr/local/ssl
 
-FROM ghcr.io/security-onion-solutions/oraclelinux:9
+FROM ghcr.io/security-onion-solutions/ubi9:9.7
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Zeek running in docker for use with Security Onion"
 
 # Common Oracle layer, Packages specific to container, User configuration
-RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
+RUN dnf update -y && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* && \
     dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
-    dnf config-manager --enable ol9_codeready_builder ol9_developer_EPEL && \
+    dnf config-manager --enable ubi-9-codeready-builder-rpms && \
     dnf -y install libnghttp2-devel brotli-devel zeromq-devel && \
-    dnf config-manager --disable ol9_codeready_builder ol9_developer_EPEL && \
+    dnf config-manager --disable ubi-9-codeready-builder-rpms && \
     dnf -y remove epel-release && \
     dnf clean all && \
     rm -rf /var/cache/dnf/ && rm -rf /var/cache/yum/ && \
-    rm -rf /usr/share/doc/oraclelinux-release/OL9-RELNOTES9-4.zip && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
