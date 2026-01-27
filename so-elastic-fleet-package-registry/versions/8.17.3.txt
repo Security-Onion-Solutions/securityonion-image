@@ -245,7 +245,6 @@ rubrik-0.8.0.zip
 sailpoint_identity_sc-0.2.0.zip
 salesforce-1.1.0.zip
 santa-3.24.0.zip
-security_detection_engine-8.17.6.zip
 sentinel_one-1.29.1.zip
 sentinel_one_cloud_funnel-1.9.0.zip
 servicenow-0.10.0.zip

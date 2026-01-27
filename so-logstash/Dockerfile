@@ -50,7 +50,7 @@ ENV LANG='en_US.UTF-8' LC_ALL='en_US.UTF-8'
 
 # Place the startup wrapper script.
 ADD bin/docker-entrypoint /usr/local/bin/
-RUN chmod 0755 /usr/local/bin/docker-entrypoint 
+RUN chmod 0755 /usr/local/bin/docker-entrypoint
 
 USER logstash
 

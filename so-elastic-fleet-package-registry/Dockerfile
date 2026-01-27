@@ -17,7 +17,7 @@ ARG VERSION
 FROM docker.elastic.co/package-registry/distribution:$VERSION AS original_image
 
 # Add bash because it is not included in the new default base image of wolfi-base (default sh shell)
-RUN apk add --no-cache bash coreutils
+RUN apk add --no-cache bash
 
 # Remove unsupported packages
 COPY scripts /scripts
@@ -30,7 +30,7 @@ RUN bash /scripts/maintained-versions.sh && bash /scripts/unsupported-integratio
 # Except for endpoint packages, keep all versions
 RUN cd /packages/package-storage/ \
 && rm -rf suricata-* zeek-* dga-* endpoint*dev* endpoint*next* *preview* *beta* \
-&& cd /packages/package-storage/ && LIST=$(ls --ignore="endpoint-*" | awk -F'[-]' '{print $1}' | sort | uniq ) \
+&& cd /packages/package-storage/ && LIST=$(ls | grep -v "^endpoint-" | awk -F'[-]' '{print $1}' | sort | uniq ) \
 && for item in $LIST; do ls $item-*.zip | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-1 | xargs -I {} echo "$item-"{} |  xargs -r rm -fr; done \
 && for item in $LIST; do ls $item-*.zip.sig | cut -d '-' -f 2 | tr - \~ | sort -V | tr \~ - | head -n-1 | xargs -I {} echo "Removing signature file: $item-"{} |  xargs -r rm -fr; done \
 && mv /packages/saved-packages/* /packages/package-storage/

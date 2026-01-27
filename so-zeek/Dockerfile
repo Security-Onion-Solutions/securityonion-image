@@ -20,7 +20,7 @@ RUN dnf -y install dnf-plugins-core && \
     dnf update -y && \
     dnf -y install epel-release bash libpcap iproute wget cmake swig && \
     dnf -y install jemalloc numactl libnl3 libdnet gdb git && \
-    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel && \
+    dnf -y install libpcap-devel openssl-devel zlib-devel jemalloc-devel python3-devel python3 kernel-devel kernel-headers libnghttp2-devel brotli-devel zeromq-devel && \
     dnf group install -y "Development Tools" && \
     yum install -y glibc-common && \
     pip3 install GitPython semantic-version requests && \
@@ -39,7 +39,7 @@ RUN dnf -y install perl && \
 
 WORKDIR /
 
-ENV ZEEKVER=7.0.10
+ENV ZEEKVER=8.0.4
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -69,7 +69,7 @@ RUN /opt/zeek/bin/zkg install --force ja3 && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-wireguard && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-stun && \
     /opt/zeek/bin/zkg install --force --skiptests https://github.com/iamckn/oui-logging && \
-    /opt/zeek/bin/zkg install --force --skiptests https://github.com/mitrecnd/bro-http2 --version master && \
+    /opt/zeek/bin/zkg install --force --skiptests https://github.com/Security-Onion-Solutions/bro-http2.git && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-ipsec && \
     /opt/zeek/bin/zkg install --force --skiptests zeek-spicy-openvpn
 
@@ -86,22 +86,21 @@ RUN groupadd --gid 937 zeek  && \
     chown -R 937:937 /nsm/zeek && \
     chown -R 937:937 /usr/local/ssl
 
-FROM ghcr.io/security-onion-solutions/oraclelinux:9
+FROM ghcr.io/security-onion-solutions/ubi9:9.7
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Zeek running in docker for use with Security Onion"
 
 # Common Oracle layer, Packages specific to container, User configuration
-RUN dnf update -y && dnf -y install epel-release bash libpcap iproute && \
+RUN dnf update -y && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* && \
     dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
-    dnf config-manager --enable ol9_codeready_builder && \
-    dnf -y install libnghttp2-devel brotli-devel && \
-    dnf config-manager --disable ol9_codeready_builder && \
+    dnf config-manager --enable ubi-9-codeready-builder-rpms && \
+    dnf -y install libnghttp2-devel brotli-devel zeromq-devel && \
+    dnf config-manager --disable ubi-9-codeready-builder-rpms && \
     dnf -y remove epel-release && \
     dnf clean all && \
     rm -rf /var/cache/dnf/ && rm -rf /var/cache/yum/ && \
-    rm -rf /usr/share/doc/oraclelinux-release/OL9-RELNOTES9-4.zip && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
@@ -111,7 +110,7 @@ COPY --from=builder /usr/local/ssl/ /usr/local/ssl
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
-RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm && rm -rf /opt/zeek/share/btest/data/pcaps/*
+RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px4_1.9.1-4/fx-libpcap-1.9.1-4.el9.x86_64.rpm && rm -rf /opt/zeek/share/btest/data/pcaps/*
 
 HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
