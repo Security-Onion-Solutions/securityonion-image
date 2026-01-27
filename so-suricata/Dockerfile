@@ -57,6 +57,6 @@ RUN groupadd --gid 940 suricata && \
 # Copy over the entry script.
 ADD files/so-suricata.sh /usr/local/sbin/so-suricata.sh
 
-RUN chmod +x /usr/local/sbin/so-suricata.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm
+RUN chmod +x /usr/local/sbin/so-suricata.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px4_1.9.1-4/fx-libpcap-1.9.1-4.el9.x86_64.rpm
 
 ENTRYPOINT ["/usr/local/sbin/so-suricata.sh"]

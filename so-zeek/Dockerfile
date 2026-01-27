@@ -110,7 +110,7 @@ COPY --from=builder /usr/local/ssl/ /usr/local/ssl
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
-RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px3_1.9.1-3/fx-libpcap-1.9.1-3.el9.x86_64.rpm && rm -rf /opt/zeek/share/btest/data/pcaps/*
+RUN chmod +x /usr/local/sbin/zeek.sh && rpm -i https://github.com/axellioinc/fx-libpcap/releases/download/px4_1.9.1-4/fx-libpcap-1.9.1-4.el9.x86_64.rpm && rm -rf /opt/zeek/share/btest/data/pcaps/*
 
 HEALTHCHECK --interval=10m --timeout=2m CMD runuser -u zeek -- /opt/zeek/bin/zeekctl status || (kill -s 15 -1 && (sleep 30; kill -s 9 -1))
 
