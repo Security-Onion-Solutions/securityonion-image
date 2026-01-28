@@ -27,7 +27,7 @@ RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
                lz4-devel make nss-devel pcre-devel pcre2-devel pkgconfig \
                python3-devel python3-sphinx python3-yaml sudo which cargo \
                zlib-devel cargo && cargo install --force cbindgen
-ENV SURIVERSION=8.0.2
+ENV SURIVERSION=8.0.3
 RUN mkdir /suricata
 
 WORKDIR /suricata
