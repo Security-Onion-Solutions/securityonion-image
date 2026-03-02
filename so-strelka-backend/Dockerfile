@@ -166,6 +166,14 @@ RUN apt-get update -qq && \
 # Set the working directory
 WORKDIR /strelka/
 
+# This next block is a workaround due to ssdeep not being compatible with setuptools>81
+# There's a PR in the ssdeep repo but we'd also need Target to update their ssdeep version pin.
+RUN echo "setuptools==81.0.0" > constraints.txt && \
+    pip -v wheel --build-constraint constraints.txt "ssdeep (==3.4)" && \
+    pip install ssdeep==3.4 && \
+    poetry config virtualenvs.create false && \
+    poetry remove ssdeep --lock
+
 # Use Poetry to install the project dependencies globally
 # This step is after the COPY step because it is more likely to change,
 # and therefore should not be included in earlier layers that can be cached.
