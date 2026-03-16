@@ -4,7 +4,7 @@ golang:1.26.1
 golang:1.26.1-alpine
 influxdb:2.8.0
 nginx:1.29.5-alpine
-node:25.8.0-alpine
+node:25.8.1-alpine
 oraclelinux:9
 python:3.14.3-slim
 redis:7.2.11-alpine
