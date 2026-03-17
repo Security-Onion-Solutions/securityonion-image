@@ -3,12 +3,12 @@
 # https://securityonion.net/license; you may not use this file except in compliance with the
 # Elastic License 2.0.
 
-FROM ghcr.io/security-onion-solutions/kafka:3.9.1
+FROM ghcr.io/security-onion-solutions/kafka:3.9.2
 
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="Kafka running in a docker container for use with Security Onion"
 
-ARG JOLOKIA_VERSION=2.2.8
+ARG JOLOKIA_VERSION=2.5.1
 ARG JOLOKIA_DOWNLOAD=https://github.com/jolokia/jolokia/releases/download/v${JOLOKIA_VERSION}/jolokia-${JOLOKIA_VERSION}-bin.tar.gz
 
 WORKDIR /opt
