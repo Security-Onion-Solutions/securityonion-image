@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/golang:1.25.1-alpine AS build
+FROM ghcr.io/security-onion-solutions/golang:1.26.1-alpine AS build
 ARG STRELKA_RELEASE_VERSION=1.0.1
 
 RUN CGO_ENABLED=0 go install github.com/target/strelka/src/go/cmd/strelka-manager@$STRELKA_RELEASE_VERSION && \
@@ -7,7 +7,7 @@ RUN CGO_ENABLED=0 go install github.com/target/strelka/src/go/cmd/strelka-manage
     CGO_ENABLED=1 go install -tags musl github.com/target/strelka/src/go/cmd/strelka-frontend@$STRELKA_RELEASE_VERSION
 
 
-FROM ghcr.io/security-onion-solutions/alpine:3.22.1
+FROM ghcr.io/security-onion-solutions/alpine:3.23.3
 LABEL maintainer="Security Onion Solutions, LLC"
 
 COPY --from=build /go/bin/strelka-manager /usr/local/bin/

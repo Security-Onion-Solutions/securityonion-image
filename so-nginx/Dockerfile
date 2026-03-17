@@ -14,9 +14,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM  ghcr.io/security-onion-solutions/node:24.9.0-alpine AS navigator-builder
+FROM  ghcr.io/security-onion-solutions/node:24.14.0-alpine AS navigator-builder
 
-ARG NAVIGATOR_VERSION=5.1.1
+ARG NAVIGATOR_VERSION=5.3.0
 
 RUN apk add git wget
 
@@ -32,19 +32,19 @@ WORKDIR /attack-navigator/nav-app/
 RUN npm ci && npx ng build
 
 # Delete base href line from index html to fix url path issues
-RUN sed -i '/<base href="\/"\/>/d' ./dist/index.html
+RUN sed -i '/<base href="\/"\/>/d' ./dist/browser/index.html
 
 ###################################
 
-FROM  ghcr.io/security-onion-solutions/nginx:1.29.1-alpine
+FROM  ghcr.io/security-onion-solutions/nginx:1.29.6-alpine
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description "Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=10.19.4
+ARG CYBERCHEF_VERSION=10.22.1
 
 RUN mkdir -p /opt/socore/html/navigator
-COPY --from=navigator-builder /attack-navigator/nav-app/dist /opt/socore/html/navigator
+COPY --from=navigator-builder /attack-navigator/nav-app/dist/browser /opt/socore/html/navigator
 COPY --from=navigator-builder /tmp/enterprise-attack.json /opt/socore/html/navigator/assets/mitre/enterprise-attack.json
 
 RUN mkdir -p /opt/socore/html/cyberchef && \
