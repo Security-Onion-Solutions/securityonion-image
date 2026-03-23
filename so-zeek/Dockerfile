@@ -94,7 +94,7 @@ LABEL description="Zeek running in docker for use with Security Onion"
 # Common Oracle layer, Packages specific to container, User configuration
 RUN dnf update -y && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* && \
-    dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel python3 python3-pip git && \
+    dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel python3 python3-pip && \
     dnf config-manager --enable ubi-9-codeready-builder-rpms && \
     dnf -y install libnghttp2-devel brotli-devel zeromq-devel && \
     dnf config-manager --disable ubi-9-codeready-builder-rpms && \
@@ -108,6 +108,8 @@ RUN dnf update -y && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-r
 COPY --from=builder /nsm/zeek /nsm/zeek
 COPY --from=builder /opt/zeek /opt/zeek
 COPY --from=builder /usr/local/ssl/ /usr/local/ssl
+COPY --from=builder /usr/bin/git /usr/bin/git
+COPY --from=builder /usr/libexec/git-core /usr/libexec/git-core
 
 # Copy over the entry script.
 COPY files/zeek.sh /usr/local/sbin/zeek.sh
