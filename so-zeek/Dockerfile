@@ -94,13 +94,14 @@ LABEL description="Zeek running in docker for use with Security Onion"
 # Common Oracle layer, Packages specific to container, User configuration
 RUN dnf update -y && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* && \
-    dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel && \
+    dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel python3 python3-pip && \
     dnf config-manager --enable ubi-9-codeready-builder-rpms && \
     dnf -y install libnghttp2-devel brotli-devel zeromq-devel && \
     dnf config-manager --disable ubi-9-codeready-builder-rpms && \
     dnf -y remove epel-release && \
     dnf clean all && \
     rm -rf /var/cache/dnf/ && rm -rf /var/cache/yum/ && \
+    pip3 install GitPython semantic-version && \
     groupadd --gid 937 zeek  && \
     adduser --uid 937 --gid 937 --home-dir /opt/zeek --no-create-home zeek
 
