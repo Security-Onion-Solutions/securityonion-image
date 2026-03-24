@@ -9,6 +9,7 @@ if [ -d "$CUSTOM_PKG_DIR" ]; then
   for pkg in "$CUSTOM_PKG_DIR"/*/; do
     [ -d "$pkg" ] || continue
     echo "Installing custom Zeek package: $pkg"
+    git config --global --add safe.directory "$pkg"
     /opt/zeek/bin/zkg install --force --skiptests "$pkg"
   done
 fi
