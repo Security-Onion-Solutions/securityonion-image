@@ -10,7 +10,6 @@ if [ -d "$CUSTOM_PKG_DIR" ]; then
     [ -d "$pkg" ] || continue
     echo "Installing custom Zeek package: $pkg"
     git config --global --add safe.directory "$pkg"
-    git -C "$pkg" stash -q
     runuser zeek -c "GIT_CONFIG_GLOBAL=/root/.gitconfig /opt/zeek/bin/zkg install --force --skiptests \"$pkg\""
   done
 fi
