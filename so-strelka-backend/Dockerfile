@@ -95,8 +95,8 @@ RUN cd /tmp/ && \
     make -s install && \
 # Download and move binary for 7z 24.09
     cd /tmp/ && \
-    curl -OL https://7-zip.org/a/7z2409-linux-x64.tar.xz && \
-    tar -xf 7z2409-linux-x64.tar.xz &&\
+    curl -OL https://github.com/ip7z/7zip/releases/download/26.00/7z2600-linux-x64.tar.xz && \
+    tar -xf 7z2600-linux-x64.tar.xz &&\
     cp 7zz /usr/local/bin && \
 # Install FireEye CAPA rules and signatures
     mkdir -p /etc/capa/rules/ && \
@@ -207,6 +207,8 @@ RUN poetry config virtualenvs.create false && \
     chgrp -R 0 /var/log/strelka/ && \
     chmod -R g=u /var/log/strelka/ && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
+
+RUN sed -i 's/24\.09/26\.00/' /strelka/strelka/tests/test_*
 
 # Run tests as non-root user
 USER $USERNAME
