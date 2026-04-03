@@ -13,11 +13,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ARG VERSION
+ARG GID=948
+ARG UID=948
+ARG USERNAME=elastic-agent-pr
 
 FROM docker.elastic.co/package-registry/distribution:$VERSION AS original_image
 
+ARG GID
+ARG UID
+ARG USERNAME
+
+USER root
 # Add bash because it is not included in the new default base image of wolfi-base (default sh shell)
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash shadow
+
+# add elastic-agent-pr user / group with no login shell or created home dir
+RUN groupadd -g ${GID} ${USERNAME} && \
+    useradd -u ${UID} -g ${GID} ${USERNAME} -M -s /sbin/nologin
 
 # Remove unsupported packages
 COPY scripts /scripts
@@ -36,6 +48,11 @@ RUN cd /packages/package-storage/ \
 && mv /packages/saved-packages/* /packages/package-storage/
 
 FROM scratch
+
+ARG UID
+ARG GID
+
+USER ${UID}:${GID}
 
 COPY --from=original_image / /
 WORKDIR /package-registry
