@@ -15,7 +15,7 @@ RUN apt update -y && \
     apt install -y \
       postgresql-17-pgvector \
       postgresql-17-cron \
-      postgresql-17-pg-partman && \
+      postgresql-17-partman && \
     apt clean -y && \
     rm -rf /var/lib/apt/lists/*
 
