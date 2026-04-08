@@ -1,6 +1,6 @@
 ARG PG_VERSION=17
 
-FROM ghcr.io/security-onion-solutions/postgres:$PG_VERSION
+FROM postgres:$PG_VERSION
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description="PostgreSQL running in Docker container for use with Security Onion"
 
