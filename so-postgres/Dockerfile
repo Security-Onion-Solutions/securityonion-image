@@ -9,7 +9,7 @@ EXPOSE 5432
 
 RUN mkdir -p /log /conf
 
-RUN groupmod -g 939 postgres
+RUN usermod -u 939 postgres && groupmod -g 939 postgres
 
 RUN apt update -y && \
     apt install -y \
