@@ -1,1 +1,9 @@
 security_detection_engine-9.3.7.zip
+filestream-2.3.3.zip
+cribl-1.1.0.zip
+kubernetes_otel-1.4.0.zip
+mysql_input_otel-0.1.1.zip
+osquery_manager-1.25.0.zip
+tcp-2.2.0.zip
+udp-2.4.0.zip
+synthetics-1.5.0.zip
