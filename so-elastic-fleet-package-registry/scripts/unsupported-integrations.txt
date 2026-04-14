@@ -2,9 +2,8 @@ apm
 cloud_security_posture
 hpe_aruba_cx
 sql_server_input_otel
-cribl-1.1.1.zip
-filestream-2.4.0.zip
-mysql_input_otel-0.2.1.zip
-sql_server_input_otel-0.1.1.zip
-udp-2.5.0.zip
-tcp-2.3.0.zip
+cribl
+filestream
+mysql_input_otel
+udp
+tcp
