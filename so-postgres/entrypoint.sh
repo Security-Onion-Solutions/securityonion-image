@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Resolve *_FILE secret env vars before launching the upstream entrypoint, so
+# the upstream handler sees POSTGRES_PASSWORD (from POSTGRES_PASSWORD_FILE) and
+# our auth step below sees SO_POSTGRES_PASS (from SO_POSTGRES_PASS_FILE).
+# Docker-standard: file contents are treated as the secret with no trimming
+# beyond a single trailing newline, matching the upstream postgres image.
+if [ -z "${SO_POSTGRES_PASS:-}" ] && [ -n "${SO_POSTGRES_PASS_FILE:-}" ] && [ -r "$SO_POSTGRES_PASS_FILE" ]; then
+    SO_POSTGRES_PASS="$(< "$SO_POSTGRES_PASS_FILE")"
+    export SO_POSTGRES_PASS
+fi
+
 # Start postgres via the official entrypoint in the background
 docker-entrypoint.sh "$@" &>> /log/postgres.log &
 PG_PID=$!
