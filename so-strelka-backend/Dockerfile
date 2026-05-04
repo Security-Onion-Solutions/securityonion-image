@@ -30,8 +30,8 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     POETRY_INSTALLER_MAX_WORKERS=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# libgl1/libglib2.0-0t64/libxcb1/libzbar0 are imported at test time by opencv
-# and pyzbar even though they're not direct build deps.
+# libxcb1/libzbar0 are imported at test time by pyzbar even though they're
+# not direct build deps.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
@@ -39,7 +39,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       perl pkg-config swig yasm \
       libarchive-dev libbz2-dev libcrypt-dev libfuzzy-dev libgmp-dev \
       libjansson-dev liblzma-dev libmagic-dev libpcap-dev libssl-dev zlib1g-dev \
-      libgl1 libglib2.0-0t64 libxcb1 libzbar0 \
+      libxcb1 libzbar0 \
       antiword tesseract-ocr unzip upx-ucl
 
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -93,6 +93,19 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install ssdeep==3.4 && \
     poetry config virtualenvs.create false
 
+# Source-build opencv-python-headless without FFmpeg to avoid the vendored
+# libcrypto-1.1.1k that aborts on import under STIG/FIPS. Build deps are
+# pre-installed system-wide and --no-build-isolation is passed so opencv's
+# CMake (which shells out to python3 to find numpy headers) sees them.
+# numpy is pinned to opencv 4.12.0.88's required <2.3; poetry install will
+# later upgrade it to ^2.4 — safe because numpy 2.x has a stable C ABI.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install "numpy<2.3" scikit-build ninja && \
+    CMAKE_ARGS="-DWITH_FFMPEG=OFF -DWITH_GSTREAMER=OFF -DWITH_1394=OFF -DWITH_OPENCL=OFF" \
+    ENABLE_HEADLESS=1 \
+    pip install --no-build-isolation --no-binary=opencv-python-headless \
+        "opencv-python-headless==4.12.0.88"
+
 RUN --mount=type=cache,target=/root/.cache/pip \
     poetry install --only main --no-root
 
@@ -134,7 +147,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       antiword libarchive13t64 libfuzzy2 libgomp1 libjansson4 libmagic1 \
-      libzbar0 libgl1 perl-base tesseract-ocr unzip upx-ucl && \
+      libzbar0 perl-base tesseract-ocr unzip upx-ucl && \
     rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --gid $USER_GID $USERNAME && \
