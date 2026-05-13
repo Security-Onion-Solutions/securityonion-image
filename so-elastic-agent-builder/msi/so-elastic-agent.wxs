@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="SO-Agent" Language="1033" Version="1.0.0" Manufacturer="Security Onion Solutions" UpgradeCode="bc258551-c208-4c6b-97b0-a164eb550599">
+  <Product Id="*" Name="SO-Agent" Language="1033" Version="$(var.ProductVersion)" Manufacturer="Security Onion Solutions" UpgradeCode="bc258551-c208-4c6b-97b0-a164eb550599">
     <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" />
     <MediaTemplate EmbedCab="yes" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />

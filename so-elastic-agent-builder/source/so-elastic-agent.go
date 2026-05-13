@@ -29,6 +29,8 @@ var caCRT []byte
 var fleetHostURLsList = ""
 var fleetHostFlag string
 
+var elasticAgentVersion = ""
+
 var enrollmentToken, enrollmentTokenFlag string
 var delayEnrollFlag bool
 var forceFlag bool
@@ -96,7 +98,7 @@ func main() {
 
 	log.WithFields(log.Fields{
 		"Wrapper Version":       "2.4.2",
-		"Elastic Agent Version": "8.7.0",
+		"Elastic Agent Version": elasticAgentVersion,
 	}).Info("Version Information")
 
 	// Allow runtime configuration
