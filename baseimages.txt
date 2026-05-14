@@ -3,7 +3,7 @@ apache/kafka:3.9.2
 golang:1.26.1
 golang:1.26.1-alpine
 influxdb:2.8.0
-nginx:1.29.6-alpine
+nginx:1.30.1-alpine
 node:24.14.0-alpine
 oraclelinux:9
 postgres:17.9
