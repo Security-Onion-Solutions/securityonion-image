@@ -32,9 +32,7 @@ var fleetHostFlag string
 var enrollmentToken, enrollmentTokenFlag string
 var delayEnrollFlag bool
 var forceFlag bool
-var verifyFlag bool
 var timeoutFlag time.Duration
-var verifyTimeoutFlag time.Duration
 
 func check(err error, context string) {
 	if err != nil {
@@ -77,68 +75,6 @@ func extractTarGz(sourceFile string, destDir string) error {
 	return utils.ExtractTarGz(sourceFile, destDir)
 }
 
-func elasticAgentStatusHealthy(output string) bool {
-	checkElasticAgentStatus := false
-
-	for _, line := range strings.Split(output, "\n") {
-		line = strings.ToUpper(strings.TrimSpace(line))
-		line = strings.ReplaceAll(line, " ", "")
-
-		if strings.Contains(line, "ELASTIC-AGENT") {
-			checkElasticAgentStatus = true
-			continue
-		}
-
-		if checkElasticAgentStatus && strings.Contains(line, "STATUS:") {
-			return strings.Contains(line, "(HEALTHY)")
-		}
-
-	}
-
-	return false
-}
-
-func waitForElasticAgentHealthy(ctx context.Context) error {
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-
-	var lastOutput string
-	for {
-		cmd := exec.CommandContext(ctx, installedAgentPath, "status")
-		output, err := cmd.CombinedOutput()
-		lastOutput = string(output)
-		if err == nil && elasticAgentStatusHealthy(lastOutput) {
-			statusLogs("Elastic Agent appears healthy: " + lastOutput)
-			return nil
-		}
-
-		select {
-		case <-ctx.Done():
-			return fmt.Errorf("timed out waiting for Elastic Agent to become healthy: %s", strings.TrimSpace(lastOutput))
-		case <-ticker.C:
-		}
-	}
-}
-
-func uninstallElasticAgent() {
-	statusLogs("Uninstalling Elastic Agent after failed verification")
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, installedAgentPath, "uninstall", "--force")
-	output, err := cmd.CombinedOutput()
-	if len(output) > 0 {
-		statusLogs("Elastic Agent uninstall output: " + string(output))
-	}
-	if err != nil {
-		log.WithFields(log.Fields{
-			"Context":       "Elastic Agent uninstall failed after verification failure",
-			"Error Details": err,
-		}).Error("Installation Progress")
-	}
-}
-
 func InitLogging(logFilename string, logLevel string) (*os.File, error) {
 	logFile, err := os.OpenFile(logFilename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err == nil {
@@ -168,9 +104,7 @@ func main() {
 	flag.StringVar(&fleetHostFlag, "fleet", "", "Override default Fleet Host")
 	flag.BoolVar(&delayEnrollFlag, "delay-enroll", false, "Add delay enroll flag")
 	flag.BoolVar(&forceFlag, "force", false, "Add force flag")
-	flag.BoolVar(&verifyFlag, "verify", false, "Wait for newly installed Elastic Agent to report healthy status")
 	flag.DurationVar(&timeoutFlag, "timeout", 5*time.Minute, "Set the timeout duration (default: 5 minutes)")
-	flag.DurationVar(&verifyTimeoutFlag, "verify-timeout", 3*time.Minute, "How long to wait for Elastic Agent to report a healthy status (default: 3 minutes)")
 	flag.Parse()
 
 	if enrollmentTokenFlag != "" {
@@ -282,19 +216,6 @@ func main() {
 	output, err := cmd.CombinedOutput()
 	check(err, string(output))
 	statusLogs(string(output))
-
-	if verifyFlag {
-		statusLogs("Verifying Elastic Agent status")
-		ctx, cancel = context.WithTimeout(context.Background(), verifyTimeoutFlag)
-		defer cancel()
-
-		err = waitForElasticAgentHealthy(ctx)
-		if err != nil {
-			uninstallElasticAgent()
-		}
-		check(err, "Installed Elastic Agent did not report healthy status within the verification timeout")
-	}
-
 	cleanupInstall()
 
 	statusLogs("Elastic Agent installation completed")

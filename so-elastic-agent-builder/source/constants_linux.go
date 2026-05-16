@@ -8,4 +8,3 @@ import (
 var agentFiles []byte
 
 const installPath = "/opt/Elastic/SO/"
-const installedAgentPath = "/opt/Elastic/Agent/elastic-agent"
