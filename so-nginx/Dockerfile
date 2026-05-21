@@ -16,16 +16,18 @@
 # Navigator build stage
 FROM  ghcr.io/security-onion-solutions/node:24.14.0-alpine AS navigator-builder
 
-ARG NAVIGATOR_VERSION=5.3.0
+# Navigator v5.3.0
+ARG NAVIGATOR_COMMIT=f40b225282c9c349bbe4a56f7ada142d79b705a3
+ARG ATTACK_VERSION=16.1
 
 RUN apk add git wget
 
-# Git clone the specified version of Navigator
-RUN git config --global advice.detachedHead false && \
-    git clone -b "v${NAVIGATOR_VERSION}" https://github.com/mitre-attack/attack-navigator.git
+# Clone Navigator and pin to commit hash
+RUN git clone https://github.com/mitre-attack/attack-navigator.git && \
+    git -C attack-navigator -c advice.detachedHead=false checkout ${NAVIGATOR_COMMIT}
 
-# Download the latest version of Enterprise ATT&CK
-RUN wget -O /tmp/enterprise-attack.json https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json 
+# Download a pinned version of Enterprise ATT&CK compatible with Navigator version
+RUN wget -O /tmp/enterprise-attack.json https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack-${ATTACK_VERSION}.json
 
 WORKDIR /attack-navigator/nav-app/
 
@@ -36,12 +38,12 @@ RUN sed -i '/<base href="\/"\/>/d' ./dist/browser/index.html
 
 ###################################
 
-FROM  ghcr.io/security-onion-solutions/nginx:1.29.6-alpine
+FROM  ghcr.io/security-onion-solutions/nginx:1.30.1-alpine
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description "Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=10.22.1
+ARG CYBERCHEF_VERSION=11.0.0
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist/browser /opt/socore/html/navigator
