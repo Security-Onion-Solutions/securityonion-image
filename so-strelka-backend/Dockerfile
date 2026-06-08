@@ -1,234 +1,163 @@
-FROM ghcr.io/security-onion-solutions/ubuntu:22.04
+# syntax=docker/dockerfile:1.7
+#
+# Source is fetched from a public git repo at build time.
+
+ARG PY_BASE=python:3.14-slim
+ARG STRELKA_REPO=https://github.com/defensivedepth/strelka
+ARG STRELKA_REF=python-3.14
+ARG YARA_VERSION=4.5.4
+ARG EXIFTOOL_VERSION=12.60
+ARG SEVENZ_VERSION=26.00
+ARG SEVENZ_ARCHIVE=7z2600-linux-x64.tar.xz
+ARG JTR_REV=b5c10480f56ff1b5d76c6cbdaf9c817582ee2228
+ARG USERNAME=strelka
+ARG USER_UID=1001
+ARG USER_GID=1001
+
+# ---- builder ---------------------------------------------------------------
+FROM ${PY_BASE} AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG STRELKA_REPO
+ARG STRELKA_REF
+ARG YARA_VERSION
+ARG EXIFTOOL_VERSION
+ARG SEVENZ_VERSION
+ARG SEVENZ_ARCHIVE
+ARG JTR_REV
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    POETRY_INSTALLER_MAX_WORKERS=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# libxcb1/libzbar0 are imported at test time by pyzbar even though they're
+# not direct build deps.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+      automake build-essential ca-certificates cmake curl git libtool make \
+      perl pkg-config swig yasm \
+      libarchive-dev libbz2-dev libcrypt-dev libfuzzy-dev libgmp-dev \
+      libjansson-dev liblzma-dev libmagic-dev libpcap-dev libssl-dev zlib1g-dev \
+      libxcb1 libzbar0 \
+      antiword tesseract-ocr unzip upx-ucl
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install setuptools wheel poetry
+
+# exiftool, 7zz, YARA, yara-python (linked dynamically against libyara).
+RUN set -eu; \
+    cd /tmp; \
+    curl -fsSLO "https://github.com/exiftool/exiftool/archive/refs/tags/${EXIFTOOL_VERSION}.tar.gz"; \
+    tar -zxf "${EXIFTOOL_VERSION}.tar.gz"; \
+    (cd "exiftool-${EXIFTOOL_VERSION}" && perl Makefile.PL && make -s -j2 && make -s install); \
+    curl -fsSLO "https://github.com/ip7z/7zip/releases/download/${SEVENZ_VERSION}/${SEVENZ_ARCHIVE}"; \
+    tar -xf "${SEVENZ_ARCHIVE}" 7zz; \
+    mv 7zz /usr/local/bin/; \
+    curl -fsSLO "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"; \
+    tar -zxf "v${YARA_VERSION}.tar.gz"; \
+    (cd "yara-${YARA_VERSION}" \
+        && ./bootstrap.sh \
+        && ./configure --with-crypto --enable-magic --enable-cuckoo \
+        && make -s -j2 && make -s install && make -s check); \
+    curl -fsSLO "https://github.com/VirusTotal/yara-python/archive/v${YARA_VERSION}.tar.gz"; \
+    tar -zxf "v${YARA_VERSION}.tar.gz"; \
+    (cd "yara-python-${YARA_VERSION}" \
+        && python3 setup.py build --dynamic-linking \
+        && python3 setup.py install); \
+    rm -rf /tmp/*
+
+# JTR — pinned to a commit because upstream doesn't tag releases.
+RUN set -eu; \
+    cpan -i Compress::Raw::Lzma; \
+    mkdir /jtr && cd /jtr; \
+    git init && \
+    git remote add origin https://github.com/openwall/john.git && \
+    git fetch --depth 1 origin "${JTR_REV}" && \
+    git reset --hard FETCH_HEAD && \
+    rm -rf /jtr/.git; \
+    cd /jtr/src && ./configure && make -s clean && make -sj2 && make install; \
+    cp -Tr /jtr/run/ /jtr && rm -rf /jtr/run; \
+    chmod -R 755 /jtr
+
+RUN git clone --depth 1 -b "${STRELKA_REF}" "${STRELKA_REPO}" /tmp/strelka-source
+
+WORKDIR /strelka/
+RUN cp /tmp/strelka-source/pyproject.toml /tmp/strelka-source/poetry.lock /strelka/
+
+# ssdeep 3.4 (last release) won't build under setuptools>81. Installed
+# out-of-band — pyproject.toml in the fork omits it from poetry deps.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    echo "setuptools==81.0.0" > constraints.txt && \
+    pip wheel --build-constraint constraints.txt "ssdeep==3.4" && \
+    pip install ssdeep==3.4 && \
+    poetry config virtualenvs.create false
+
+# Source-build opencv-python-headless without FFmpeg to avoid the vendored
+# libcrypto-1.1.1k that aborts on import under STIG/FIPS. Build deps are
+# pre-installed system-wide and --no-build-isolation is passed so opencv's
+# CMake (which shells out to python3 to find numpy headers) sees them.
+# numpy is pinned to opencv 4.12.0.88's required <2.3; poetry install will
+# later upgrade it to ^2.4 — safe because numpy 2.x has a stable C ABI.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install "numpy<2.3" scikit-build ninja && \
+    CMAKE_ARGS="-DWITH_FFMPEG=OFF -DWITH_GSTREAMER=OFF -DWITH_1394=OFF -DWITH_OPENCL=OFF" \
+    ENABLE_HEADLESS=1 \
+    pip install --no-build-isolation --no-binary=opencv-python-headless \
+        "opencv-python-headless==4.12.0.88"
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    poetry install --only main --no-root
+
+RUN cp -r /tmp/strelka-source/src/python/. /strelka/ && \
+    python3 setup.py -q build && \
+    python3 setup.py -q install && \
+    python3 setup.py -q clean --all
+
+# Build gate — pcap/clamav tests need deps out of scope for this image.
+RUN cp -r /tmp/strelka-source/configs/python/backend/. /etc/strelka/ && \
+    ldconfig && \
+    cd /strelka/strelka/ && \
+    python3 -m pytest -p no:cacheprovider --tb=short --no-header -rN \
+        --ignore=tests/test_scan_pcap.py \
+        --ignore=tests/test_scan_clamav.py \
+        tests/
+
+# Trim before final COPY.
+RUN find /usr/local -name '__pycache__' -type d -prune -exec rm -rf {} + && \
+    find /usr/local -name '*.pyc' -delete && \
+    rm -rf /usr/local/include /usr/local/share/doc /usr/local/share/man \
+           /usr/local/lib/python3.14/site-packages/poetry* \
+           /usr/local/lib/python3.14/site-packages/poetry_core*
+
+# ---- runtime ---------------------------------------------------------------
+FROM ${PY_BASE} AS runtime
+
 LABEL maintainer="Security Onion Solutions, LLC"
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG USERNAME
+ARG USER_UID
+ARG USER_GID
 
-# Test configuration
-ARG CONFIG_TESTS=false
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1
 
-ARG YARA_VERSION=4.3.1
-ARG CAPA_VERSION=9.2.1
-ARG EXIFTOOL_VERSION=12.60
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      antiword libarchive13t64 libfuzzy2 libgomp1 libjansson4 libmagic1 \
+      libzbar0 perl-base tesseract-ocr unzip upx-ucl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONFAULTHANDLER 1
-ENV PYTHONUNBUFFERED 1
+RUN groupadd --gid $USER_GID $USERNAME && \
+    useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME && \
+    mkdir -p /var/log/strelka && \
+    chown -R $USER_UID:$USER_GID /var/log/strelka
 
-# User configuration
-ARG USERNAME=strelka
-ARG USER_UID=1001
-ARG USER_GID=$USER_UID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME
+COPY --from=builder /usr/local /usr/local
+COPY --from=builder --chown=${USER_UID}:${USER_GID} /jtr /jtr
 
-# SO - Pin to release tag, download from GitHub, and prepare container dirs
-ARG STRELKA_RELEASE_VERSION=1.0.1
-
-RUN mkdir /strelka && \
-    mkdir /etc/strelka && \
-    mkdir /tmp/strelka && \
-    mkdir /var/log/strelka && \
-    apt -y update && \
-    apt -y upgrade && \
-    apt install git -y && \
-    git clone -b $STRELKA_RELEASE_VERSION https://github.com/target/strelka /tmp/strelka && \
-    cp -fr /tmp/strelka/pyproject.toml /strelka/ && \
-    cp -fr /tmp/strelka/poetry.lock /strelka/ && \
-    cp -fr /tmp/strelka/src/python/* /strelka/ && \
-    cp -fr /tmp/strelka/configs/python/backend/* /etc/strelka/ && \
-    rm -fr /tmp/strelka && \
-    chown -R ${USER_UID}:${USER_GID} /var/log/strelka/ && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
-
-# Install build packages
-RUN apt-get -q update && \
-    apt-get install -q -y --no-install-recommends \
-    automake \
-    build-essential \
-    cmake \
-    curl \
-    gcc \
-    git \
-    dirmngr \
-    gnupg \
-    gpg \
-    libglu1-mesa \
-    libtool \
-    make \
-    swig \
-    python3-dev \
-    python3-pip \
-    python3-wheel \
-    python-is-python3 \
-    pkg-config \
-    supervisor \
-    ncat && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
-
-# Install runtime packages
-RUN apt-get -q update && apt-get install -q -y --no-install-recommends \
-    antiword \
-    binwalk \
-    libarchive-dev \
-    libfuzzy-dev \
-    libjansson-dev \
-    libmagic-dev \
-    libssl-dev \
-    libzbar0 \
-    libgl1 \
-    python3-setuptools \
-    redis-server \
-    tesseract-ocr \
-    unrar \
-    unzip \
-    upx \
-    jq && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
-# Download and compile exiftool
-RUN cd /tmp/ && \
-    curl -OL https://github.com/exiftool/exiftool/archive/refs/tags/$EXIFTOOL_VERSION.tar.gz && \
-    tar -zxvf $EXIFTOOL_VERSION.tar.gz && \
-    cd exiftool-$EXIFTOOL_VERSION/ && \
-    perl Makefile.PL && \
-    make -s -j && \
-    make -s install && \
-# Download and move binary for 7z 24.09
-    cd /tmp/ && \
-    curl -OL https://github.com/ip7z/7zip/releases/download/26.00/7z2600-linux-x64.tar.xz && \
-    tar -xf 7z2600-linux-x64.tar.xz &&\
-    cp 7zz /usr/local/bin && \
-# Install FireEye CAPA rules and signatures
-    mkdir -p /etc/capa/rules/ && \
-    curl -OL https://github.com/mandiant/capa-rules/archive/refs/tags/v$CAPA_VERSION.zip && \
-    unzip v$CAPA_VERSION.zip -d /etc/capa/rules/ && \
-    rm -rf v$CAPA_VERSION.zip && \
-    mkdir -p /etc/capa/signatures/ && \
-    cd /etc/capa/signatures/ && \
-    curl -OL https://github.com/mandiant/capa/raw/master/sigs/1_flare_msvc_rtf_32_64.sig && \
-    curl -OL https://github.com/mandiant/capa/raw/master/sigs/2_flare_msvc_atlmfc_32_64.sig && \
-    curl -OL https://github.com/mandiant/capa/raw/master/sigs/3_flare_common_libs.sig && \
-# Install FireEye FLOSS
-#   - Binary installation, not supported as Python 3 plugin
-#   - Requires binary to be executable
-    cd /tmp/ && \
-    curl -OL https://s3.amazonaws.com/build-artifacts.floss.flare.fireeye.com/travis/linux/dist/floss && \
-    chmod +x /tmp/floss && \
-    mv /tmp/floss /bin/floss && \
-# Install YARA
-    cd /tmp/ && \
-    curl -OL https://github.com/VirusTotal/yara/archive/v$YARA_VERSION.tar.gz && \
-    tar -zxvf v$YARA_VERSION.tar.gz && \
-    cd yara-$YARA_VERSION/ && \
-    ./bootstrap.sh && \
-    ./configure --with-crypto --enable-magic --enable-cuckoo && \
-    make -s -j && make -s install && make -s check && \
-# Install yara-python
-    cd /tmp/ && \
-    curl -OL https://github.com/VirusTotal/yara-python/archive/v$YARA_VERSION.tar.gz && \
-    tar -zxvf v$YARA_VERSION.tar.gz && \
-    cd yara-python-$YARA_VERSION/ && \
-    python3 setup.py build --dynamic-linking && \
-    python3 setup.py install
-
-# Install JTR
-RUN apt-get update -qq && \
-    apt-get install -qq -y --no-install-recommends \
-    ca-certificates \
-    zlib1g-dev \
-    yasm \
-    libgmp-dev \
-    liblzma-dev \
-    libpcap-dev \
-    libbz2-dev \
-    libgomp1 && \
-    cpan -i Compress::Raw::Lzma && \
-# The maintainer isn't big on releases or tags so grab an arbitrary, but consistent, commit.
-# Additionally jump through some extra hoops to get the single commit to save some download time.
-    mkdir jtr && cd jtr && git init && git remote add origin https://github.com/openwall/john.git && \
-    git fetch --depth 1 origin b5c10480f56ff1b5d76c6cbdaf9c817582ee2228 && \
-    git reset --hard FETCH_HEAD && \
-    rm -rf /jtr/.git && \
-    cd /jtr/src && \
-    ./configure && \
-    make -s clean && \
-    make -sj && \
-    make install && \
-    cp -Tr /jtr/run/ /jtr && rm -rf /jtr/run && \
-    chmod -R 777 /jtr && \
-    chown -R $USER_UID:$USER_UID /jtr && \
-# Install Poetry globally and copy project files
-    python3 -m pip install -U pip setuptools && \
-    python3 -m pip install poetry && \
-    rm -rf /root/.cache/pip && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
-
-# Set the working directory
-WORKDIR /strelka/
-
-# This next block is a workaround due to ssdeep not being compatible with setuptools>81
-# There's a PR in the ssdeep repo but we'd also need Target to update their ssdeep version pin.
-RUN echo "setuptools==81.0.0" > constraints.txt && \
-    pip -v wheel --build-constraint constraints.txt "ssdeep (==3.4)" && \
-    pip install ssdeep==3.4 && \
-    poetry config virtualenvs.create false && \
-    poetry remove ssdeep --lock
-
-# Use Poetry to install the project dependencies globally
-# This step is after the COPY step because it is more likely to change,
-# and therefore should not be included in earlier layers that can be cached.
-RUN poetry config virtualenvs.create false && \
-    poetry install --only main && \
-    rm -rf /root/.cache/pypoetry && \
-# Install Strelka
-    cd /strelka/ && \
-    python3 setup.py -q build && \
-    python3 setup.py -q install && \
-# Remove build packages
-    python3 setup.py -q clean --all && \
-    rm -rf dist/ strelka.egg-info && \
-    apt-get -q update && \
-    apt-get purge -y \
-    automake \
-    build-essential \
-    cmake \
-    curl \
-    gcc \
-    git \
-    gpg \
-    libtool \
-    make \
-    python3-dev \
-    python3-pip \
-    python3-wheel && \
-    apt-get clean -qq && \
-    rm -rf /var/lib/apt/lists/* /tmp/yara* && \
-# Assign permissions to Strelka scan result logging directory
-    chgrp -R 0 /var/log/strelka/ && \
-    chmod -R g=u /var/log/strelka/ && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*.bin /var/cache/apt/archives/*.deb
-
-RUN sed -i 's/24\.09/26\.00/' /strelka/strelka/tests/test_*
-
-# Run tests as non-root user
-USER $USERNAME
-
-# Run build checks
-ARG SCANNER_TEST=""
-RUN echo '[+] Run build checks' && \
-    cd /strelka/strelka/ && \
-    if $SCANNER_TESTS; then python3 -m pytest -p no:cacheprovider -s --ignore=tests/test_scan_pcap.py --ignore=tests/test_scan_clamav.py tests/$SCANNER_TEST; fi && \
-    if $CONFIG_TESTS; then python3 -m pytest -s --ignore=tests/test_scan_pcap.py tests_configuration/; fi && \
-    echo '[+] Done'
-
-USER root
-
-# Remove build directories and unused files
-# Remove config directory (will bind mount once built)
-RUN cd /strelka/ && \
-    rm -rf /strelka/ && \
-    rm -rf /root/.cache && \
-    rm -rf /tmp/* && \
-    rm -rf /etc/strelka/
+RUN ldconfig
 
 USER $USERNAME
