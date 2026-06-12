@@ -36,14 +36,7 @@ ADD files/domainstats /usr/share/logstash/pipeline.dstats/
 
 RUN    ln -s /usr/share/logstash /opt/logstash \
     && mkdir /usr/share/logstash/pipeline.so \
-    && mkdir /usr/share/logstash/pipeline.enabled \
-    && chown --recursive 931:931 /usr/share/logstash \
-    && chown --recursive 931:931 /lib/dictionaries
-
-RUN groupmod -g 931 logstash && \
-    usermod -u 931 -g 931 logstash && \
-    groupadd -g 945 ossec && \
-    usermod -a -G ossec logstash
+    && mkdir /usr/share/logstash/pipeline.enabled
 
 # Ensure Logstash gets a UTF-8 locale by default.
 ENV LANG='en_US.UTF-8' LC_ALL='en_US.UTF-8'

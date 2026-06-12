@@ -21,7 +21,6 @@ RUN addgroup -g 960 kafka && \
     tar -xzf jolokia-${JOLOKIA_VERSION}-bin.tar.gz && \
     rm -f jolokia-${JOLOKIA_VERSION}-bin.tar.gz && \
     mv jolokia-${JOLOKIA_VERSION} jolokia && \
-    chown -R 960:960 kafka && \
     chown -R 960:960 jolokia
 
 USER kafka
