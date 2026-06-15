@@ -18,12 +18,3 @@
 ARG VERSION
 
 FROM docker.elastic.co/elastic-agent/elastic-agent:$VERSION
-
-ARG GID=947
-ARG UID=947
-ARG USERNAME=elastic-agent
-
-USER root 
-RUN groupmod -g ${GID} ${USERNAME} && \
-    usermod -u ${UID} -g ${GID} ${USERNAME} && \
-    chown ${USERNAME}:${USERNAME} /usr/share/elastic-agent/data/elastic-agent-*/components/*
