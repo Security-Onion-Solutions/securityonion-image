@@ -28,7 +28,8 @@ ARG JTR_REV
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     POETRY_INSTALLER_MAX_WORKERS=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    CXX=g++
 
 # libxcb1/libzbar0 are imported at test time by pyzbar even though they're
 # not direct build deps.
