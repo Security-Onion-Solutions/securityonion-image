@@ -128,7 +128,8 @@ RUN find /usr/local -name '__pycache__' -type d -prune -exec rm -rf {} + && \
     find /usr/local -name '*.pyc' -delete && \
     rm -rf /usr/local/include /usr/local/share/doc /usr/local/share/man \
            /usr/local/lib/python3.14/site-packages/poetry* \
-           /usr/local/lib/python3.14/site-packages/poetry_core*
+           /usr/local/lib/python3.14/site-packages/poetry_core* \
+           /usr/local/src/*/.git /usr/local/src/*/samples
 
 # ---- runtime ---------------------------------------------------------------
 FROM ${PY_BASE} AS runtime
