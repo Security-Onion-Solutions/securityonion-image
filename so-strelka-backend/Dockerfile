@@ -2,7 +2,7 @@
 #
 # Source is fetched from a public git repo at build time.
 
-ARG PY_BASE=python:3.14-slim
+ARG PY_BASE=python:3.14.6-trixie
 ARG STRELKA_REPO=https://github.com/defensivedepth/strelka
 ARG STRELKA_REF=python-3.14
 ARG YARA_VERSION=4.5.4

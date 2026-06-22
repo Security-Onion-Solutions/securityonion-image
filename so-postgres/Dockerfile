@@ -1,4 +1,4 @@
-ARG PG_VERSION=17.9
+ARG PG_VERSION=17.10
 
 FROM ghcr.io/security-onion-solutions/postgres:$PG_VERSION
 LABEL maintainer "Security Onion Solutions, LLC"

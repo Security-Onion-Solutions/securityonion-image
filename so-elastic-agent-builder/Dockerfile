@@ -4,7 +4,7 @@
 
 ARG MSITOOLS_VERSION=v0.103
 
-FROM ghcr.io/security-onion-solutions/alpine:3.23.3 AS msibuilder
+FROM ghcr.io/security-onion-solutions/alpine:3.24.1 AS msibuilder
 
 # Re-declare ARG to make it available in this stage
 ARG MSITOOLS_VERSION
@@ -26,7 +26,7 @@ RUN git clone https://github.com/GNOME/msitools.git /build/msitools \
     && ninja -C builddir install
 
 # Final stage with Go
-FROM ghcr.io/security-onion-solutions/golang:1.26.1-alpine
+FROM ghcr.io/security-onion-solutions/golang:1.26.4-alpine
 
 # Install runtime dependencies for wixl
 RUN apk add --no-cache \

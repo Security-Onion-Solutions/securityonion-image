@@ -1,13 +1,15 @@
-ARG INFLUX_VERSION=2.7.12
+ARG INFLUX_VERSION=2.9.1
+ARG INFLUX_UI_VERSION=2.9.0
 
 FROM ghcr.io/security-onion-solutions/ubuntu:26.04 as builder
 
 ARG INFLUX_VERSION
-ARG NODE_VERSION=v24.14.0
+ARG INFLUX_UI_VERSION
+ARG NODE_VERSION=v26.3.1
 ARG NODE_ARCH=linux-x64
 
-RUN apt update -y && apt install -y git wget xz-utils
-RUN git clone https://github.com/influxdata/ui -b OSS-v$INFLUX_VERSION
+RUN apt update -y && apt install -y git wget xz-utils libatomic1
+RUN git clone https://github.com/influxdata/ui -b OSS-v$INFLUX_UI_VERSION
 RUN wget https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-$NODE_ARCH.tar.xz -O /node.xz
 RUN tar -xJf /node.xz
 
@@ -37,4 +39,4 @@ COPY --from=builder /ui/build /ui
 RUN apt update -y && apt install netcat-traditional -y && apt clean -y
 
 ENTRYPOINT ["/redirect_to_file.sh"]
-CMD ["/entrypoint.sh", "influxd"]
+CMD ["/entrypoint.sh", "influxd", "--use-hashed-tokens=false"]
