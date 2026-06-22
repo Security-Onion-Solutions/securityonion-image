@@ -1,4 +1,4 @@
-FROM ghcr.io/jertel/elastalert2/elastalert2@sha256:6527e47b20e10516149fc19ebc9de225134250ce379d8f7497c6d9db0e591e83
+FROM ghcr.io/jertel/elastalert2/elastalert2@sha256:dccf765417eee3827035fcaa9e7f60812c9c84163e8958556bb7875fa69513a8
 LABEL maintainer "Security Onion Solutions, LLC"
 
 ARG GID=933

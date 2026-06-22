@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM  ghcr.io/security-onion-solutions/node:24.14.0-alpine AS navigator-builder
+FROM  ghcr.io/security-onion-solutions/node:26.3.1-alpine AS navigator-builder
 
 # Navigator v5.3.0
 ARG NAVIGATOR_COMMIT=f40b225282c9c349bbe4a56f7ada142d79b705a3
@@ -38,19 +38,22 @@ RUN sed -i '/<base href="\/"\/>/d' ./dist/browser/index.html
 
 ###################################
 
-FROM  ghcr.io/security-onion-solutions/nginx:1.30.1-alpine
+FROM  ghcr.io/security-onion-solutions/nginx:1.31.2-alpine
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description "Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=11.0.0
+ARG CYBERCHEF_VERSION=11.2.0
+ARG CYBERCHEF_HASH=d358d82cbcb269d764a2deb598a37043bd054f45
+ARG CYBERCHEF_VERIFY=9abbe74b94af3423b4e0e6d064cf5142df01c5e89d6b222e412fd6f4daf906ac
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist/browser /opt/socore/html/navigator
 COPY --from=navigator-builder /tmp/enterprise-attack.json /opt/socore/html/navigator/assets/mitre/enterprise-attack.json
 
 RUN mkdir -p /opt/socore/html/cyberchef && \
-    wget -O /tmp/CyberChef.zip https://github.com/gchq/CyberChef/releases/download/v${CYBERCHEF_VERSION}/CyberChef_v${CYBERCHEF_VERSION}.zip  && \
+    wget -O /tmp/CyberChef.zip https://github.com/gchq/CyberChef/releases/download/v${CYBERCHEF_VERSION}/CyberChef_${CYBERCHEF_HASH}.zip && \
+    sha256sum /tmp/CyberChef.zip | grep ${CYBERCHEF_VERIFY} && \
     unzip -o /tmp/CyberChef.zip -d /opt/socore/html/cyberchef && \
     mv /opt/socore/html/cyberchef/CyberChef_v${CYBERCHEF_VERSION}.html /opt/socore/html/cyberchef/index.html && \
     rm -f /tmp/CyberChef.zip

@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/python:3.14.3-slim AS builder
+FROM ghcr.io/security-onion-solutions/python:3.14.6-trixie AS builder
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Tools for use with PCAP & EVTX files"
@@ -14,7 +14,7 @@ RUN wget https://github.com/Rup0rt/pcapfix/archive/refs/tags/v${PCAPFIX_VERSION}
     make && \
     make install
 
-FROM ghcr.io/security-onion-solutions/python:3.14.3-slim
+FROM ghcr.io/security-onion-solutions/python:3.14.6-trixie
 
 ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
 RUN chmod +x /evtx_calc_timestamps.sh
