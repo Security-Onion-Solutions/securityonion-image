@@ -41,8 +41,12 @@ FROM ghcr.io/security-onion-solutions/ubi9:9.7
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
 
+RUN dnf update -y && \
+    dnf install -y --nodocs ca-certificates && \
+    dnf clean all
+
 # Packages Specific to this Container
-RUN dnf -y update && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
     dnf -y install bash libpcap iproute libnet jansson libyaml nss libmaxminddb && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/*
 
