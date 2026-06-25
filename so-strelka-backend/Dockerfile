@@ -155,7 +155,8 @@ ARG USER_GID
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONFAULTHANDLER=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    MAGIC=/usr/share/file/magic.mgc
 
 RUN dnf update -y && \
     dnf install -y --nodocs ca-certificates && \
@@ -175,7 +176,10 @@ RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
         libarchive ssdeep-libs libgomp jansson file-libs zbar perl-interpreter perl-Compress-Raw-Lzma tesseract unzip upx \
         python3.14 python3.14-pip && \
     dnf -y remove epel-release && \
-    dnf clean all && rm -rf /var/cache/dnf/*
+    dnf clean all && rm -rf /var/cache/dnf/* && \
+    mkdir -p /usr/share/file /usr/lib/file && \
+    ln -sf /usr/share/misc/magic.mgc /usr/share/file/magic.mgc && \
+    ln -sf /usr/share/misc/magic.mgc /usr/lib/file/magic.mgc
 
 RUN groupadd --gid $USER_GID $USERNAME && \
     useradd --uid $USER_UID --gid $USER_GID --create-home --shell /bin/bash $USERNAME && \
