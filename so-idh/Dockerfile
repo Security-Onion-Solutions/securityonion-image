@@ -9,4 +9,4 @@ RUN dnf update -y && \
     dnf clean all
 RUN pip3.14 install opencanary==0.9.8
 
-ENTRYPOINT ["/usr/local/bin/opencanaryd", "--start", "--uid=nobody", "--gid=nobody"]
+ENTRYPOINT ["/usr/local/bin/opencanaryd", "--dev", "--uid=nobody", "--gid=nobody"]
