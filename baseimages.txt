@@ -7,7 +7,6 @@ nginx:1.31.2-alpine
 node:26.3.1-alpine
 oraclelinux:9
 postgres:18.4
-python:3.14.6-trixie
 redis:7.4.9-alpine
 registry:3.1.1
 telegraf:1.39.0-alpine
