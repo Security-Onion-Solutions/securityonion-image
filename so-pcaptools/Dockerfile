@@ -14,6 +14,9 @@ RUN wget https://github.com/Rup0rt/pcapfix/archive/refs/tags/v${PCAPFIX_VERSION}
 
 FROM ghcr.io/security-onion-solutions/ubi9:9.7
 
+RUN dnf update -y && \
+    dnf install -y --nodocs ca-certificates && \
+    dnf clean all
 
 ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
 RUN chmod +x /evtx_calc_timestamps.sh
@@ -26,7 +29,7 @@ RUN dnf install -y --repofrompath=rocky-baseos,https://dl.rockylinux.org/pub/roc
     --repofrompath=rocky-appstream,https://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/ \
     --setopt=rocky-baseos.gpgcheck=0 \
     --setopt=rocky-appstream.gpgcheck=0 \
-    wireshark-cli git jq python3-pip && \
+    wireshark-cli jq python3-pip && \
     dnf clean all && rm -rf /var/cache/dnf/*
 RUN pip3 install evtx elasticsearch==7.17.1 tqdm orjson importlib_metadata
 RUN pip3 install evtx2es --no-dependencies
