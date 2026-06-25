@@ -1,23 +1,44 @@
-FROM ghcr.io/jertel/elastalert2/elastalert2@sha256:dccf765417eee3827035fcaa9e7f60812c9c84163e8958556bb7875fa69513a8
-LABEL maintainer "Security Onion Solutions, LLC"
+FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS builder
+
+RUN dnf update -y && \
+    dnf install -y --nodocs ca-certificates gcc libffi-devel python3.14 python3.14-pip python3.14-devel && \
+    dnf clean all
+
+RUN pip3.14 install --no-cache-dir elastalert2
+
+FROM ghcr.io/security-onion-solutions/ubi9:9.7
+LABEL maintainer="Security Onion Solutions, LLC"
 
 ARG GID=933
 ARG UID=933
 ARG USERNAME=so-elastalert
 
-USER root
+RUN dnf update -y && \
+    dnf install -y --nodocs ca-certificates jq python3.14 python3.14-pip && \
+    dnf clean all
 
-RUN groupadd -g ${GID} ${USERNAME} && \
+COPY --from=builder /usr/local /usr/local
+
+RUN mkdir -p /opt/elastalert /var/log/elastalert && \
+    echo "#!/bin/sh" > /opt/elastalert/run.sh && \
+    echo "set -e" >> /opt/elastalert/run.sh && \
+    echo "elastalert-create-index --config /opt/elastalert/config.yaml" >> /opt/elastalert/run.sh && \
+    echo "elastalert --config /opt/elastalert/config.yaml \"\$@\" >> /var/log/elastalert/stdout.log 2>> /var/log/elastalert/stderr.log" >> /opt/elastalert/run.sh && \
+    chmod +x /opt/elastalert/run.sh && \
+    groupadd -g ${GID} ${USERNAME} && \
     useradd -u ${UID} -g ${GID} -M -b /opt/elastalert -s /sbin/nologin \
-        -c "ElastAlert 2 User" ${USERNAME}
+        -c "ElastAlert 2 User" ${USERNAME} && \
+    chown -R ${USERNAME}:${USERNAME} /opt/elastalert /var/log/elastalert
 
 COPY ./files /custom
 
-RUN cp -fr /custom/* $(find /usr -name elastalert -type d) && rm -fr /custom
+RUN cp -fr /custom/* $(find /usr/local -name elastalert -type d) && rm -fr /custom
 
 RUN sed -i 's|\"enabled\": \"false\"|\"enabled\": "true"|' /usr/local/lib/*/site-packages/elastalert/es_mappings/8/*elastalert.json
 
-RUN sed -i -e '$s,$, >> /var/log/elastalert/stdout.log 2>> /var/log/elastalert/stderr.log,' /opt/elastalert/run.sh
-
 USER ${USERNAME}
+ENV TZ="UTC"
+
+WORKDIR /opt/elastalert
 ENTRYPOINT ["/opt/elastalert/run.sh", "--verbose"]
+
