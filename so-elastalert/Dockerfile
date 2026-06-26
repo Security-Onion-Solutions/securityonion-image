@@ -1,10 +1,19 @@
 FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS builder
 
+ARG ELASTALERT_REPO=https://github.com/jertel/elastalert2.git
+ARG ELASTALERT_REF=master
+
 RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates gcc libffi-devel python3.14 python3.14-pip python3.14-devel && \
+    dnf install -y --nodocs ca-certificates && \
     dnf clean all
 
-RUN pip3.14 install --no-cache-dir elastalert2
+RUN dnf install -y --nodocs gcc git libffi-devel python3.14 python3.14-pip python3.14-devel && \
+    dnf clean all
+
+RUN git clone --depth 1 -b "${ELASTALERT_REF}" "${ELASTALERT_REPO}" /tmp/elastalert
+
+RUN pip3.14 install --no-cache-dir wheel setuptools && \
+    pip3.14 install --no-cache-dir /tmp/elastalert
 
 FROM ghcr.io/security-onion-solutions/ubi9:9.7
 LABEL maintainer="Security Onion Solutions, LLC"
@@ -14,7 +23,10 @@ ARG UID=933
 ARG USERNAME=so-elastalert
 
 RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates jq python3.14 python3.14-pip && \
+    dnf install -y --nodocs ca-certificates && \
+    dnf clean all
+
+RUN dnf install -y --nodocs jq python3.14 python3.14-pip && \
     dnf clean all
 
 COPY --from=builder /usr/local /usr/local
