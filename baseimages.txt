@@ -1,5 +1,5 @@
 alpine:3.24.1
-apache/kafka:3.9.2
+apache/kafka:4.3.1
 golang:1.26.4
 golang:1.26.4-alpine
 influxdb:2.9.1
