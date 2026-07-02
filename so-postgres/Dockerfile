@@ -1,7 +1,7 @@
-ARG PG_VERSION=17.10
+ARG PG_VERSION=17.10-alpine3.24
 
 FROM ghcr.io/security-onion-solutions/postgres:$PG_VERSION
-LABEL maintainer "Security Onion Solutions, LLC"
+LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="PostgreSQL running in Docker container for use with Security Onion"
 
 HEALTHCHECK --interval=1m --timeout=10s CMD pg_isready -U postgres || exit 1
@@ -9,15 +9,14 @@ EXPOSE 5432
 
 RUN mkdir -p /log /conf
 
-RUN usermod -u 939 postgres && groupmod -g 939 postgres
+RUN apk update && apk upgrade && \
+    apk add \
+      postgresql-pgvector \
+      postgresql-pg_cron \
+      postgresql-pg_partman \
+      shadow
 
-RUN apt update -y && \
-    apt install -y \
-      postgresql-17-pgvector \
-      postgresql-17-cron \
-      postgresql-17-partman && \
-    apt clean -y && \
-    rm -rf /var/lib/apt/lists/*
+RUN usermod -u 939 postgres && groupmod -g 939 postgres
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
