@@ -1,11 +1,12 @@
 # Exact integration name prefixes
-# Removes ALL versions of any package whose name prefix matches exactly.
+# Removes ALL versions of any package whose name prefix matches exactly. (except those that are listed in /versions/ )
 apm
 cloud_security_posture
 hpe_aruba_cx
 zeek
 suricata
 dga
+openai
 
 # Glob patterns matched against full filenames (zip and sig)
 # Removes pre-release and internal-only endpoint build variants.
