@@ -1,4 +1,6 @@
 ARG PG_VERSION=17.10
+# Reminder: Update this commit hash whenever the PostgreSQL version is upgraded.
+ARG ENTRYPOINT_COMMIT=4f9ced003ba58a854656ba150d146243d27ae3ac
 FROM ghcr.io/security-onion-solutions/ubi9:9.7
 
 LABEL maintainer="Security Onion Solutions, LLC"
@@ -22,7 +24,7 @@ EXPOSE 5432
 RUN dnf install -y --nodocs shadow-utils && \
     dnf install -y --nodocs libicu python3-psycopg2 && \
     dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm && \
-    dnf install -y --nogpgcheck --disablerepo=* --enablerepo=pgdg17 \
+    dnf install -y --disablerepo=* --enablerepo=pgdg17 \
         postgresql17-server \
         pgvector_17 \
         pg_cron_17 \
@@ -35,7 +37,7 @@ RUN curl -L -s https://github.com/tianon/gosu/releases/download/1.19/gosu-amd64 
     chmod +x /usr/local/bin/gosu
 
 # Fetch and install the official postgres entrypoint script
-RUN curl -L -s https://raw.githubusercontent.com/docker-library/postgres/master/docker-entrypoint.sh -o /usr/local/bin/docker-entrypoint.sh && \
+RUN curl -L -s https://raw.githubusercontent.com/docker-library/postgres/${ENTRYPOINT_COMMIT}/docker-entrypoint.sh -o /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
 RUN mkdir -p /log /conf "$PGDATA" /var/run/postgresql && \
