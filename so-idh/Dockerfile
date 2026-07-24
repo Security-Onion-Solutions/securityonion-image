@@ -10,6 +10,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN dnf install -y --nodocs sudo gcc python3.14 python3.14-pip && \
     dnf clean all
-RUN pip3.14 install opencanary==0.9.8
+RUN pip3.14 install opencanary==0.9.8 && \
+    pip3.14 install --no-deps 'pyopenssl==26.0.0'
 
 ENTRYPOINT ["/usr/local/bin/opencanaryd", "--dev", "--uid=nobody", "--gid=nobody"]
