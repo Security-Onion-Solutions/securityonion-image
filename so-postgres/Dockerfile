@@ -1,14 +1,13 @@
-ARG PG_VERSION=17.10
-# Reminder: Update this commit hash whenever the PostgreSQL version is upgraded.
-ARG ENTRYPOINT_COMMIT=4f9ced003ba58a854656ba150d146243d27ae3ac
 FROM ghcr.io/security-onion-solutions/ubi9:9.7
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="PostgreSQL running in Docker container for use with Security Onion"
 
 # Set PostgreSQL specific environment variables
+# Reminder: Update the commit hash whenever the PostgreSQL version is upgraded.
 ENV PG_MAJOR=17 \
     PG_VERSION=17.10 \
+    ENTRYPOINT_COMMIT=4f9ced003ba58a854656ba150d146243d27ae3ac \
     PGDATA=/var/lib/postgresql/data \
     PATH=/usr/pgsql-17/bin:$PATH \
     LANG=en_US.utf8
