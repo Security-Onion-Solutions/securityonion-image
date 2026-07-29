@@ -27,7 +27,7 @@ RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
                lz4-devel make nss-devel pcre-devel pcre2-devel pkgconfig \
                python3-devel python3-sphinx python3-yaml sudo which cargo \
                zlib-devel cargo && cargo install --force cbindgen
-ENV SURIVERSION=8.0.5
+ENV SURIVERSION=8.0.6
 RUN mkdir /suricata
 
 WORKDIR /suricata
@@ -41,8 +41,12 @@ FROM ghcr.io/security-onion-solutions/ubi9:9.7
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
 
+RUN dnf update -y && \
+    dnf install -y --nodocs ca-certificates && \
+    dnf clean all
+
 # Packages Specific to this Container
-RUN dnf -y update && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
+RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \
     dnf -y install bash libpcap iproute libnet jansson libyaml nss libmaxminddb && \
     dnf -y erase epel-release && dnf clean all && rm -rf /var/cache/dnf/*
 

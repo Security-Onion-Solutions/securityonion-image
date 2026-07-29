@@ -39,7 +39,7 @@ RUN dnf -y install perl && \
 
 WORKDIR /
 
-ENV ZEEKVER=8.0.8
+ENV ZEEKVER=8.0.9
 ARG BUILD_TYPE=Release
 
 RUN mkdir /zeekbuild
@@ -91,8 +91,12 @@ FROM ghcr.io/security-onion-solutions/ubi9:9.7
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Zeek running in docker for use with Security Onion"
 
+RUN dnf update -y && \
+    dnf install -y --nodocs ca-certificates && \
+    dnf clean all
+
 # Common Oracle layer, Packages specific to container, User configuration
-RUN dnf update -y && dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm bash libpcap iproute && \
+RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm bash libpcap iproute && \
     dnf clean all && rm -rf /var/cache/dnf/* && \
     dnf -y install findutils jemalloc numactl libnl3 libdnet gdb libunwind-devel python3 python3-pip && \
     dnf config-manager --enable ubi-9-codeready-builder-rpms && \
