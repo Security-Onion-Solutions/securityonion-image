@@ -1,8 +1,5 @@
-FROM ghcr.io/security-onion-solutions/ubi9:9.7
-
-RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates && \
-    dnf clean all
+ARG SO_BASE
+FROM ${SO_BASE}
 
 WORKDIR /root/
 

@@ -1,6 +1,3 @@
-# Shared base image for Security Onion containers built on UBI9.
-#
-
 FROM ghcr.io/security-onion-solutions/ubi9:9.7
 
 LABEL maintainer="Security Onion Solutions, LLC"
