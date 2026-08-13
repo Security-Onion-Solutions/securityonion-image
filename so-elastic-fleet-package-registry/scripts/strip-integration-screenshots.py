@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Remove screenshot metadata and assets from Fleet integration archives for all versions EXCEPT for the latest version of an integration available."""
+"""Remove screenshot metadata and assets from Fleet integration archives."""
 
 import copy
 import os
@@ -120,6 +120,7 @@ def main():
     storage_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/packages/package-storage")
     compatible_packages_file = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("/compatible-packages.txt")
     versions_dir = Path(sys.argv[3]) if len(sys.argv) > 3 else Path("/versions")
+    strip_all = os.environ.get("STRIP_ALL_SCREENSHOTS", "").lower() == "true"
     compatible_packages = set()
     if compatible_packages_file.is_file():
         compatible_packages = {
@@ -139,9 +140,9 @@ def main():
     removed_files = 0
     removed_bytes = 0
     for archive in sorted(storage_dir.glob("*.zip")):
-        if archive.name not in maintained_packages:
+        if not strip_all and archive.name not in maintained_packages:
             continue
-        if archive.name in compatible_packages:
+        if not strip_all and archive.name in compatible_packages:
             retained += 1
             continue
         archive_changed, files, bytes_removed = strip_archive(archive)
