@@ -1,6 +1,7 @@
 from contextlib import redirect_stdout
 import importlib.util
 from io import StringIO
+import os
 from pathlib import Path
 import stat
 import sys
@@ -10,7 +11,7 @@ from unittest.mock import patch
 import zipfile
 
 
-SCRIPT = Path(__file__).with_name("strip-integration-screenshots.py")
+SCRIPT = Path(os.environ.get("SCREENSHOT_SCRIPT", Path(__file__).with_name("strip-integration-screenshots.py")))
 SPEC = importlib.util.spec_from_file_location("strip_integration_screenshots", SCRIPT)
 screenshots = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(screenshots)
