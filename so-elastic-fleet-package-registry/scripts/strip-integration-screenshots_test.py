@@ -206,3 +206,31 @@ screenshots:
                 sys.argv = original_argv
 
             self.assertNotIn("screenshots:", self.archive_contents(old)[1])
+
+    def test_main_strips_all_packages_when_enabled(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            storage_dir = root / "packages"
+            versions_dir = root / "versions"
+            storage_dir.mkdir()
+            versions_dir.mkdir()
+            compatible = root / "compatible-packages.txt"
+            compatible.write_text("latest-1.0.0.zip\n")
+            latest = self.create_archive(storage_dir, "latest-1.0.0.zip", self.manifest, {"img/icon.png": b"icon", "img/screenshot.png": b"latest"})
+            unmaintained = self.create_archive(storage_dir, "other-1.0.0.zip", self.manifest, {"img/icon.png": b"icon", "img/screenshot.png": b"other"})
+            original_argv = sys.argv
+            original_strip_all = os.environ.get("STRIP_ALL_SCREENSHOTS")
+            try:
+                sys.argv = [str(SCRIPT), str(storage_dir), str(compatible), str(versions_dir)]
+                os.environ["STRIP_ALL_SCREENSHOTS"] = "true"
+                with redirect_stdout(StringIO()):
+                    screenshots.main()
+            finally:
+                sys.argv = original_argv
+                if original_strip_all is None:
+                    del os.environ["STRIP_ALL_SCREENSHOTS"]
+                else:
+                    os.environ["STRIP_ALL_SCREENSHOTS"] = original_strip_all
+
+            self.assertNotIn("screenshots:", self.archive_contents(latest)[1])
+            self.assertNotIn("screenshots:", self.archive_contents(unmaintained)[1])

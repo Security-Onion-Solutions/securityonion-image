@@ -66,6 +66,8 @@ RUN bash /scripts/maintained-versions.sh && \
 
 FROM package_storage_stage AS stripped_packages
 
+ARG STRIP_ALL_SCREENSHOTS=false
+
 USER root
 
 # Keeping the latest version of each integration as-is. Screenshots intact / signature valid.
@@ -79,8 +81,8 @@ COPY scripts/strip-integration-screenshots_test.py /tests/
 RUN apk add --no-cache python3 py3-pip && \
     python3 -m pip install --no-cache-dir --break-system-packages flake8 pytest pytest-cov && \
     flake8 /scripts /tests --show-source --max-complexity=12 --doctests --max-line-length=200 --statistics && \
-    SCREENSHOT_SCRIPT=/scripts/strip-integration-screenshots.py PYTHONPATH=/scripts pytest /tests/strip-integration-screenshots_test.py --cov=/scripts --doctest-modules --cov-report=term --cov-fail-under=100 && \
-    python3 /scripts/strip-integration-screenshots.py && \
+    STRIP_ALL_SCREENSHOTS= SCREENSHOT_SCRIPT=/scripts/strip-integration-screenshots.py PYTHONPATH=/scripts pytest /tests/strip-integration-screenshots_test.py --cov=/scripts --doctest-modules --cov-report=term --cov-fail-under=100 && \
+    STRIP_ALL_SCREENSHOTS=${STRIP_ALL_SCREENSHOTS} python3 /scripts/strip-integration-screenshots.py && \
     rm -rf /scripts /tests /compatible-packages.txt
 
 FROM package_storage_stage AS final_image
