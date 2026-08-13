@@ -73,10 +73,15 @@ USER root
 # Remove package screenshots and associated entries in package manifests, invalidating package signature.
 # Installed latest package is complete
 # Retained older versions remain "installable", in case of failed integration upgrade rollback can happen automatically
-RUN apk add --no-cache python3
-COPY scripts/strip-integration-screenshots.py /strip-integration-screenshots.py
-RUN python3 /strip-integration-screenshots.py && \
-    rm -f /strip-integration-screenshots.py /compatible-packages.txt
+COPY scripts/strip-integration-screenshots.py /scripts/strip-integration-screenshots.py
+COPY scripts/strip-integration-screenshots_test.py /tests/
+
+RUN apk add --no-cache python3 py3-pip && \
+    python3 -m pip install --no-cache-dir --break-system-packages flake8 pytest pytest-cov && \
+    flake8 /scripts /tests --show-source --max-complexity=12 --doctests --max-line-length=200 --statistics && \
+    SCREENSHOT_SCRIPT=/scripts/strip-integration-screenshots.py PYTHONPATH=/scripts pytest /tests/strip-integration-screenshots_test.py --cov=/scripts --doctest-modules --cov-report=term --cov-fail-under=100 && \
+    python3 /scripts/strip-integration-screenshots.py && \
+    rm -rf /scripts /tests /compatible-packages.txt
 
 FROM package_storage_stage AS final_image
 
