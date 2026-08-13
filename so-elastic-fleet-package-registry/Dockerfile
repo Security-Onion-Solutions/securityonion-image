@@ -37,7 +37,7 @@ RUN EPR_ADDRESS=127.0.0.1:18080 /package-registry/package-registry & \
     echo "Compatible packages found: $(wc -l < /compatible-packages.txt)" && \
     kill $EPR_PID
 
-FROM docker.elastic.co/package-registry/distribution:$VERSION AS original_image
+FROM docker.elastic.co/package-registry/distribution:$VERSION AS package_storage_stage
 
 ARG GID
 ARG UID
@@ -62,7 +62,29 @@ RUN bash /scripts/maintained-versions.sh && \
     bash /scripts/unsupported-integrations.sh && \
     bash /scripts/latest-compatible.sh /compatible-packages.txt && \
     mv /packages/saved-packages/* /packages/package-storage/ && \
-    rm -rf /scripts /compatible-packages.txt /packages/saved-packages
+    rm -rf /scripts /packages/saved-packages
+
+FROM package_storage_stage AS stripped_packages
+
+USER root
+
+# Keeping the latest version of each integration as-is. Screenshots intact / signature valid.
+
+# Remove package screenshots and associated entries in package manifests, invalidating package signature.
+# Installed latest package is complete
+# Retained older versions remain "installable", in case of failed integration upgrade rollback can happen automatically
+RUN apk add --no-cache python3
+COPY scripts/strip-integration-screenshots.py /strip-integration-screenshots.py
+RUN python3 /strip-integration-screenshots.py && \
+    rm -f /strip-integration-screenshots.py /compatible-packages.txt
+
+FROM package_storage_stage AS final_image
+
+USER root
+
+# Copy integrations from previous stage, so we can avoid having python in final image.
+RUN rm -rf /packages/package-storage
+COPY --from=stripped_packages /packages/package-storage /packages/package-storage
 
 FROM scratch
 
@@ -71,12 +93,13 @@ ARG GID
 
 USER ${UID}:${GID}
 
-COPY --from=original_image / /
+COPY --from=final_image / /
 WORKDIR /package-registry
 
 EXPOSE 8080
 ENTRYPOINT ["./package-registry"]
 
-ENV EPR_ADDRESS=0.0.0.0:8080
+ENV EPR_ADDRESS=0.0.0.0:8080 \
+    EPR_REQUIRE_PACKAGE_SIGNATURES=false
 
 HEALTHCHECK --interval=1m --retries=30 CMD curl --silent --fail localhost:8080/health || exit 1
