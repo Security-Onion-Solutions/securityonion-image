@@ -45,4 +45,7 @@ for i in securityonion-samples-20121202-1.noarch.rpm securityonion-samples-bro-2
 rm *.deb && \
 rm *.rpm
 
+# EVTX samples
+COPY files/evtx-samples /opt/evtx-samples
+
 ENTRYPOINT ["/bin/bash"]

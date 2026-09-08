@@ -9,7 +9,10 @@ if [[ -z "${SHIFTTS}" ]]; then
 cat /tmp/evtx/import.json | jq -c .[] > /tmp/evtx/data.json
 else
 # Shift timestamp
-python timeshift.py /tmp/evtx/import.json "${SHIFTTS}" event.created
+if ! python3 /timeshift.py /tmp/evtx/import.json "${SHIFTTS}" event.created; then
+echo "ERROR: timeshift failed; aborting so unshifted timestamps are not imported" >&2
+exit 1
+fi
 cat /tmp/evtx/import.json | jq -c .[] > /tmp/evtx/data.json
 fi
 

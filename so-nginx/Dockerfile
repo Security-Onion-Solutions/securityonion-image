@@ -43,9 +43,9 @@ HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description "Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=11.2.0
-ARG CYBERCHEF_HASH=d358d82cbcb269d764a2deb598a37043bd054f45
-ARG CYBERCHEF_VERIFY=9abbe74b94af3423b4e0e6d064cf5142df01c5e89d6b222e412fd6f4daf906ac
+ARG CYBERCHEF_VERSION=11.3.0
+ARG CYBERCHEF_HASH=d24ba1afce2e3a080308b5df7db033332fe94a1a
+ARG CYBERCHEF_VERIFY=98ba94991dc3ed5f58a42f2c5d3a61d11e741c74bd438cca9f7e4be3fdbd9e56
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist/browser /opt/socore/html/navigator
