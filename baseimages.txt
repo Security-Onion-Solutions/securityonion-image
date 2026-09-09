@@ -9,5 +9,5 @@ oraclelinux:9
 postgres:17.10-alpine3.24
 redis:7.4.9-alpine
 registry:3.1.1
-telegraf:1.39.3-alpine
+telegraf:1.40.0-alpine
 redhat/ubi9:9.7
