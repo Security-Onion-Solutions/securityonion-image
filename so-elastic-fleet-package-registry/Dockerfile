@@ -23,19 +23,22 @@ ARG VERSION
 
 USER root
 
-RUN apk add --no-cache jq
-
 # GET /search?kibana.version=$VERSION to collect only packages compatible with kibana $VERSION
 RUN EPR_ADDRESS=127.0.0.1:18080 /package-registry/package-registry & \
     EPR_PID=$! && \
     echo "Waiting for EPR to become healthy..." && \
     until curl -sf http://127.0.0.1:18080/health; do sleep 2; done && \
     echo "Querying compatible packages for kibana.version=${VERSION}..." && \
-    curl -sf "http://127.0.0.1:18080/search?kibana.version=${VERSION}" \
-        | jq -r '.[].download | ltrimstr("/epr/") | split("/") | last' \
-        > /compatible-packages.txt && \
-    echo "Compatible packages found: $(wc -l < /compatible-packages.txt)" && \
+    curl -sf "http://127.0.0.1:18080/search?kibana.version=${VERSION}" > /search.json && \
     kill $EPR_PID
+
+# Parse EPR JSON on UBI9. Installing jq in query_stage is flaky depending on jq version from wolfi package registry
+FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS jq_stage
+RUN dnf install -y jq
+COPY --from=query_stage /search.json /search.json
+RUN jq -r '.[].download | ltrimstr("/epr/") | split("/") | last' \
+        /search.json > /compatible-packages.txt && \
+    echo "Compatible packages found: $(wc -l < /compatible-packages.txt)"
 
 FROM docker.elastic.co/package-registry/distribution:$VERSION AS original_image
 
@@ -51,7 +54,7 @@ RUN apk add --no-cache bash shadow
 RUN groupadd -g ${GID} ${USERNAME} && \
     useradd -u ${UID} -g ${GID} ${USERNAME} -M -s /sbin/nologin
 
-COPY --from=query_stage /compatible-packages.txt /compatible-packages.txt
+COPY --from=jq_stage /compatible-packages.txt /compatible-packages.txt
 
 # Remove unsupported packages
 COPY scripts /scripts
