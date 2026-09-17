@@ -4,5 +4,5 @@ LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Patched UBI9 base image shared by Security Onion containers"
 
 RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates && \
+    dnf install -y --nodocs --allowerasing ca-certificates curl && \
     dnf clean all
