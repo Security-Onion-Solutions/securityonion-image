@@ -67,26 +67,29 @@ RUN bash /scripts/maintained-versions.sh && \
     mv /packages/saved-packages/* /packages/package-storage/ && \
     rm -rf /scripts /packages/saved-packages
 
-FROM package_storage_stage AS stripped_packages
+FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS stripped_packages
 
 ARG STRIP_ALL_SCREENSHOTS=false
 
 USER root
 
-# Keeping the latest version of each integration as-is. Screenshots intact / signature valid.
+# Keeping the latest version of each integration as-is by default (unless STRIP_ALL_SCREENSHOTS is set to true via build arg). Screenshots intact / signature valid.
 
 # Remove package screenshots and associated entries in package manifests, invalidating package signature.
-# Installed latest package is complete
-# Retained older versions remain "installable", in case of failed integration upgrade rollback can happen automatically
+# Retained older versions remain "installable", in case of failed integration upgrade; rollback can happen automatically
+COPY --from=package_storage_stage /packages/package-storage /packages/package-storage
+COPY --from=package_storage_stage /compatible-packages.txt /compatible-packages.txt
+COPY --from=package_storage_stage /versions /versions
 COPY scripts/strip-integration-screenshots.py /scripts/strip-integration-screenshots.py
 COPY scripts/strip-integration-screenshots_test.py /tests/
 
-RUN apk add --no-cache python3 py3-pip && \
-    python3 -m pip install --no-cache-dir --break-system-packages flake8 pytest pytest-cov && \
+RUN dnf install -y python3 python3-pip && \
+    python3 -m pip install --no-cache-dir flake8 pytest pytest-cov && \
     flake8 /scripts /tests --show-source --max-complexity=12 --doctests --max-line-length=200 --statistics && \
     STRIP_ALL_SCREENSHOTS= SCREENSHOT_SCRIPT=/scripts/strip-integration-screenshots.py PYTHONPATH=/scripts pytest /tests/strip-integration-screenshots_test.py --cov=/scripts --doctest-modules --cov-report=term --cov-fail-under=100 && \
     STRIP_ALL_SCREENSHOTS=${STRIP_ALL_SCREENSHOTS} python3 /scripts/strip-integration-screenshots.py && \
-    rm -rf /scripts /tests /compatible-packages.txt
+    dnf clean all && \
+    rm -rf /scripts /tests /compatible-packages.txt /versions /root/.cache /var/cache/dnf
 
 FROM package_storage_stage AS final_image
 
