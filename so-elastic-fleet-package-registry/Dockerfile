@@ -40,7 +40,7 @@ RUN jq -r '.[].download | ltrimstr("/epr/") | split("/") | last' \
         /search.json > /compatible-packages.txt && \
     echo "Compatible packages found: $(wc -l < /compatible-packages.txt)"
 
-FROM docker.elastic.co/package-registry/distribution:$VERSION AS original_image
+FROM docker.elastic.co/package-registry/distribution:$VERSION AS package_storage_stage
 
 ARG GID
 ARG UID
@@ -65,7 +65,39 @@ RUN bash /scripts/maintained-versions.sh && \
     bash /scripts/unsupported-integrations.sh && \
     bash /scripts/latest-compatible.sh /compatible-packages.txt && \
     mv /packages/saved-packages/* /packages/package-storage/ && \
-    rm -rf /scripts /compatible-packages.txt /packages/saved-packages
+    rm -rf /scripts /packages/saved-packages
+
+FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS stripped_packages
+
+ARG STRIP_ALL_SCREENSHOTS=false
+
+USER root
+
+# Keeping the latest version of each integration as-is by default (unless STRIP_ALL_SCREENSHOTS is set to true via build arg). Screenshots intact / signature valid.
+
+# Remove package screenshots and associated entries in package manifests, invalidating package signature.
+# Retained older versions remain "installable", in case of failed integration upgrade; rollback can happen automatically
+COPY --from=package_storage_stage /packages/package-storage /packages/package-storage
+COPY --from=package_storage_stage /compatible-packages.txt /compatible-packages.txt
+COPY --from=package_storage_stage /versions /versions
+COPY scripts/strip-integration-screenshots.py /scripts/strip-integration-screenshots.py
+COPY scripts/strip-integration-screenshots_test.py /tests/
+
+RUN dnf install -y python3 python3-pip && \
+    python3 -m pip install --no-cache-dir flake8 pytest pytest-cov && \
+    flake8 /scripts /tests --show-source --max-complexity=12 --doctests --max-line-length=200 --statistics && \
+    STRIP_ALL_SCREENSHOTS= SCREENSHOT_SCRIPT=/scripts/strip-integration-screenshots.py PYTHONPATH=/scripts pytest /tests/strip-integration-screenshots_test.py --cov=/scripts --doctest-modules --cov-report=term --cov-fail-under=100 && \
+    STRIP_ALL_SCREENSHOTS=${STRIP_ALL_SCREENSHOTS} python3 /scripts/strip-integration-screenshots.py && \
+    dnf clean all && \
+    rm -rf /scripts /tests /compatible-packages.txt /versions /root/.cache /var/cache/dnf
+
+FROM package_storage_stage AS final_image
+
+USER root
+
+# Copy integrations from previous stage, so we can avoid having python in final image.
+RUN rm -rf /packages/package-storage
+COPY --from=stripped_packages /packages/package-storage /packages/package-storage
 
 FROM scratch
 
@@ -74,12 +106,13 @@ ARG GID
 
 USER ${UID}:${GID}
 
-COPY --from=original_image / /
+COPY --from=final_image / /
 WORKDIR /package-registry
 
 EXPOSE 8080
 ENTRYPOINT ["./package-registry"]
 
-ENV EPR_ADDRESS=0.0.0.0:8080
+ENV EPR_ADDRESS=0.0.0.0:8080 \
+    EPR_REQUIRE_PACKAGE_SIGNATURES=false
 
 HEALTHCHECK --interval=1m --retries=30 CMD curl --silent --fail localhost:8080/health || exit 1
