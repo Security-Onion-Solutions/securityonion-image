@@ -7,7 +7,7 @@ nginx:1.31.5-alpine
 node:26.3.1-alpine
 oraclelinux:9
 postgres:17.10-alpine3.24
-redis:7.4.9-alpine
+redis:7.4.11-alpine
 registry:3.1.1
 telegraf:1.40.0-alpine
 redhat/ubi9:9.7
