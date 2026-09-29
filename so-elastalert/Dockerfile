@@ -2,8 +2,9 @@ ARG SO_BASE
 
 FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS builder
 
-ARG ELASTALERT_REPO=https://github.com/jertel/elastalert2.git
-ARG ELASTALERT_REF=master
+# Fork: ES|QL fixes
+ARG ELASTALERT_REPO=https://github.com/defensivedepth/elastalert2.git
+ARG ELASTALERT_REF=3ca80cb6fe6f6454f93e9d040d96b819828bf441
 
 RUN dnf update -y && \
     dnf install -y --nodocs ca-certificates && \
@@ -12,7 +13,10 @@ RUN dnf update -y && \
 RUN dnf install -y --nodocs gcc git libffi-devel python3.14 python3.14-pip python3.14-devel && \
     dnf clean all
 
-RUN git clone --depth 1 -b "${ELASTALERT_REF}" "${ELASTALERT_REPO}" /tmp/elastalert
+RUN git init /tmp/elastalert && \
+    git -C /tmp/elastalert remote add origin "${ELASTALERT_REPO}" && \
+    git -C /tmp/elastalert fetch --depth 1 origin "${ELASTALERT_REF}" && \
+    git -C /tmp/elastalert checkout FETCH_HEAD
 
 RUN pip3.14 install --no-cache-dir wheel setuptools && \
     pip3.14 install --no-cache-dir /tmp/elastalert
