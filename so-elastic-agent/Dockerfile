@@ -17,11 +17,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ARG VERSION
-# Pin to package.hash / .elastic-agent.active.commit in the official images
-# These sources are used to verify the agent commit, from both slim and full image
+# Confirm slim and full images are the same Elastic build so copied fleet-server
+# matches. Compared to each other (not a pinned SHA) using:
 # - /usr/share/elastic-agent/.elastic-agent.active.commit
 # - package.hash in /usr/share/elastic-agent/manifest.yaml
-ARG AGENT_COMMIT=7a92f7b9479cbfbcb88c94c398660e981dee3d14
 
 FROM docker.elastic.co/elastic-agent/elastic-agent:$VERSION AS servers
 USER root
@@ -39,25 +38,37 @@ FROM docker.elastic.co/elastic-agent/elastic-agent-slim:$VERSION AS slim
 
 # Kept: elastic-agent, elastic-otel-collector, fleet-server.
 # Removed: pf-host-agent, osquery, defend, cloudbeat (not used for heavy/fleet node)
-ARG AGENT_COMMIT
 USER root
 COPY --from=servers --chown=elastic-agent:elastic-agent /fleet-export/ /tmp/fleet-export/
 COPY --from=servers /so-meta/ /tmp/servers-meta/
 RUN set -euo pipefail; \
-    check_commit() { \
-      role="$1"; dir="$2"; \
-      active="$(cat "$dir/.elastic-agent.active.commit")"; \
-      hash="$(awk '/^[[:space:]]+hash:[[:space:]]+/ {print $2; exit}' "$dir/manifest.yaml")"; \
-      for got in "$active" "$hash"; do \
-        case "$got" in "$AGENT_COMMIT"*) continue ;; esac; \
-        case "$AGENT_COMMIT" in "$got"*) continue ;; esac; \
-        echo "$role commit mismatch: expected $AGENT_COMMIT got $got" >&2; \
+    read_commit() { \
+      dir="$1"; which="$2"; \
+      if [ "$which" = active ]; then \
+        got="$(cat "$dir/.elastic-agent.active.commit")"; \
+      else \
+        got="$(awk '/^[[:space:]]+hash:[[:space:]]+/ {print $2; exit}' "$dir/manifest.yaml")"; \
+      fi; \
+      if [ -z "$got" ]; then \
+        echo "empty $which commit in $dir" >&2; \
         exit 1; \
-      done; \
-      echo "$role commit ok: $active"; \
+      fi; \
+      printf '%s' "$got"; \
     }; \
-    check_commit slim /usr/share/elastic-agent; \
-    check_commit servers /tmp/servers-meta; \
+    commits_match() { \
+      a="$1"; b="$2"; \
+      case "$a" in "$b"*) return 0 ;; esac; \
+      case "$b" in "$a"*) return 0 ;; esac; \
+      echo "slim/servers commit mismatch: $a vs $b" >&2; \
+      exit 1; \
+    }; \
+    slim_active="$(read_commit /usr/share/elastic-agent active)"; \
+    slim_hash="$(read_commit /usr/share/elastic-agent hash)"; \
+    servers_active="$(read_commit /tmp/servers-meta active)"; \
+    servers_hash="$(read_commit /tmp/servers-meta hash)"; \
+    commits_match "$slim_active" "$servers_active"; \
+    commits_match "$slim_hash" "$servers_hash"; \
+    echo "slim/servers commit ok: $slim_active"; \
     components="$(echo /usr/share/elastic-agent/data/elastic-agent-*/components)"; \
     test -d "$components"; \
     cp -a /tmp/fleet-export/fleet-server /tmp/fleet-export/fleet-server.spec.yml "$components/"; \
