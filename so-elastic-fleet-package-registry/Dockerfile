@@ -73,6 +73,9 @@ ARG STRIP_ALL_SCREENSHOTS=false
 
 USER root
 
+# Remove integration and input packages whose only input is otelcol. Fleet will not add them to agent policies using the Logstash output.
+# Maintained versions listed in /versions/*.txt are kept.
+
 # Keeping the latest version of each integration as-is by default (unless STRIP_ALL_SCREENSHOTS is set to true via build arg). Screenshots intact / signature valid.
 
 # Remove package screenshots and associated entries in package manifests, invalidating package signature.
@@ -82,11 +85,14 @@ COPY --from=package_storage_stage /compatible-packages.txt /compatible-packages.
 COPY --from=package_storage_stage /versions /versions
 COPY scripts/strip-integration-screenshots.py /scripts/strip-integration-screenshots.py
 COPY scripts/strip-integration-screenshots_test.py /tests/
+COPY scripts/remove-otel-only-packages.py /scripts/remove-otel-only-packages.py
+COPY scripts/remove-otel-only-packages_test.py /tests/
 
 RUN dnf install -y python3 python3-pip && \
-    python3 -m pip install --no-cache-dir flake8 pytest pytest-cov && \
+    python3 -m pip install --no-cache-dir flake8 pytest pytest-cov pyyaml && \
     flake8 /scripts /tests --show-source --max-complexity=12 --doctests --max-line-length=200 --statistics && \
-    STRIP_ALL_SCREENSHOTS= SCREENSHOT_SCRIPT=/scripts/strip-integration-screenshots.py PYTHONPATH=/scripts pytest /tests/strip-integration-screenshots_test.py --cov=/scripts --doctest-modules --cov-report=term --cov-fail-under=100 && \
+    STRIP_ALL_SCREENSHOTS= SCREENSHOT_SCRIPT=/scripts/strip-integration-screenshots.py OTEL_SCRIPT=/scripts/remove-otel-only-packages.py PYTHONPATH=/scripts pytest /tests --cov=/scripts --doctest-modules --cov-report=term --cov-fail-under=100 && \
+    python3 /scripts/remove-otel-only-packages.py && \
     STRIP_ALL_SCREENSHOTS=${STRIP_ALL_SCREENSHOTS} python3 /scripts/strip-integration-screenshots.py && \
     dnf clean all && \
     rm -rf /scripts /tests /compatible-packages.txt /versions /root/.cache /var/cache/dnf
