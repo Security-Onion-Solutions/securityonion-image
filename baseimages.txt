@@ -1,4 +1,4 @@
-alpine:3.24.1
+alpine:3.24
 apache/kafka:4.3.1
 golang:1.26.4
 golang:1.26.4-alpine
@@ -10,4 +10,4 @@ postgres:17.10-alpine3.24
 redis:7.4.11-alpine
 registry:3.1.1
 telegraf:1.40.0-alpine
-redhat/ubi9:9.7
+redhat/ubi9:
