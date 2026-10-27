@@ -6,7 +6,6 @@ influxdb:2.9.1
 nginx:1.31.5-alpine
 node:26.3.1-alpine
 oraclelinux:9
-postgres:17.10-alpine3.24
 redis:7.4.11-alpine
 registry:3.1.1
 telegraf:1.40.0-alpine
