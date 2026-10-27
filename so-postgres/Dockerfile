@@ -1,4 +1,5 @@
-FROM ghcr.io/security-onion-solutions/ubi9:9.7
+ARG SO_BASE
+FROM ${SO_BASE}
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="PostgreSQL running in Docker container for use with Security Onion"
@@ -11,10 +12,6 @@ ENV PG_MAJOR=17 \
     PGDATA=/var/lib/postgresql/data \
     PATH=/usr/pgsql-17/bin:$PATH \
     LANG=en_US.utf8
-
-RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates && \
-    dnf clean all
 
 HEALTHCHECK --interval=1m --timeout=10s CMD pg_isready -U postgres || exit 1
 EXPOSE 5432

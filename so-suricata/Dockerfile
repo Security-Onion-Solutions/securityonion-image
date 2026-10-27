@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+ARG SO_BASE
+
 FROM ghcr.io/security-onion-solutions/oraclelinux:9 as builder
 
 RUN dnf update -y && \
@@ -27,7 +29,7 @@ RUN dnf -y install autoconf automake diffutils file-devel gcc gcc-c++ git \
                lz4-devel make nss-devel pcre-devel pcre2-devel pkgconfig \
                python3-devel python3-sphinx python3-yaml sudo which cargo \
                zlib-devel cargo && cargo install --force cbindgen
-ENV SURIVERSION=8.0.6
+ENV SURIVERSION=8.0.7
 RUN mkdir /suricata
 
 WORKDIR /suricata
@@ -36,14 +38,10 @@ RUN curl -vO https://www.openinfosecfoundation.org/download/suricata-$SURIVERSIO
     cd suricata-$SURIVERSION && ./configure --enable-rust --prefix=/opt/suricata --sysconfdir=/etc --disable-gccmarch-native --localstatedir=/var --enable-geoip && make -j4
 RUN mkdir suriinstall && cd suricata-$SURIVERSION && make install DESTDIR=/suricata/suriinstall && make install-conf DESTDIR=/suricata/suriinstall && rm -rf /suricata/suriinstall/var/run
 
-FROM ghcr.io/security-onion-solutions/ubi9:9.7
+FROM ${SO_BASE}
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Suricata running in a docker with AF_Packet for use with Security Onion."
-
-RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates && \
-    dnf clean all
 
 # Packages Specific to this Container
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm && \

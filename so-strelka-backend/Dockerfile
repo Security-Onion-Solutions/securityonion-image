@@ -2,7 +2,7 @@
 #
 # Source is fetched from a public git repo at build time.
 
-ARG PY_BASE=ghcr.io/security-onion-solutions/ubi9:9.7
+ARG PY_BASE
 ARG STRELKA_REPO=https://github.com/defensivedepth/strelka
 ARG STRELKA_REF=python-3.14
 ARG YARA_VERSION=4.5.4
@@ -157,10 +157,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     MAGIC=/usr/share/file/magic.mgc
-
-RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates && \
-    dnf clean all
 
 RUN --mount=type=cache,target=/var/cache/dnf,sharing=locked \
     dnf install -y --repofrompath=rocky-baseos,https://dl.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/ \

@@ -38,14 +38,14 @@ RUN sed -i '/<base href="\/"\/>/d' ./dist/browser/index.html
 
 ###################################
 
-FROM  ghcr.io/security-onion-solutions/nginx:1.31.2-alpine
+FROM  ghcr.io/security-onion-solutions/nginx:1.31.5-alpine
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description "Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=11.3.0
-ARG CYBERCHEF_HASH=d24ba1afce2e3a080308b5df7db033332fe94a1a
-ARG CYBERCHEF_VERIFY=98ba94991dc3ed5f58a42f2c5d3a61d11e741c74bd438cca9f7e4be3fdbd9e56
+ARG CYBERCHEF_VERSION=11.5.0
+ARG CYBERCHEF_HASH=8cd426dd4f40f1423912d5fad91b578a86a65112
+ARG CYBERCHEF_VERIFY=f6478925d3eaa16ec08626a85f5b85eed10d531a5e18700615fed7ecb024cccf
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist/browser /opt/socore/html/navigator

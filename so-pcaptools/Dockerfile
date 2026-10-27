@@ -1,3 +1,5 @@
+ARG SO_BASE
+
 FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS builder
 
 LABEL maintainer="Security Onion Solutions, LLC"
@@ -12,11 +14,7 @@ RUN wget https://github.com/Rup0rt/pcapfix/archive/refs/tags/v${PCAPFIX_VERSION}
     make && \
     make install
 
-FROM ghcr.io/security-onion-solutions/ubi9:9.7
-
-RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates && \
-    dnf clean all
+FROM ${SO_BASE}
 
 ADD evtx_calc_timestamps.sh /evtx_calc_timestamps.sh
 RUN chmod +x /evtx_calc_timestamps.sh

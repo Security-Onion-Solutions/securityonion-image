@@ -44,10 +44,9 @@ def find_nested_value(data, nested_key):
     keys = nested_key.split('.')
     value = data
     for key in keys:
-        if key in value:
-            value = value[key]
-        else:
-            raise KeyError("Key not found: {}".format(nested_key))
+        if not isinstance(value, dict) or key not in value:
+            return None
+        value = value[key]
     return value
 
 def read_json_data_from_file(file_path):

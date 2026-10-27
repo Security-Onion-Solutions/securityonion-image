@@ -1,3 +1,5 @@
+ARG SO_BASE
+
 FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS builder
 
 ARG ELASTALERT_REPO=https://github.com/jertel/elastalert2.git
@@ -15,16 +17,12 @@ RUN git clone --depth 1 -b "${ELASTALERT_REF}" "${ELASTALERT_REPO}" /tmp/elastal
 RUN pip3.14 install --no-cache-dir wheel setuptools && \
     pip3.14 install --no-cache-dir /tmp/elastalert
 
-FROM ghcr.io/security-onion-solutions/ubi9:9.7
+FROM ${SO_BASE}
 LABEL maintainer="Security Onion Solutions, LLC"
 
 ARG GID=933
 ARG UID=933
 ARG USERNAME=so-elastalert
-
-RUN dnf update -y && \
-    dnf install -y --nodocs ca-certificates && \
-    dnf clean all
 
 RUN dnf install -y --nodocs jq python3.14 python3.14-pip && \
     dnf clean all
