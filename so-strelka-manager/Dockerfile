@@ -1,4 +1,4 @@
-FROM ghcr.io/security-onion-solutions/golang:1.26.4-alpine AS build
+FROM ghcr.io/security-onion-solutions/golang:1.27.3-alpine AS build
 ARG STRELKA_RELEASE_VERSION=7d955e95e41c6fc578aa5204b857896d29040e7b
 
 RUN CGO_ENABLED=0 go install github.com/target/strelka/src/go/cmd/strelka-manager@$STRELKA_RELEASE_VERSION && \

@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Navigator build stage
-FROM  ghcr.io/security-onion-solutions/node:26.3.1-alpine AS navigator-builder
+FROM  ghcr.io/security-onion-solutions/node:26.12.1-alpine AS navigator-builder
 
 # Navigator v5.3.0
 ARG NAVIGATOR_COMMIT=f40b225282c9c349bbe4a56f7ada142d79b705a3
@@ -38,14 +38,16 @@ RUN sed -i '/<base href="\/"\/>/d' ./dist/browser/index.html
 
 ###################################
 
-FROM  ghcr.io/security-onion-solutions/nginx:1.31.2-alpine
+FROM  ghcr.io/security-onion-solutions/nginx:1.31.8-alpine-slim
 HEALTHCHECK --interval=5m --timeout=3s CMD curl --fail http://localhost/ || exit 1
 LABEL maintainer "Security Onion Solutions, LLC"
 LABEL description "Security Onion Core Functions Docker"
 
-ARG CYBERCHEF_VERSION=11.3.0
-ARG CYBERCHEF_HASH=d24ba1afce2e3a080308b5df7db033332fe94a1a
-ARG CYBERCHEF_VERIFY=98ba94991dc3ed5f58a42f2c5d3a61d11e741c74bd438cca9f7e4be3fdbd9e56
+RUN apk add --no-cache curl
+
+ARG CYBERCHEF_VERSION=11.5.0
+ARG CYBERCHEF_HASH=8cd426dd4f40f1423912d5fad91b578a86a65112
+ARG CYBERCHEF_VERIFY=f6478925d3eaa16ec08626a85f5b85eed10d531a5e18700615fed7ecb024cccf
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist/browser /opt/socore/html/navigator

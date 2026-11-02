@@ -26,7 +26,7 @@ RUN git clone https://github.com/GNOME/msitools.git /build/msitools \
     && ninja -C builddir install
 
 # Final stage with Go
-FROM ghcr.io/security-onion-solutions/golang:1.26.4-alpine
+FROM ghcr.io/security-onion-solutions/golang:1.27.3-alpine
 
 # Install runtime dependencies for wixl
 RUN apk add --no-cache \

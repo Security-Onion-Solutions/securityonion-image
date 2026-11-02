@@ -16,9 +16,4 @@ export ES_JAVA_OPTS="-Des.cgroups.hierarchy.override=/ $ES_JAVA_OPTS"
 
 ES_DIR=/usr/share/elasticsearch
 
-if [ -f $ES_DIR/config/elasticsearch.p12 ]; then
-    echo "Importing PKCS12 keypair into Java keystore"
-    jdk/bin/keytool -importkeystore -destkeystore $ES_DIR/config/sokeys -deststorepass changeit -srckeystore $ES_DIR/config/elasticsearch.p12 -srcstoretype pkcs12 -srcstorepass "" -noprompt
-fi
-
 exec bin/elasticsearch #"${es_opts[@]}"
