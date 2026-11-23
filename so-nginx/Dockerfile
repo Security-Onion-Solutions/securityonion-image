@@ -45,9 +45,9 @@ LABEL description "Security Onion Core Functions Docker"
 
 RUN apk add --no-cache curl
 
-ARG CYBERCHEF_VERSION=11.5.0
-ARG CYBERCHEF_HASH=8cd426dd4f40f1423912d5fad91b578a86a65112
-ARG CYBERCHEF_VERIFY=f6478925d3eaa16ec08626a85f5b85eed10d531a5e18700615fed7ecb024cccf
+ARG CYBERCHEF_VERSION=11.6.0
+ARG CYBERCHEF_HASH=f464d62c7c943cda9749a765932a7548ba9bfb16
+ARG CYBERCHEF_VERIFY=6b6518c620d43776c19bf5cea1fd4a505b018bc829f7e88f7f77be38d64598d9
 
 RUN mkdir -p /opt/socore/html/navigator
 COPY --from=navigator-builder /attack-navigator/nav-app/dist/browser /opt/socore/html/navigator
