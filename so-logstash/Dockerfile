@@ -34,7 +34,7 @@ ADD files/dictionaries/ /lib/dictionaries/
 ADD files/freq /usr/share/logstash/pipeline.freq/
 ADD files/domainstats /usr/share/logstash/pipeline.dstats/
 
-RUN    ln -s /usr/share/logstash /opt/logstash \
+RUN ln -s /usr/share/logstash /opt/logstash \
     && mkdir /usr/share/logstash/pipeline.so \
     && mkdir /usr/share/logstash/pipeline.enabled
 
@@ -47,13 +47,15 @@ RUN chmod 0755 /usr/local/bin/docker-entrypoint
 
 USER logstash
 
-RUN cd /usr/share/logstash && LOGSTASH_PACK_URL=https://artifacts.elastic.co/downloads/logstash-plugins && \
-  logstash-plugin install logstash-filter-translate \
-                          logstash-filter-tld \
-                          logstash-filter-elasticsearch \
-                          logstash-filter-rest \
-                          logstash-integration-kafka \
-                          logstash-output-syslog \
-                          logstash-filter-json_encode
+RUN cd /usr/share/logstash && \
+    LOGSTASH_PACK_URL=https://artifacts.elastic.co/downloads/logstash-plugins && \
+    JRUBY_OPTS=-J-Xmx2g logstash-plugin install \
+        logstash-filter-translate \
+        logstash-filter-tld \
+        logstash-filter-elasticsearch \
+        logstash-filter-rest \
+        logstash-integration-kafka \
+        logstash-output-syslog \
+        logstash-filter-json_encode
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
