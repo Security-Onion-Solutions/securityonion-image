@@ -1,11 +1,11 @@
-ARG INFLUX_VERSION=2.9.1
-ARG INFLUX_UI_VERSION=2.9.0
+ARG INFLUX_VERSION=2.10.1
+ARG INFLUX_UI_VERSION=2.10.0
 
 FROM ghcr.io/security-onion-solutions/ubuntu:26.04 as builder
 
 ARG INFLUX_VERSION
 ARG INFLUX_UI_VERSION
-ARG NODE_VERSION=v26.3.1
+ARG NODE_VERSION=v26.13.1
 ARG NODE_ARCH=linux-x64
 
 RUN apt update -y && apt install -y git wget xz-utils libatomic1

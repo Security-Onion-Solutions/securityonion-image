@@ -1,6 +1,6 @@
 ARG SO_BASE
 
-FROM ghcr.io/security-onion-solutions/ubi9:9.7 AS builder
+FROM ghcr.io/security-onion-solutions/ubi9:9.9 AS builder
 
 LABEL maintainer="Security Onion Solutions, LLC"
 LABEL description="Tools for use with PCAP & EVTX files"
