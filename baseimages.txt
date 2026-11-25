@@ -6,7 +6,7 @@ influxdb:2.10.1
 nginx:1.31.10-alpine-slim
 node:26.13.1-alpine
 oraclelinux:9
-valkey/valkey:9.1.4-alpine
+redhat/ubi9:9.9
 registry:3.1.2
 telegraf:1.40.3-alpine
-redhat/ubi9:9.9
+valkey/valkey:9.1.4-alpine
