@@ -3,7 +3,7 @@ ARG SO_BASE
 FROM ghcr.io/security-onion-solutions/ubi9:9.9 AS builder
 
 ARG ELASTALERT_REPO=https://github.com/jertel/elastalert2.git
-ARG ELASTALERT_REF=2.32.0
+ARG ELASTALERT_REF=master
 
 RUN dnf update -y && \
     dnf install -y --nodocs ca-certificates && \
